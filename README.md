@@ -17,7 +17,7 @@ Replace `${YOUR_BUILD_NAME}` with the file name of the build.
 
 ```shell
 nextstrain remote upload \
-    nextstrain.org/groups/PekoszLab/Bvic \
+    nextstrain.org/groups/PekoszLab/${YOUR_BUILD_NAME} \
     auspice/${YOUR_BUILD_NAME}.json
 ```
 
