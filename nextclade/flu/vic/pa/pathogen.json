@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "3.0.0",
+  "alignmentParams": {
+    "excessBandwidth": 9,
+    "terminalBandwidth": 100,
+    "allowedMismatches": 4,
+    "gapAlignmentSide": "right",
+    "minSeedCover": 0.1
+  },
+  "compatibility": {
+    "cli": "3.0.0-alpha.0",
+    "web": "3.0.0-alpha.0"
+  },
+  "defaultCds": "PA",
+  "files": {
+    "changelog": "CHANGELOG.md",
+    "genomeAnnotation": "genome_annotation.gff",
+    "pathogenJson": "pathogen.json",
+    "readme": "README.md",
+    "reference": "reference.fasta"
+  },
+  "qc": {
+    "privateMutations": {
+      "enabled": true,
+      "typical": 5,
+      "cutoff": 15,
+      "weightLabeledSubstitutions": 2,
+      "weightReversionSubstitutions": 1,
+      "weightUnlabeledSubstitutions": 1
+    },
+    "missingData": {
+      "enabled": false,
+      "missingDataThreshold": 100,
+      "scoreBias": 10
+    },
+    "snpClusters": {
+      "enabled": false,
+      "windowSize": 100,
+      "clusterCutOff": 5,
+      "scoreWeight": 50
+    },
+    "mixedSites": {
+      "enabled": true,
+      "mixedSitesThreshold": 4
+    },
+    "frameShifts": {
+      "enabled": true
+    },
+    "stopCodons": {
+      "enabled": true,
+      "ignoredStopCodons": []
+    }
+  },
+  "maintenance": {
+    "authors": [
+      "Pekosz Lab <https://pekoszlab.com/>"
+    ]
+  },
+  "nucMutLabelMap": {},
+  "nucMutLabelMapReverse": {},
+  "attributes": {
+    "name": "Influenza B Victoria PA",
+    "segment": "PA",
+    "reference accession": "KC866602.1",
+    "reference name": "B/Brisbane/60/2008-egg"
+  },
+  "version": {
+    "updatedAt": "2024-05-23",
+    "tag": "2024-05-23"
+  }
+}

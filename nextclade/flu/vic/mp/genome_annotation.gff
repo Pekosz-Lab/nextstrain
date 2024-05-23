@@ -1,0 +1,12 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor NCBI annotwriter
+##sequence-region CY115152.1 1 1147
+##species https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=604436
+CY115152.1	Genbank	region	1	1147	.	+	.	ID=CY115152.1:1..1147;Dbxref=taxon:604436;Name=7;collection-date=2008;country=Australia: Brisbane;gbkey=Src;lab-host=Egg passage(s);mol_type=viral cRNA;nat-host=human;segment=7;strain=B/Brisbane/60/2008
+CY115152.1	Genbank	sequence_feature	1	1147	.	+	.	ID=id-CY115152.1:1..1147;Dbxref=IRD:NIGSP_BUCB_00018.MP;gbkey=misc_feature
+CY115152.1	Genbank	gene	3	749	.	+	.	ID=gene-M1;Name=M1;gbkey=Gene;gene=M1;gene_biotype=protein_coding
+CY115152.1	Genbank	CDS	3	749	.	+	0	ID=cds-AFH57910.1;Parent=gene-M1;Dbxref=NCBI_GP:AFH57910.1;Name=M1;gbkey=CDS;gene=M1;product=matrix protein 1;protein_id=AFH57910.1
+CY115152.1	Genbank	gene	749	1078	.	+	.	ID=gene-BM2;Name=BM2;gbkey=Gene;gene=BM2;gene_biotype=protein_coding
+CY115152.1	Genbank	CDS	749	1078	.	+	0	ID=cds-AFH57911.1;Parent=gene-BM2;Dbxref=NCBI_GP:AFH57911.1;Name=BM2;gbkey=CDS;gene=BM2;product=BM2 protein;protein_id=AFH57911.1
+
