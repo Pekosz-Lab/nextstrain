@@ -15,7 +15,7 @@ Each dataset contains the following files:
 
 |Virus|Segment|Reference cds Accession|Date Updated|
 |---|---|---|---|
-|Influenza B|[pb2](/flu/vic/pb2/)|[KC866604.1](https://www.ncbi.nlm.nih.gov/nuccore/KC866604.1/)|2024-04-29|
+|Influenza B|[pb2](flu/vic/pb2/)|[KC866604.1](https://www.ncbi.nlm.nih.gov/nuccore/KC866604.1/)|2024-04-29|
 |Influenza B|[pb1](flu/vic/pb1/)|[KC866603.1](https://www.ncbi.nlm.nih.gov/nuccore/KC866603.1)|2024-04-29|
 |Influenza B|[pa](flu/vic/pa/)|[KC866602.1](https://www.ncbi.nlm.nih.gov/nuccore/KC866602.1)|2024-04-29|
 |Influenza B|[np](flu/vic/np/)|[KC866605.1](https://www.ncbi.nlm.nih.gov/nuccore/KC866605.1)|2024-04-29|
