@@ -1,1 +1,18 @@
+# Specify the files that we would like to keep out of the Pekosz Lab Nextstrain repository
+
+# Sensitive Directories
+data/
+results/
+auspice/
+
+# OS Generated #
 *DS_Store
+*DS_Store?
+**DS_Store
+
+# Sensitive environment variables
+environment*
+
+# cluster logs
+slurm-*
+
