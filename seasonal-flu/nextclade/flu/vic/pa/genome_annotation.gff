@@ -1,0 +1,9 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor NCBI annotwriter
+##sequence-region KC866602.1 1 2305
+##species https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=604436
+KC866602.1	Genbank	region	1	2305	.	+	.	ID=KC866602.1:1..2305;Dbxref=taxon:604436;Name=3;collection-date=2008;country=Australia: Brisbane;gbkey=Src;genome=genomic;mol_type=viral cRNA;nat-host=Homo sapiens;note=passage history: EX/CX;segment=3;strain=B/Brisbane/60/2008
+KC866602.1	Genbank	gene	30	2210	.	+	.	ID=gene-PA;Name=PA;gbkey=Gene;gene=PA;gene_biotype=protein_coding
+KC866602.1	Genbank	CDS	30	2210	.	+	0	ID=cds-AGK63061.1;Parent=gene-PA;Dbxref=NCBI_GP:AGK63061.1;Name=PA;gbkey=CDS;gene=PA;product=polymerase PA;protein_id=AGK63061.1
+

@@ -1,0 +1,54 @@
+{
+  "title": "Baltimore 2023-24 season influenza B/Vic evolution",
+  "maintainers": [
+    {"name": "Elgin Akin", "url": "https://elginakin.github.io"},
+    {"name": "The Pekosz Lab", "url": "https://pekoszlab.com"}
+  ],
+  "build_url": "https://github.com/Pekosz-Lab/nextstrain",
+  "colorings":[
+    {
+      "key": "clade",
+      "title": "clade",
+      "type": "categorical"
+    },
+    {
+      "key": "subclade",
+      "title": "subclade", 
+      "type": "categorical"
+    },
+    {
+      "key": "sequencing_run",
+      "title": "sequencing run ID",
+      "type": "categorical"
+    },
+    {
+      "key": "qc.overallScore",
+      "title": "qc.overallScore",
+      "type": "categorical"
+    },
+    {
+      "key": "qc.overallStatus",
+      "title": "qc.overallStatus",
+      "type": "categorical"
+    },
+    {
+      "key": "coverage",
+      "title": "coverage",
+      "type": "categorical"
+    }
+  ],
+  "display_defaults": {
+    "color_by": "subclade"
+  },
+  "filters": [
+    "clade",
+    "subclade",
+    "sequencing_run",
+    "qc_overallScore",
+    "qc_overallStatus"
+  ],
+   "panels": [
+    "tree",
+    "entropy"
+  ]
+}
