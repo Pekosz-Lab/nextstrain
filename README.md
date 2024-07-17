@@ -6,28 +6,8 @@ This repository houses all configuration data and **WORKING** scripts for the [P
 
 2. Specialized Builds Unique to Pekosz Lab-specific manuscripts.
 
-> [!IMPORTANT 🚧]
+> [!IMPORTANT] 🚧
 > This repository is under construction thus scripts are not constructed for optimal run efficiency.
-
-## Seasonal Influenza Build Input Data
-
-Since our sequence accession database also under construction, sequence aquisition still requires additional 'hands on' for curation. Currently, the seasonal-flu builds require the following data curation steps: 
-
-```mermaid
-graph TD
-
-  A[IAV and IBV Consensus sequences raw sequences \n with only >ID_seg# header information]
-  B[Merge with \n vaccine reference sequences]
-  C[Subtyping and \n Genome QC `flusort.py`]
-  D[Manually curated metadata merging \n :sequence dates and additional identifiers]
-  E[✅ Proceed with nextstrain builds \n `scripts/nextstrain.ipynb`]
-
-  A --> B
-  B --> C
-  C --> D
-  D --> E
-
-```
 
 ## How to upload an auspice build to the group (example): 
 
