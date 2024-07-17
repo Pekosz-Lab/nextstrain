@@ -5,7 +5,7 @@
 
 This repository houses the **WORKING** seasonal [Pekosz Lab Nextstrain](https://nextstrain.org/groups/PekoszLab) builds.
 
-Currently, 24 total builds are maintained containing (H1N1, H3N2, and B/Vic) of circulaing viruses detected through the Johns Hopkins Hospital Network supported by [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr).
+Currently, 24 total builds are maintained for all 8 segments of circulaing H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital Network supported by [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr).
 
 ## Seasonal Influenza Build Input Data
 
