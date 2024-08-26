@@ -21,7 +21,7 @@ python fludb_initiate.py
 ```
 ## 2. Preparing your data
  
-Uploading data requires 2 files in the following formats. 
+Uploading data requires 2 files in the following formats.
 
 1. A `.fasta` file containing header information in the following format `seqid_segment number` (e.g. JH12345_1). The databse utilizes the seqid (JH number) as the relational key. Additional information in the header is not compatible with the provided upload scripts and will need to be adapted to fit your specific headers. 
 
@@ -60,23 +60,38 @@ fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,
 ### Usage
 
 **-h, --help**
-    show this help message and exit
+
+> show this help message and exit
+
 **-d DB, --db DB**        
-    Path to the SQLite database file.
+
+> Path to the SQLite database file.
+
 **-f FASTA, --fasta** 
-    FASTA Path to the output FASTA file.
+
+> FASTA Path to the output FASTA file.
+
 **-m METADATA, --metadata** 
-    METADATA Path to the output metadata TSV file.
-**--headers OPTIONS: seq_id,sample_id,subtype,collection_date,passage_history,study_id,segment,sequencing_run**
-    Metadata fields to include in the FASTA header.
+
+> METADATA Path to the output metadata TSV file.
+
+**--headers**
+
+> OPTIONS: seq_id,sample_id,subtype,collection_date,passage_history,study_id,segment,sequencing_run
+
+> Metadata fields to include in the FASTA header.
+
 **--filters [FILTERS ...]**
-    SQL conditions for querying the database are accepted. 
-    Use AND, OR, and NOT for complex queries. 
-        Passage History Example: "passage_history='hNEC1S2'" 
-        Date range example: "collection_date BETWEEN '2024-01-01' AND '2024-12-31'"
+
+> SQL conditions for querying the database are accepted. 
+
+> Use AND, OR, and NOT for complex queries. Passage History Example: "passage_history='hNEC1S2'", Date range example: "collection_date BETWEEN '2024-01-01' AND '2024-12-31'"
+
 **--segments OPTIONS: pb2,pb1,pa,ha,np,na,mp,ns**
-    Specific segments to include in the FASTA file. 
-    Example: ha pb1
+    
+> Specific segments to include in the FASTA file. 
+
+> Example: ha pb1 
 
 ### Example Queries
 
@@ -94,7 +109,7 @@ python fludb_download.py \
 
 #### References
 
-FluDB is partially inspired by [fauna](https://github.com/nextstrain/fauna). 
+FluDB is partially inspired by [fauna](https://github.com/nextstrain/fauna).
 
 #### Feature roadmap 
 
