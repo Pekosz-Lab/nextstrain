@@ -1,17 +1,22 @@
 import sqlite3
 
+# Connect to the database (or create it if it doesn't exist)
 conn = sqlite3.connect('fludb.db')
 cursor = conn.cursor()
 
+# Create the table with additional columns for location and database origin
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS influenza_genomes (
-    seq_id TEXT PRIMARY KEY,
-    sample_id TEXT,
+    sequence_ID TEXT PRIMARY KEY,
+    sample_ID TEXT,
+    type TEXT,
     subtype TEXT,
-    collection_date TEXT,
+    date TEXT,
     passage_history TEXT,
     study_id TEXT,
     sequencing_run TEXT,
+    location TEXT,
+    database_origin TEXT, 
     pb2 TEXT,
     pb1 TEXT,
     pa TEXT,
@@ -23,8 +28,6 @@ CREATE TABLE IF NOT EXISTS influenza_genomes (
 )
 ''')
 
-# Save (commit) the changes
+# Commit the changes and close the connection
 conn.commit()
-
-# Close the connection
 conn.close()

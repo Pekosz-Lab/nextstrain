@@ -1,9 +1,14 @@
 # Specify the files that we would like to keep out of the Pekosz Lab Nextstrain repository
 
 # Sensitive Directories
+source/
 data/
 results/
 auspice/
+
+# database files 
+*.db
+**.db
 
 # OS Generated #
 *DS_Store

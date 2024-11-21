@@ -11,12 +11,14 @@ The resulting files included a fasta file with appended headers to identify the 
 
 1. flusort is written in python v3.X.X and requires [biopython](https://biopython.org/wiki/Download) (validated on v1.83) and [numpy](https://pypi.org/project/numpy/) (validated on v1.23.4).
 
-2. ⚠️ The current build of flusort requires BLAST 2.13.0+ CLI to be accesible via your global $PATH. Please [download](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) and test your local blast installation with `blastn -h` prior to running. By default, `pyflute.py` will search for the blastn databse in the "scripts" directory unless specified by the -df flag. 
+2. BLAST+ Database: The current build of flusort requires BLAST 2.13.0+ CLI to be accesible via your global $PATH. Please [download](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/) and test your local blast installation with `blastn -h` prior to running. By default, `pyflute.py` will search for the blastn databse in the "scripts" directory unless specified by the `-df` flag. The current BLAST database contains all Influenza A segments for H1N1 and H3N2 as well as IBV Segments for B/Victoria. 
 
-Dependency installation using [`pip`](https://pip.pypa.io/en/stable/installation/)
+
 
 ```
+
 pip install biopython numpy
+
 ```
 
 ## Arguments

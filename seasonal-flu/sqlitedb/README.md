@@ -33,14 +33,21 @@ Uploading data requires 2 files in the following formats.
    - **passage_history**: The passage history of the sequence. 
    - **study_id**: This is intended to be used as a shortcut alias for easier querying across experiments. 
 
-## 3. Uploading your data `fludb_upload.py` or `fludb_ibv_upload.py`
+## 3. Uploading your data
 
-Once initialized, you'll notice there are 2 scripts for uploading influenza genome and metadata to the database.
+Once initialized, you'll notice there are several scripts for uploading influenza genome and metadata to the database depending on the source of your data.
 
-Influenza A virus sequences (h1n1 and h3n2) should use the `fludb_upload.py` scripts. 
+|script|data schema|
+|--|--|
+|`fludb_jhh_upload.py`|Johns Hopkins Hospital|
+|`fludb_ibv_jhh_upload.py`|Johns Hopkins Hospital|
+|`fludb_gisaid_upload.py`|GISAID|
+
+Users uploading Influenza A virus sequences (h1n1 and h3n2) should use the `fludb_jhh_upload.py` or `fludb_gisaid_upload.py` script. 
 
 Influenza B virus sequences (vic) should use the `fludb_ibv_upload.py` script. The only difference here is that the pb2 and pb1 segments correlate with segment number 2 and 1, respecitvely due to the NCBI references used in consensus calling in the sequencing pipeline (described here: [10.1093/ofid/ofad577](https://academic.oup.com/ofid/article/10/12/ofad577/7424824?login=false)). This non-coniacle numbering is unique to the NCBI reference sequences.
 
+The `fludb_gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header `Isolate name | Collection date | Passage details/history | Segment number | sample_id`.
 
 
 ## 4. Filtering and Querying `fludb_download.py` 
