@@ -143,7 +143,7 @@ def main():
     grouped_df['H_Subtype'].replace('', 'xx', inplace=True)
     grouped_df['N_Subtype'].replace('', 'xx', inplace=True)
     grouped_df['subtype'] = grouped_df['H_Subtype'] + grouped_df['N_Subtype']
-    grouped_df.loc[grouped_df['type'] == 'InfluenzaB', 'subtype'] = 'Vic'
+    grouped_df.loc[grouped_df['type'] == 'InfluenzaB', 'subtype'] = 'Victoria'
 
     fludb_meta = grouped_df.drop(columns=['Segment_Number', 'Subtype', 'H_Subtype', 'N_Subtype', 'Completeness'])
 

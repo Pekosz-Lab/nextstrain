@@ -1,6 +1,6 @@
 # Pekosz Lab Nextstrain Builds
 
-> [!IMPORTANT] Important 🚧
+> [!IMPORTANT]
 > This repository is under construction thus scripts are not constructed for optimal run efficiency.
 
 This repository houses the **WORKING** seasonal [Pekosz Lab Nextstrain](https://nextstrain.org/groups/PekoszLab) builds.
@@ -16,7 +16,7 @@ graph TD
 
   A[IAV and IBV Consensus sequences raw sequences \n with only >ID_seg# header information]
   B[Merge with \n vaccine reference sequences]
-  C[Subtyping and \n Genome QC `flusort.py`]
+  C[Typing and Subtyping and \n Genome QC `flusort.py`]
   D[Manually curated metadata merging \n :sequence dates and additional identifiers]
   E[✅ Proceed with nextstrain builds \n `scripts/nextstrain.ipynb`]
 

@@ -73,8 +73,6 @@ def update_database(db_path, fasta_file, metadata_file, require_sequence):
                 print(f"Skipping record {header}: No valid segment mapping found for segment number {segment_num}.")
                 continue
 
-            print(f"Inserting sequence {sequence_ID} into column: {segment_name} (segment {segment_num})")
-
             # Insert the sequence into the correct segment column
             sequence = str(record.seq)
             cursor.execute(f'''

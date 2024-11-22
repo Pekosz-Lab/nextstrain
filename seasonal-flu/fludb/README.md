@@ -1,6 +1,7 @@
 # fludb
 
 'fludb' is a consensus sequence database specifically designed to import, append, filter and export influenza genome consensus sequences. The motivation for this database is a 'two birds, one stone approach'.
+
 - Firstly, the Pekosz Lab group required a standardized way to pass Influenza genomes generated in 'real time' into nextstrain and bi-weekly reports. 
 - Secondly, we needed a way to filter, query, and format `.fasta` headers for gene-specific, concatentated genome, and reassortment analysis in our h1n1, h3n2 and influenza B pipelines.
 
@@ -10,15 +11,33 @@ fludb is a crudely simple database with a single table at the moment built in [s
 
 # Getting Started with fludb
 
-All dependecies for fluDB are included in the `seasonal-flu/environment.yml` file.
+All dependecies for fluDB are included in  `seasonal-flu/environment.yml`.
 
 ## 1. initiate the database
 
 ```shell
-cd seasonal-flu/sqlitedb/scripts 
-
 python fludb_initiate.py
 ```
+
+- sequence_ID (KEY)
+- sample_ID
+- type 
+- subtype
+- date
+- passage_history
+- study_id
+- sequencing_run
+- location
+- database_origin
+- pb2
+- pb1
+- pa
+- ha
+- np
+- n
+- mp
+- ns
+
 ## 2. Preparing your data
  
 Uploading data requires 2 files in the following formats.
@@ -37,26 +56,57 @@ Uploading data requires 2 files in the following formats.
 
 Once initialized, you'll notice there are several scripts for uploading influenza genome and metadata to the database depending on the source of your data.
 
-|script|data schema|
-|--|--|
-|`fludb_jhh_upload.py`|Johns Hopkins Hospital|
-|`fludb_ibv_jhh_upload.py`|Johns Hopkins Hospital|
-|`fludb_gisaid_upload.py`|GISAID|
+|script|originating data|required input|
+|--|--|--|
+|`upload_jhh.py`|Johns Hopkins Hospital|`sequences.fasta` `metadata.tsv`|
+|`upload_gisaid.py`|GISAID|`sequences.fasta`, `metadata.tsv`|
 
-Users uploading Influenza A virus sequences (h1n1 and h3n2) should use the `fludb_jhh_upload.py` or `fludb_gisaid_upload.py` script. 
+### `upload_jhh.py`
 
-Influenza B virus sequences (vic) should use the `fludb_ibv_upload.py` script. The only difference here is that the pb2 and pb1 segments correlate with segment number 2 and 1, respecitvely due to the NCBI references used in consensus calling in the sequencing pipeline (described here: [10.1093/ofid/ofad577](https://academic.oup.com/ofid/article/10/12/ofad577/7424824?login=false)). This non-coniacle numbering is unique to the NCBI reference sequences.
+- **Sequences in FASTA format**
+  - Headers must follow standard JH# sequencing identifiers of any length (e.g. JH1234 or JH11111)
+- **metadata.tsv**
+  - sequencing_ID
+  - sample_ID
+  - sequencing_run
+  - date: Must be in YYYY-MM-DD format. Unknown month or days are accepted (e.g. 2024-01-XX or 2023-XX-XX).
+  - passage_history
+  - type
+  - subtype
 
-The `fludb_gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header `Isolate name | Collection date | Passage details/history | Segment number | sample_id`.
+#### example
+```shell
+python seasonal-flu/sqlitedb/scripts/upload_jhh.py \
+    -d fludb.db \
+    -f data/JHH_sequences.fasta \
+    -m data/JHH_metadata.tsv \
+    --require-sequence
+```  
 
+### `fludb_gisaid_upload.py`
 
-## 4. Filtering and Querying `fludb_download.py` 
+The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header formay: `Isolate name | Collection date | Passage details/history | Segment number | sample_id`.
+
+#### example usage
+
+```shell
+python seasonal-flu/sqlitedb/scripts/upload_gisaid.py \
+    -d fludb.db \
+    -f source/20241021_GISAID_Epiflu_Sequence.fasta \
+    -m source/20241021_GISAID_isolates.xls
+```
+
+## 4. Querying Sequences `fludb_download.py` 
 
 At minimum, `fludb_download.py` requires the following:
 
-1. The specified `fludb.db` path (e.g. path/to/your/fludb.db)
-2. The path and name of the resulting fasta file. This will be in standard fasta format.
-3. The path and name of the resulting metadata file. This will be in .tsv format. 
+The download script will produce 2 files.
+  1. 
+  2.
+
+- A Database connection`fludb.db` path (e.g. path/to/your/fludb.db)
+- The path and name of the resulting fasta file. This will be in standard fasta format.
+- The path and name of the resulting metadata file. This will be in .tsv format. 
 
 NOTE: The metadata file will only have entries present in the fasta file.
 NOTE: Queries to the database follow standard SQL language. 
