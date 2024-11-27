@@ -5,9 +5,9 @@
 - Firstly, the Pekosz Lab group required a standardized way to pass Influenza genomes generated in 'real time' into nextstrain and bi-weekly reports. 
 - Secondly, we needed a way to filter, query, and format `.fasta` headers for gene-specific, concatentated genome, and reassortment analysis in our h1n1, h3n2 and influenza B pipelines.
 
-fludb is not inteded to be a permenant data storage solution for influenza genomes, rather a lightweight tool for efficiently passing sequences and assicated metadata data for cleaning/filtering purposes. 
+fludb is not inteded to be a permenant data storage solution for influenza genomes, rather a lightweight tool for efficiently passing sequences and associated metadata to a centralized space for specifiec querying. 
 
-fludb is a crudely simple database with a single table at the moment built in [sqlite](https://www.sqlite.org/). There are many limitations with using a file-based RDBMS but they are outweighed by the advantages in our specific usecase as we do not host any fludb instance and thus user is required to generate their own.
+fludb is a crudely simple database built in [sqlite](https://www.sqlite.org/). There are many limitations with using a file-based RDBMS. However, thse are outweighed by the advantages (in our specific usecase) as we do not host any fludb instance and thus user is required to generate their own.
 
 # fludb Quickstart
 
@@ -27,9 +27,12 @@ python seasonal-flu/fludb/scripts/upload_jhh.py \
     --require-sequence
 ```  
 
+See all arguments [below](#usage)
+
 ## Query and download your data
 
-### Download only Influenza B Victoria NS segments with a hNEC1 Siat 2 passage history
+### Example: Download only Influenza B Victoria NS segments with a hNEC1 SIAT 2 passage history
+
 ```shell
 python fludb_download.py \
     -d fludb.db \
@@ -40,9 +43,7 @@ python fludb_download.py \
     --segments ns
 ```
 
-### Download complete
-
-# fludb Detailed Start Guide
+# fludb Start Guide
 
 All dependecies for fluDB are included in  `seasonal-flu/environment.yml`.
 
@@ -107,7 +108,7 @@ Once initialized, you'll notice there are several scripts for uploading influenz
   - type
   - subtype
 
-#### example
+example:
 ```shell
 python seasonal-flu/fludb/scripts/upload_jhh.py \
     -d fludb.db \
@@ -120,7 +121,6 @@ python seasonal-flu/fludb/scripts/upload_jhh.py \
 
 The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header formay: `Isolate name | Collection date | Passage details/history | Segment number | sample_id`.
 
-#### example usage
 
 ```shell
 python seasonal-flu/fludb/scripts/upload_gisaid.py \
@@ -137,18 +137,45 @@ The download script will produce 2 files.
 
 ### At minimum, `fludb_download.py` requires the following:
 
-- A Database connection`fludb.db` path (e.g. path/to/your/fludb.db)
-- The path and name of the resulting fasta file. This will be in standard fasta format.
-- The path and name of the resulting metadata file. This will be in .tsv format. 
+1. A Database connection`fludb.db` path (e.g. path/to/your/fludb.db)
+2. The path and name of the resulting fasta file. This will be in standard fasta format.
+3. The path and name of the resulting metadata file. This will be in .tsv format. 
+
+
 
 >[!NOTE] 
 > - The metadata file will only have entries present in the fasta file.
 > - Queries to the database follow standard SQL language. 
 
-fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,subtype,collection_date,passage_history,study_id,segment,sequencing_run} ...]] [--filters [FILTERS ...]]
-                         [--segments [{pb2,pb1,pa,ha,np,na,mp,ns} ...]]
+Example to download only ibv NS sequences from working stocks: 
+
+```shell
+python fludb_download.py \
+    -d fludb.db \
+    -f sequences.fasta \
+    -m metadata.tsv \
+    --headers sample_id \
+    --filters "subtype='vic',passage_history='hNEC1S2'" \
+    --segments ns
+```
+
+### Example: Download the HA segment of Influenza A H1N1 from viruses that have complete genomes. 
+
+```shell
+fludb/scripts/download_v2.py \
+    -d fludb.db \
+    -f results/complete_test.fasta \
+    -m results/complete_test.tsv \
+    --headers sequence_ID \
+    --filters "subtype='H1N1'" \
+    --segments ns \
+    --complete-genomes
+```
 
 ### Usage
+
+fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,subtype,collection_date,passage_history,study_id,segment,sequencing_run} ...]] [--filters [FILTERS ...]]
+                         [--segments [{pb2,pb1,pa,ha,np,na,mp,ns} ...]]
 
 **-h, --help**
 
@@ -184,24 +211,7 @@ fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,
 
 > Example: ha pb1 
 
-### Example Queries
-
-Example to download only ibv NS sequences from working stocks: 
-
-```shell
-python fludb_download.py \
-    -d fludb.db \
-    -f sequences.fasta \
-    -m metadata.tsv \
-    --headers sample_id \
-    --filters "subtype='vic',passage_history='hNEC1S2'" \
-    --segments ns
-```
-
-#### References
+# Acknowledgments
 
 FluDB is partially inspired by [fauna](https://github.com/nextstrain/fauna).
 
-#### Feature roadmap 
-
-- [ ] Add genome-completeness column automatically refreshed with each upload.

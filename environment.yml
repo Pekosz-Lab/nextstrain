@@ -19,6 +19,8 @@ dependencies:
   - xlrd=1.*
   - pip=23.0.1
   - pathogen-embed=3.1.0
-  - sqlite
+  - libsqlite=3.46.0=h1b8f9f3_0
+  - snakemake=7.32.4=hdfd78af_1
+  - snakemake-minimal=7.32.4=pyhdfd78af_1
   - pip:
     - rethinkdb==2.3.0.post6

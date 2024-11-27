@@ -1,3 +1,7 @@
+"""
+This script downloads complete genomes for all subtypes and organizes them by subtype and segment. 
+"""
+
 import os
 import subprocess
 
@@ -30,11 +34,12 @@ for subtype in subtypes:
             "--metadata", metadata_file,
             "--headers", headers,
             "--filters", f"subtype='{subtype}'",
-            "--segments", segment
+            "--segments", segment,
+            "--complete-genomes"  # Add the flag for complete genomes
         ]
 
         # Print a concise message for logging purposes
-        print(f"Downloading data for {subtype} - {segment} segment...")
+        print(f"Downloading data for {subtype} - {segment} segment with complete genomes...")
         
         # Execute the command
         try:

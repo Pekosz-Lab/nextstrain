@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 
 # Function to fetch data from the database with optional filters and segment selection
-def fetch_data_from_db(db_path, filters, segments, complete_genomes):
+def fetch_data_from_db(db_path, filters, segments):
     try:
         conn = sqlite3.connect(db_path)
     except sqlite3.Error as e:
@@ -14,7 +14,6 @@ def fetch_data_from_db(db_path, filters, segments, complete_genomes):
     SELECT sequence_ID, sample_ID, type, subtype, date, passage_history, study_id,
            sequencing_run, location, database_origin
     """
-    # Include the required segments in the query
     if segments:
         query += ", " + ", ".join(segments)
     else:
@@ -22,17 +21,9 @@ def fetch_data_from_db(db_path, filters, segments, complete_genomes):
 
     query += " FROM influenza_genomes WHERE 1=1"
 
-    # Apply filters if provided
+    # Apply SQL filters dynamically
     if filters:
         query += " AND " + " AND ".join(filters)
-
-    # Apply complete genomes filter if requested
-    if complete_genomes:
-        query += """
-        AND pb2 IS NOT NULL AND pb1 IS NOT NULL AND pa IS NOT NULL AND 
-            ha IS NOT NULL AND np IS NOT NULL AND na IS NOT NULL AND 
-            mp IS NOT NULL AND ns IS NOT NULL
-        """
 
     try:
         df = pd.read_sql_query(query, conn)
@@ -46,7 +37,6 @@ def fetch_data_from_db(db_path, filters, segments, complete_genomes):
     df['date'] = df['date'].apply(clean_date_format)
 
     return df
-
 
 # Function to clean and standardize the date format
 def clean_date_format(date):
@@ -118,8 +108,8 @@ def generate_metadata(df, metadata_file, fasta_seq_ids):
     metadata_df.to_csv(metadata_file, sep='\t', index=False)
 
 # Main function to handle argument parsing and workflow execution
-def main(db_path, fasta_file, metadata_file, headers, filters, segments, complete_genomes):
-    df = fetch_data_from_db(db_path, filters, segments, complete_genomes)
+def main(db_path, fasta_file, metadata_file, headers, filters, segments):
+    df = fetch_data_from_db(db_path, filters, segments)
     fasta_seq_ids = generate_fasta(df, fasta_file, headers, segments)
     generate_metadata(df, metadata_file, fasta_seq_ids)
 
@@ -132,7 +122,6 @@ if __name__ == "__main__":
     parser.add_argument('--headers', nargs='*', choices=['sequence_ID', 'sample_ID', 'type', 'subtype', 'date', 'passage_history', 'study_id', 'location', 'database_origin', 'segment', 'sequencing_run'], default=['sequence_ID'], help='Metadata fields to include in the FASTA header.')
     parser.add_argument('--filters', nargs='*', help='SQL conditions for querying the database. Example: "type=\'InfluenzaB\'", "date BETWEEN \'2024-01-01\' AND \'2024-12-31\'".')
     parser.add_argument('--segments', nargs='*', choices=['pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns'], help='Specific segments to include in the FASTA file.')
-    parser.add_argument('--complete-genomes', action='store_true', help='Filter for complete genomes (samples with all 8 segments).')
 
     args = parser.parse_args()
 
@@ -142,4 +131,4 @@ if __name__ == "__main__":
     # Parse segments
     segments = args.segments if args.segments else ['pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns']
 
-    main(args.db, args.fasta, args.metadata, args.headers, filters, segments, args.complete_genomes)
+    main(args.db, args.fasta, args.metadata, args.headers, filters, segments)

@@ -124,7 +124,7 @@ python fludb/scripts/upload_jhh.py \
 >[!IMPORTANT]
 >The `--require-sequence` flag requires at least one genomic segment to be paired with a meatadata entry to be uploaded to `fludb.db`. If metadata information is availible in the metadata file without complementary sequencing data, it will be ignored.
 
-### Upload Vaccine Virus genomes and metadata
+### (OPTIONAL) Upload Vaccine Virus genomes and metadata
 
 ```shell
 python fludb/scripts/upload_jhh.py \
@@ -167,6 +167,7 @@ You should have 2 major directories housing your data:
 Below is what your datastructure sould look like. Regardless of what sequences are uploaded to fludb, the resulting data/ directory should be structured in the same way each and every time this pipeline is executed. 
 
 ### **source**: (2 files per "data source" e.g. GISAID or JHH)
+
 ```
 source/
 ├── GISAID_metadata.xls - UNMODIFIED `.xls` file from GISAID. Do not convert to `csv`. 
@@ -242,23 +243,26 @@ Below is a simplified representation of the rules implemented for each build. Be
 
 1. Download and assign updated Clades with Nextclade
 
-   > Automatically download updated nextclade dataset thus keeping all clade and subclade delineations up-to-date with each build execution. This is a not the way the nextstrain teams assigns clades and is (in my opinion) the most controversial step in this pipeline. [`augur clades'](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/clades.html). My reasoning is: nextclade can immediately provide an appendable table containing several [qc metrics](https://docs.nextstrain.org/projects/nextclade/en/stable/user/algorithm/06-quality-control.html) including missing data, sites, private mutations, clusters, frameshipts, stop codons etc, which we can later filter by [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html) if needed. Furthermore, functions for glycosylation site prediction is included. In my opnion, these metrics should be considered at least qualitatively during filtering and later analysus. Thus, adding clades at this stage would reduce an additional `augur clades` step but store clade and subclade information in the metadata. Open to debating this.  
 
-2. Append HA clade assignment to all segment metadata. 
-3. Append quality metrics by segment 
+   - Automatically download updated nextclade dataset thus keeping all clade and subclade delineations up-to-date with each build execution. This is a not the way the nextstrain teams assigns clades and is (in my opinion) the most controversial step in this pipeline (see [augur clades](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/clades.html)) My reasoning is: nextclade can immediately provide an appendable table containing several [qc metrics](https://docs.nextstrain.org/projects/nextclade/en/stable/user/algorithm/06-quality-control.html) including missing data, sites, private mutations, clusters, frameshipts, stop codons etc, which we can later filter by [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html) if needed and is metadata-centered. Furthermore, a function for glycosylation site prediction is included. In my opnion, these metrics should be considered at least qualitatively during filtering and later analysus. Thus, adding clades at this stage would reduce an additional `augur clades` step but store clade and subclade information in the metadata. Open to debating this.  
+
+2. Append HA clade assignment to all segment metadata.
+3. Append quality metrics by segment
 4. Filter by coverage, qc status and length staus using [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html)
+
 ```shell
 "--query", "(coverage >= 0.9) & (`qc.overallStatus` == 'good')",  # Add qc_overallStatus == 'mediocre' if needed
 "--min-length", str(min_length),
 ```
-1.  Align 
-2.  Build Raw Tree 
-3.  Refine branches 
-4.  Annotate 
-5.  Infer ancestral sequences
-6.  Translate sequences
-7.  Export (auspice V2)
-8.  Upload and deploy the builds to [Nextstrain](https://nextstrain.org/groups/PekoszLab)
+
+5.   Align 
+6.    Build Raw Tree 
+7.  Refine branches 
+8.  Annotate 
+9.  Infer ancestral sequences
+10. Translate sequences
+11. Export (auspice V2)
+12. Upload and deploy the builds to [Nextstrain](https://nextstrain.org/groups/PekoszLab)
 
 # How to upload an auspice build to the group (example):
 
@@ -269,7 +273,17 @@ For detailed nextstrain group page settings and how to upload data, see the [Off
 ```shell
 nextstrain login
 ```
-## Add a pathogen build
+## Uploading all 24 pathogen builds constructed in this pipline:
+
+### Private Deployment 
+
+[`nextstrain_upload_public.py`](scripts/nextstrain_upload_public.py)
+
+```
+python nextstrain_upload_public.py
+```
+
+## Uploading a single build
 
 Replace `${YOUR_BUILD_NAME}` with the file name of the build. 
 
@@ -278,16 +292,17 @@ nextstrain remote upload \
     nextstrain.org/groups/PekoszLab/${YOUR_BUILD_NAME} \
     auspice/${YOUR_BUILD_NAME}.json
 ```
+
 ### Verify The Uploaded Build 
 
 ```shell
 nextstrain remote list nextstrain.org/groups/PekoszLab
 ```
+
 # Roadmap 
 
-- [ ] Add t-SNE implementation for all builds using [pathogen-embed]()
-   - Example implementations:
-   - Manuscript: 
+- [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/)
+   - Manuscript: https://bedford.io/papers/nanduri-cartography/
 - [ ] Automated concatenated genome builds for h1n1 and h3n2
   - Proposed DAG 
     1.  [fludb](seasonal-flu/sqllitedb/) Query database for segment builds (24 total) including vaccine and previous season data for each subtype.
