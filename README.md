@@ -49,6 +49,7 @@ A build should contain 2 types of files for each institute:
 
 These should be placed in the `source` folder prior to [fludb](fludb/) upload
 
+```
 source/
 ├── GISAID_metadata.xls
 ├── GISAID_sequences.fasta
@@ -56,6 +57,7 @@ source/
 ├── JHH_sequences.fasta
 ├── vaccines.fasta
 └── vaccines.tsv
+```
 
 ## Data Preparation
 
