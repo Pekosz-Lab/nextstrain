@@ -1,9 +1,0 @@
-##gff-version 3
-#!gff-spec-version 1.21
-#!processor NCBI annotwriter
-##sequence-region OQ718998.1 1 1439
-##species https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=11320
-OQ718998.1	Genbank	region	1	1439	.	+	.	ID=OQ718998.1:1..1439;Dbxref=taxon:11320;Name=6;collection-date=2021-03-16;country=Australia: Northern Territory%2C Darwin;gbkey=Src;isolate=6;mol_type=viral cRNA;nat-host=Homo sapiens;note=EPI_ISL_2233238;segment=6;serotype=H3N2;strain=A/Darwin/6/2021
-OQ718998.1	Genbank	gene	8	1417	.	+	.	ID=gene-NA;Name=NA;gbkey=Gene;gene=NA;gene_biotype=protein_coding
-OQ718998.1	Genbank	CDS	8	1417	.	+	0	ID=cds-WEY08915.1;Parent=gene-NA;Dbxref=NCBI_GP:WEY08915.1;Name=WEY08915.1;gbkey=CDS;gene=NA;product=neuraminidase;protein_id=WEY08915.1
-

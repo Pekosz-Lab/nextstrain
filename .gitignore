@@ -1,17 +1,38 @@
 # Specify the files that we would like to keep out of the Pekosz Lab Nextstrain repository
 
 # Sensitive Directories
+source/
 data/
 results/
 auspice/
+figures/
+
+# database files 
+*.db
+**.db
 
 # OS Generated #
 *DS_Store
 *DS_Store?
 **DS_Store
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+*~
 
 # Sensitive environment variables
-environment*
+
+# All Snakemake files
+.snake*/ 
+
+#Jupyter 
+.ipynb_checkpoints
+geckodriver.log
 
 # cluster logs
 slurm-*
