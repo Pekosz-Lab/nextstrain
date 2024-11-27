@@ -1,10 +1,15 @@
 {
-  "title": "Baltimore 2023-24 season influenza A/H3N2 evolution",
-  "maintainers": [
+  "title": "Baltimore 2023-24 season influenza A/H1N1pdm evolution",
+ "maintainers": [
     {"name": "Elgin Akin", "url": "https://elginakin.github.io"},
     {"name": "The Pekosz Lab", "url": "https://pekoszlab.com"}
   ],
-  "build_url": "https://github.com/Pekosz-Lab/nextstrain",
+  "data_provenance": [
+    {
+      "name": "The Mostafa Lab", "url": "https://profiles.hopkinsmedicine.org/provider/Heba+Mabrouk+Mostafa/2777563"
+    }
+  ],
+  "build_url": "https://github.com/Pekosz-Lab/seasonal-flu",
   "colorings":[
     {
       "key": "clade",
@@ -22,13 +27,13 @@
       "type": "categorical"
     },
     {
-      "key": "qc.overallScore",
-      "title": "qc.overallScore",
+      "key": "qc_overallScore",
+      "title": "qc_overallScore",
       "type": "categorical"
     },
     {
-      "key": "qc.overallStatus",
-      "title": "qc.overallStatus",
+      "key": "qc_overallStatus",
+      "title": "qc_overallStatus",
       "type": "categorical"
     },
     {

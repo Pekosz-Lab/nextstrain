@@ -1,6 +1,6 @@
 # Pekosz Lab Nextclade Datasets
 
-This repository houses [nextclade](https://github.com/nextstrain/nextclade/tree/master) datasets used in the Pekosz Lab Nextstrain builds. 
+This repository houses [nextclade](https://github.com/seasonal-flu/nextclade/tree/master) datasets used in the Pekosz Lab Nextstrain builds. 
 
 ## Notes
 
@@ -27,7 +27,7 @@ For Influenza B builds, all datasets have been created according to specificatio
 - `README.md`
 - `changelog.md`
 
-## Changelog 
+## Changelog
 
 - 2024-07-16: Influenza A datasets created and deposited.
 - 2024-05-23: NA Segment added to include the NB cds from [CY073894.1](https://www.ncbi.nlm.nih.gov/nuccore/CY073894.1).

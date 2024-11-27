@@ -5,6 +5,7 @@ source/
 data/
 results/
 auspice/
+figures/
 
 # database files 
 *.db
@@ -14,9 +15,25 @@ auspice/
 *DS_Store
 *DS_Store?
 **DS_Store
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+*~
 
 # Sensitive environment variables
 environment*
+
+# All Snakemake files
+.snake*/ 
+
+#Jupyter 
+.ipynb_checkpoints
+geckodriver.log
 
 # cluster logs
 slurm-*

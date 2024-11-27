@@ -1,6 +1,6 @@
 # fludb
 
-'fludb' is a consensus sequence database specifically designed to import, append, filter and export influenza genome consensus sequences. The motivation for this database is a 'two birds, one stone approach'.
+`fludb` is a consensus sequence database specifically designed to import, append, filter and export influenza genome consensus sequences. The motivation for this database is a 'two birds, one stone approach'.
 
 - Firstly, the Pekosz Lab group required a standardized way to pass Influenza genomes generated in 'real time' into nextstrain and bi-weekly reports. 
 - Secondly, we needed a way to filter, query, and format `.fasta` headers for gene-specific, concatentated genome, and reassortment analysis in our h1n1, h3n2 and influenza B pipelines.
@@ -9,7 +9,40 @@ fludb is not inteded to be a permenant data storage solution for influenza genom
 
 fludb is a crudely simple database with a single table at the moment built in [sqlite](https://www.sqlite.org/). There are many limitations with using a file-based RDBMS but they are outweighed by the advantages in our specific usecase as we do not host any fludb instance and thus user is required to generate their own.
 
-# Getting Started with fludb
+# fludb Quickstart
+
+## Initiate a local instance of your database.
+
+```shell
+python fludb_initiate.py
+```
+
+## Upload your data
+
+```shell
+python seasonal-flu/fludb/scripts/upload_jhh.py \
+    -d fludb.db \
+    -f data/JHH_sequences.fasta \
+    -m data/JHH_metadata.tsv \
+    --require-sequence
+```  
+
+## Query and download your data
+
+### Download only Influenza B Victoria NS segments with a hNEC1 Siat 2 passage history
+```shell
+python fludb_download.py \
+    -d fludb.db \
+    -f sequences.fasta \
+    -m metadata.tsv \
+    --headers sample_id \
+    --filters "subtype='vic',passage_history='hNEC1S2'" \
+    --segments ns
+```
+
+### Download complete
+
+# fludb Detailed Start Guide
 
 All dependecies for fluDB are included in  `seasonal-flu/environment.yml`.
 
@@ -19,24 +52,24 @@ All dependecies for fluDB are included in  `seasonal-flu/environment.yml`.
 python fludb_initiate.py
 ```
 
-- sequence_ID (KEY)
-- sample_ID
-- type 
-- subtype
-- date
-- passage_history
-- study_id
-- sequencing_run
-- location
-- database_origin
-- pb2
-- pb1
-- pa
-- ha
-- np
-- n
-- mp
-- ns
+- sequence_ID (KEY): 
+- sample_ID:
+- type: 
+- subtype:
+- date:
+- passage_history:
+- study_id:
+- sequencing_run:
+- location:
+- database_origin:
+- pb2: sequence
+- pb1: sequence
+- pa: sequence
+- ha: sequence
+- np: sequence
+- na: sequence
+- mp: sequence
+- ns: sequence
 
 ## 2. Preparing your data
  
@@ -76,7 +109,7 @@ Once initialized, you'll notice there are several scripts for uploading influenz
 
 #### example
 ```shell
-python seasonal-flu/sqlitedb/scripts/upload_jhh.py \
+python seasonal-flu/fludb/scripts/upload_jhh.py \
     -d fludb.db \
     -f data/JHH_sequences.fasta \
     -m data/JHH_metadata.tsv \
@@ -90,7 +123,7 @@ The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and met
 #### example usage
 
 ```shell
-python seasonal-flu/sqlitedb/scripts/upload_gisaid.py \
+python seasonal-flu/fludb/scripts/upload_gisaid.py \
     -d fludb.db \
     -f source/20241021_GISAID_Epiflu_Sequence.fasta \
     -m source/20241021_GISAID_isolates.xls
@@ -98,18 +131,19 @@ python seasonal-flu/sqlitedb/scripts/upload_gisaid.py \
 
 ## 4. Querying Sequences `fludb_download.py` 
 
-At minimum, `fludb_download.py` requires the following:
-
 The download script will produce 2 files.
-  1. 
-  2.
+  1. sequences.fata
+  2. metadata.tsv
+
+### At minimum, `fludb_download.py` requires the following:
 
 - A Database connection`fludb.db` path (e.g. path/to/your/fludb.db)
 - The path and name of the resulting fasta file. This will be in standard fasta format.
 - The path and name of the resulting metadata file. This will be in .tsv format. 
 
-NOTE: The metadata file will only have entries present in the fasta file.
-NOTE: Queries to the database follow standard SQL language. 
+>[!NOTE] 
+> - The metadata file will only have entries present in the fasta file.
+> - Queries to the database follow standard SQL language. 
 
 fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,subtype,collection_date,passage_history,study_id,segment,sequencing_run} ...]] [--filters [FILTERS ...]]
                          [--segments [{pb2,pb1,pa,ha,np,na,mp,ns} ...]]
@@ -120,7 +154,7 @@ fludb_download.py [-h] -d DB -f FASTA -m METADATA [--headers [{seq_id,sample_id,
 
 > show this help message and exit
 
-**-d DB, --db DB**        
+**-d DB, --db DB**
 
 > Path to the SQLite database file.
 
