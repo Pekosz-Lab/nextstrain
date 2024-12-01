@@ -1,3 +1,11 @@
+"""
+author: jameshadfield
+description: This script concatenates flu genome segment FASTAs in the specified input order and provides a single file.
+    Note that FASTA headers that contain "|" will be stripped from that point forward.
+source: https://github.com/nextstrain/avian-flu/blob/master/scripts/join-segments.py
+    - With no modifications 
+"""
+
 from Bio import SeqIO
 from collections import defaultdict
 import argparse

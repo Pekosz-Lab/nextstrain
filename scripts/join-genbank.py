@@ -1,3 +1,9 @@
+"""
+author: jameshadfield
+description: This script concatenates genbank files in the specify input order and provides a single file with concatenated gene coordinates. 
+source: https://github.com/nextstrain/avian-flu/blob/master/scripts/join-genbank.py 
+    - With no modifications 
+"""
 
 import argparse
 from Bio import SeqIO
