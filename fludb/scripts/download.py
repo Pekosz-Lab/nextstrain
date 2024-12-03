@@ -60,7 +60,7 @@ def clean_date_format(date):
     return date  # Already in YYYY-MM-DD format
 
 # Function to generate the FASTA file
-def generate_fasta(df, fasta_file, headers, segments):
+def generate_fasta(df, fasta_file, headers, segments, header_delimiter):
     fasta_seq_ids = set()
 
     # Ensure headers include sequence_ID or sample_ID
@@ -100,7 +100,7 @@ def generate_fasta(df, fasta_file, headers, segments):
                         header_parts.append(row.get('sequencing_run', 'NA'))
 
                     # Create the final header string
-                    header = "|".join(header_parts)
+                    header = header_delimiter.join(header_parts)
                     f.write(f">{header}\n{sequence}\n")
                 
                 # Track sequence_IDs for metadata file filtering
@@ -118,9 +118,9 @@ def generate_metadata(df, metadata_file, fasta_seq_ids):
     metadata_df.to_csv(metadata_file, sep='\t', index=False)
 
 # Main function to handle argument parsing and workflow execution
-def main(db_path, fasta_file, metadata_file, headers, filters, segments, complete_genomes):
+def main(db_path, fasta_file, metadata_file, headers, filters, segments, complete_genomes, header_delimiter):
     df = fetch_data_from_db(db_path, filters, segments, complete_genomes)
-    fasta_seq_ids = generate_fasta(df, fasta_file, headers, segments)
+    fasta_seq_ids = generate_fasta(df, fasta_file, headers, segments, header_delimiter)
     generate_metadata(df, metadata_file, fasta_seq_ids)
 
 if __name__ == "__main__":
@@ -133,6 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('--filters', nargs='*', help='SQL conditions for querying the database. Example: "type=\'InfluenzaB\'", "date BETWEEN \'2024-01-01\' AND \'2024-12-31\'".')
     parser.add_argument('--segments', nargs='*', choices=['pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns'], help='Specific segments to include in the FASTA file.')
     parser.add_argument('--complete-genomes', action='store_true', help='Filter for complete genomes (samples with all 8 segments).')
+    parser.add_argument('--header-delimiter', default='|', help='Delimiter to use between fields in the FASTA header. Default is "|".')
 
     args = parser.parse_args()
 
@@ -142,4 +143,4 @@ if __name__ == "__main__":
     # Parse segments
     segments = args.segments if args.segments else ['pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns']
 
-    main(args.db, args.fasta, args.metadata, args.headers, filters, segments, args.complete_genomes)
+    main(args.db, args.fasta, args.metadata, args.headers, filters, segments, args.complete_genomes, args.header_delimiter)

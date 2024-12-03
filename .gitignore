@@ -6,6 +6,7 @@ data/
 results/
 auspice/
 figures/
+logs/
 
 # database files 
 *.db
