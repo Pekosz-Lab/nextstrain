@@ -138,7 +138,7 @@ python fludb/scripts/upload_jhh.py \
 
 >[!NOTE]
 > This requires and un-edited `.xls` file from gisaid as metadata input and FASTA headers in the following (default) format: 
->  `Isolate name | Collection date | Passage details/history | Segment number | sample_id`
+>  `Isolate name | Collection date | Passage details/history | Segment number | EPI_ID (Accession)`
 
 ```shell
 python fludb/scripts/upload_gisaid.py \

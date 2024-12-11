@@ -119,7 +119,7 @@ python seasonal-flu/fludb/scripts/upload_jhh.py \
 
 ### `fludb_gisaid_upload.py`
 
-The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header formay: `Isolate name | Collection date | Passage details/history | Segment number | sample_id`.
+The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header formay: `Isolate name | Collection date | Passage details/history | Segment number | EPI_ID (Accession)`.
 
 
 ```shell
