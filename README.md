@@ -24,7 +24,7 @@ Currently, 24 total builds are maintained for all 8 segments of circulaing H1N1,
 ## 1. Clone this repository
 
 ```shell
-git clone https://github.com/Pekosz-Lab/seasonal-flu.git
+git clone https://github.com/Pekosz-Lab/nextstrain
 ```
 
 ## 2. Setup your environment
