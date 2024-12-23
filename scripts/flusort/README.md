@@ -52,15 +52,24 @@ python flusort.py \
   -m input_metadata.tsv \
   -f output_sequences.fasta \
   -o output_appended_metadata.tsv
-
 ```
+
+Initial metadata table
+
+
+Final metadata table with type and subtype appended: 
+
+
+
 
 # Changelog 
 
+
 ## 2024-06-26
+
 - Depreciated flusory_split.py.
 - Specification of header metadata delimiters.
-- Appended headers now compatible with `augur parse`: 
+- Appended headers now compatible with [`augur parse`](): 
   - sequence_id_segment_number
   - sequence_id
   - segment_number

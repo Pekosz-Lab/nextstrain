@@ -12,7 +12,7 @@ def fetch_data_from_db(db_path, filters, segments, complete_genomes):
     # Construct the SQL query
     query = """
     SELECT sequence_ID, sample_ID, type, subtype, date, passage_history, study_id,
-           sequencing_run, location, database_origin
+           sequencing_run, location, database_origin, age, age_unit, sex
     """
     # Include the required segments in the query
     if segments:
@@ -76,28 +76,14 @@ def generate_fasta(df, fasta_file, headers, segments, header_delimiter):
                 for segment_name, sequence in segments_dict.items():
                     # Build the FASTA header based on specified fields
                     header_parts = []
-                    if 'sequence_ID' in headers:
-                        header_parts.append(row.get('sequence_ID', 'NA'))
-                    if 'sample_ID' in headers:
-                        header_parts.append(row.get('sample_ID', 'NA'))
-                    if 'type' in headers:
-                        header_parts.append(row.get('type', 'NA'))
-                    if 'subtype' in headers:
-                        header_parts.append(row.get('subtype', 'NA'))
-                    if 'date' in headers:
-                        header_parts.append(row.get('date', 'NA'))
-                    if 'passage_history' in headers:
-                        header_parts.append(row.get('passage_history', 'NA'))
-                    if 'study_id' in headers:
-                        header_parts.append(row.get('study_id', 'NA'))
-                    if 'location' in headers:
-                        header_parts.append(row.get('location', 'NA'))
-                    if 'database_origin' in headers:
-                        header_parts.append(row.get('database_origin', 'NA'))
+                    for field in headers:
+                        # Safely get the field value and skip None/NaN
+                        value = row.get(field, None)
+                        header_parts.append(str(value) if value is not None and pd.notna(value) else '')
+
+                    # Include the segment name if 'segment' is specified in headers
                     if 'segment' in headers:
                         header_parts.append(segment_name)
-                    if 'sequencing_run' in headers:
-                        header_parts.append(row.get('sequencing_run', 'NA'))
 
                     # Create the final header string
                     header = header_delimiter.join(header_parts)
@@ -107,6 +93,7 @@ def generate_fasta(df, fasta_file, headers, segments, header_delimiter):
                 fasta_seq_ids.add(sequence_id)
 
     return fasta_seq_ids
+
 
 # Function to generate the metadata file
 def generate_metadata(df, metadata_file, fasta_seq_ids):
@@ -129,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--db', required=True, help='Path to the SQLite database file.')
     parser.add_argument('-f', '--fasta', required=True, help='Path to the output FASTA file.')
     parser.add_argument('-m', '--metadata', required=True, help='Path to the output metadata TSV file.')
-    parser.add_argument('--headers', nargs='*', choices=['sequence_ID', 'sample_ID', 'type', 'subtype', 'date', 'passage_history', 'study_id', 'location', 'database_origin', 'segment', 'sequencing_run'], default=['sequence_ID'], help='Metadata fields to include in the FASTA header.')
+    parser.add_argument('--headers', nargs='*', choices=['sequence_ID', 'sample_ID', 'type', 'subtype', 'date', 'passage_history', 'study_id', 'location', 'database_origin', 'segment', 'sequencing_run', 'age', 'age_unit', 'sex'], default=['sequence_ID'], help='Metadata fields to include in the FASTA header.')
     parser.add_argument('--filters', nargs='*', help='SQL conditions for querying the database. Example: "type=\'InfluenzaB\'", "date BETWEEN \'2024-01-01\' AND \'2024-12-31\'".')
     parser.add_argument('--segments', nargs='*', choices=['pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns'], help='Specific segments to include in the FASTA file.')
     parser.add_argument('--complete-genomes', action='store_true', help='Filter for complete genomes (samples with all 8 segments).')

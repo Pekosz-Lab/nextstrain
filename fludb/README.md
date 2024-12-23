@@ -20,7 +20,7 @@ python fludb_initiate.py
 ## Upload your data
 
 ```shell
-python seasonal-flu/fludb/scripts/upload_jhh.py \
+python nextstrain/fludb/scripts/upload_jhh.py \
     -d fludb.db \
     -f data/JHH_sequences.fasta \
     -m data/JHH_metadata.tsv \
@@ -110,23 +110,34 @@ Once initialized, you'll notice there are several scripts for uploading influenz
 
 example:
 ```shell
-python seasonal-flu/fludb/scripts/upload_jhh.py \
+python fludb/scripts/upload_jhh.py \
     -d fludb.db \
     -f data/JHH_sequences.fasta \
     -m data/JHH_metadata.tsv \
     --require-sequence
 ```  
 
-### `fludb_gisaid_upload.py`
+### [`upload_gisaid.py`](fludb/scripts/upload_gisaid.py)
 
-The `gisaid_upload.py` script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header formay: `Isolate name | Collection date | Passage details/history | Segment number | EPI_ID (Accession)`.
-
+The [`upload_gisaid.py`](fludb/scripts/upload_gisaid.py) script requires both an **UNMODIFIED** FASTA file and metadata.xls file from GISAID. The fasta file should containg the default (as of October 2024) header format:
+> `Isolate name | Collection date | Passage details/history | Segment number | EPI_ID`.
 
 ```shell
-python seasonal-flu/fludb/scripts/upload_gisaid.py \
+python fludb/scripts/upload_gisaid.py \
     -d fludb.db \
     -f source/20241021_GISAID_Epiflu_Sequence.fasta \
     -m source/20241021_GISAID_isolates.xls
+```
+
+### [`upload_vaccine.py`](fludb/scripts/upload_vaccine.py)
+
+The `upload_vaccine.py` script **requires only a fasta file** with the following information in the header in this order: 
+>`Isolate name | Isolate ID | Collection date | Passage details/history | Segment number  | Type | Lineage`
+
+```shell
+python fludb/scripts/upload_vaccine.py \
+  -d fludb.db \
+  -f source/vaccines.fasta
 ```
 
 ## 4. Querying Sequences `fludb_download.py` 
@@ -141,8 +152,6 @@ The download script will produce 2 files.
 2. The path and name of the resulting fasta file. This will be in standard fasta format.
 3. The path and name of the resulting metadata file. This will be in .tsv format. 
 
-
-
 >[!NOTE] 
 > - The metadata file will only have entries present in the fasta file.
 > - Queries to the database follow standard SQL language. 
@@ -150,7 +159,7 @@ The download script will produce 2 files.
 Example to download only ibv NS sequences from working stocks: 
 
 ```shell
-python fludb_download.py \
+python fludb/scripts/fludb_download.py \
     -d fludb.db \
     -f sequences.fasta \
     -m metadata.tsv \
@@ -162,7 +171,7 @@ python fludb_download.py \
 ### Example: Download the HA segment of Influenza A H1N1 from viruses that have complete genomes. 
 
 ```shell
-fludb/scripts/download_v2.py \
+python fludb/scripts/download.py \
     -d fludb.db \
     -f results/complete_test.fasta \
     -m results/complete_test.tsv \

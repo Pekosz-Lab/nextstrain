@@ -1,3 +1,10 @@
+"""
+author: Elgin Akin
+description: This script queries fludb and subtype-specific nextclade output and generates a summarized flat table. This can then be piped into PowerBI or quarto report workflows.
+requirements: path to a populated fludb database
+optional: 3 paths to unmodified h1n1, h3n2 or ibv (only victoria supported) nextclade.tsv output tables
+"""
+
 import sqlite3
 import argparse
 import pandas as pd

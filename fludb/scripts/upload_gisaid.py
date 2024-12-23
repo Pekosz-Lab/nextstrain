@@ -82,20 +82,26 @@ def update_database(db_path, fasta_file, metadata_file):
         collection_date = format_date(row.get('Collection_Date', None))
         passage_history = row.get('Passage_History', None)
         location = row.get('Location', None)
+        age = row.get('Host_Age', None)
+        age_unit = row.get('Host_Age_Unit', None)
+        sex = row.get('Host_Gender', None)
 
         try:
             cursor.execute('''
-                INSERT INTO influenza_genomes (sequence_ID, sample_ID, subtype, date, passage_history, location, database_origin)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO influenza_genomes (sequence_ID, sample_ID, subtype, date, passage_history, location, database_origin, age, age_unit, sex)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(sequence_ID) DO UPDATE SET
                     sample_ID = COALESCE(?, sample_ID),
                     subtype = COALESCE(?, subtype),
                     date = COALESCE(?, date),
                     passage_history = COALESCE(?, passage_history),
                     location = COALESCE(?, location),
-                    database_origin = COALESCE(?, database_origin)
-            ''', (seq_id, isolate_name, lineage, collection_date, passage_history, location, database_origin,
-                  isolate_name, lineage, collection_date, passage_history, location, database_origin))
+                    database_origin = COALESCE(?, database_origin),
+                    age = COALESCE(?, age),
+                    age_unit = COALESCE(?, age_unit),
+                    sex = COALESCE(?, sex)
+            ''', (seq_id, isolate_name, lineage, collection_date, passage_history, location, database_origin, age, age_unit, sex,
+                  isolate_name, lineage, collection_date, passage_history, location, database_origin, age, age_unit, sex))
             metadata_records_inserted += 1
         except Exception as e:
             print(f"Skipped record {seq_id}: {e}")

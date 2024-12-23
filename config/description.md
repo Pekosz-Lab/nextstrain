@@ -10,5 +10,4 @@ https\://nextstrain.org/groups/PekoszLab-Public/**{subtype}**/**{segment}**\:gro
 
 Further details are provided by the Nextstrain team [here](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/second-trees.html). 
 
-
 Tremendous thanks to Amary Fall, David Villafuerte, Madeline Yunker and Omar Abdullahfor of the Mostafa lab for their expertise in the generation and sharing of these sequences.

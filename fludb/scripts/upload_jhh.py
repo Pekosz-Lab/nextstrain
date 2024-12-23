@@ -95,6 +95,11 @@ def update_database(db_path, fasta_file, metadata_file, require_sequence):
     metadata_count = 0
     skipped_metadata = 0
 
+    # Check if 'age', 'sex', and 'age_unit' columns exist
+    has_age = 'age' in metadata_df.columns
+    has_sex = 'sex' in metadata_df.columns
+    has_age_unit = 'age_unit' in metadata_df.columns
+
     for _, row in metadata_df.iterrows():
         sequence_ID = row['sequence_ID']
         sample_ID = row['sample_ID']
@@ -103,6 +108,11 @@ def update_database(db_path, fasta_file, metadata_file, require_sequence):
         passage_history = row['passage_history']
         type_ = row['type']
         subtype = row['subtype']
+
+        # Optional fields: age, sex, and age_unit
+        age = row['age'] if has_age and pd.notna(row['age']) else None
+        sex = row['sex'] if has_sex and pd.notna(row['sex']) else None
+        age_unit = row['age_unit'] if has_age_unit and pd.notna(row['age_unit']) else None
 
         # Check if sequence data exists for the current sequence_ID
         if require_sequence:
@@ -121,9 +131,9 @@ def update_database(db_path, fasta_file, metadata_file, require_sequence):
 
         cursor.execute('''
             INSERT INTO influenza_genomes (
-                sequence_ID, sample_ID, sequencing_run, date, passage_history, type, subtype, location, database_origin
+                sequence_ID, sample_ID, sequencing_run, date, passage_history, type, subtype, location, database_origin, age, sex, age_unit
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(sequence_ID) DO UPDATE SET
                 sample_ID = COALESCE(EXCLUDED.sample_ID, sample_ID),
                 sequencing_run = COALESCE(EXCLUDED.sequencing_run, sequencing_run),
@@ -132,8 +142,11 @@ def update_database(db_path, fasta_file, metadata_file, require_sequence):
                 type = COALESCE(EXCLUDED.type, type),
                 subtype = COALESCE(EXCLUDED.subtype, subtype),
                 location = COALESCE(EXCLUDED.location, location),
-                database_origin = COALESCE(EXCLUDED.database_origin, database_origin)
-        ''', (sequence_ID, sample_ID, sequencing_run, date, passage_history, type_, subtype, location, database_origin))
+                database_origin = COALESCE(EXCLUDED.database_origin, database_origin),
+                age = COALESCE(EXCLUDED.age, age),
+                sex = COALESCE(EXCLUDED.sex, sex),
+                age_unit = COALESCE(EXCLUDED.age_unit, age_unit)
+        ''', (sequence_ID, sample_ID, sequencing_run, date, passage_history, type_, subtype, location, database_origin, age, sex, age_unit))
         metadata_count += 1
 
     print(f"Metadata file processed: {metadata_count} records inserted or updated, {skipped_metadata} records skipped due to missing sequencing data.")
