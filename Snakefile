@@ -95,7 +95,8 @@ rule nextclade:
             f"-D {params.dataset} "
             f"--output-fasta {output.nextclade_fasta} "
             f"--output-tsv {output.nextclade_tsv} "
-            f"{input.fasta}"
+            f"{input.fasta}" 
+            f"| tee {log}"
         )
 
 rule assign_clades:
@@ -170,7 +171,7 @@ rule augur_filter:
             --exclude {params.exclude} \
             --metadata-id-columns sample_ID \
             --output-sequences {output.filtered_sequences} \
-            --output-metadata {output.filtered_metadata}
+            --output-metadata {output.filtered_metadata} | tee {log}
         """
 
 rule align:
@@ -195,7 +196,7 @@ rule align:
             --reference-sequence {input.reference} \
             --remove-reference \
             --output {output.aligned_sequences} \
-            --fill-gaps
+            --fill-gaps | tee {log}
         """
 
 rule raw_tree:
@@ -208,7 +209,7 @@ rule raw_tree:
         """
         augur tree \
             --alignment {input.alignment} \
-            --output {output.tree}
+            --output {output.tree} | tee {log}
         """
 
 # TODO: identify more rigorous rates for h3n2 mp,ns h1n1 mp and vic mp,ns. 
@@ -292,7 +293,7 @@ rule refine:
             --date-inference {params.date_inference} \
             --clock-filter-iqd {params.clock_filter_iqd} \
             --clock-rate {params.clock_rate}  \
-            --clock-std-dev {params.clock_std_dev}
+            --clock-std-dev {params.clock_std_dev} | tee {log}
         """
 
 rule annotate_traits:
@@ -304,6 +305,8 @@ rule annotate_traits:
         traits = "results/{subtype}/{segment}/traits.json"
     params:
         columns=["clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
+    log: 
+        "logs/annotate_traits_{subtype}_{segment}.txt"
     shell:
         """
         augur traits \
@@ -312,7 +315,7 @@ rule annotate_traits:
             --metadata-id-columns sample_ID \
             --output-node-data {output.traits} \
             --columns {params.columns} \
-            --confidence
+            --confidence | tee {log}
         """
 
 rule infer_ancestral:
@@ -332,7 +335,7 @@ rule infer_ancestral:
             --tree {input.tree} \
             --alignment {input.alignment} \
             --output-node-data {output.ancestral} \
-            --inference {params.inference}
+            --inference {params.inference} | tee {log}
         """
 
 rule translate:
@@ -352,7 +355,7 @@ rule translate:
             --tree {input.tree} \
             --ancestral-sequences {input.ancestral} \
             --reference-sequence {input.reference_sequence} \
-            --output-node-data {output.aa_muts}
+            --output-node-data {output.aa_muts} | tee {log}
         """    
 
 rule export:
@@ -379,6 +382,8 @@ rule export:
             input.aa_muts,
             input.vaccine
         ])
+    log: 
+        "logs/export_{subtype}_{segment}.txt"
     shell:
         """
         augur export v2 \
@@ -388,5 +393,5 @@ rule export:
             --node-data {params.node_data} \
             --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
-            --output {output.auspice_json}
+            --output {output.auspice_json} | tee {log}
         """
