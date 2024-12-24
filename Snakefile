@@ -44,6 +44,7 @@ rule all:
         expand("auspice/{subtype}/{segment}.json", subtype=["h3n2", "h1n1", "vic"], segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"])
 
 rule fetch_HANA_datasets:
+    message: "Downloading updated nextclade datasets"
     output:
         ha_dir="nextclade/flu/{subtype}/ha",
         na_dir="nextclade/flu/{subtype}/na"
@@ -76,6 +77,7 @@ rule fetch_HANA_datasets:
         shutil.rmtree(params.temp_dir)
 
 rule nextclade:
+    message: "Running nextclade for {input.fasta}"
     input:
         fasta=f"{data_dir}/{{subtype}}/{{segment}}/sequences.fasta",
         ha_dir="nextclade/flu/{subtype}/ha",
@@ -83,6 +85,8 @@ rule nextclade:
     output:
         nextclade_tsv="results/{subtype}/{segment}/nextclade.tsv",
         nextclade_fasta="results/{subtype}/{segment}/nextclade.aligned.fasta"
+    log: 
+        "logs/nextclade_{subtype}_{segment}.txt"
     params:
         dataset="nextclade/flu/{subtype}/{segment}/"
     run:
@@ -95,18 +99,21 @@ rule nextclade:
         )
 
 rule assign_clades:
+    message: "Appending clade data "
     input:
         metadata="data/{subtype}/{segment}/metadata.tsv",
         ha_clade="results/{subtype}/ha/nextclade.tsv"
     output:
         metadata_clade="results/{subtype}/{segment}/metadata.tsv"
+    log: 
+        "logs/assign-clades_{subtype}_{segment}.txt"
     run:
         import pandas as pd
 
         metadata_df = pd.read_csv(input.metadata, sep='\t')
         clade_df = pd.read_csv(input.ha_clade, sep='\t', usecols=['seqName', 'clade', 'subclade'])
 
-        merged_df = pd.merge(metadata_df, clade_df, left_on='sequence_ID', right_on='seqName', how='left')
+        merged_df = pd.merge(metadata_df, clade_df, left_on='sample_ID', right_on='seqName', how='left')
 
         merged_df.to_csv(output.metadata_clade, sep='\t', index=False)
 
@@ -116,6 +123,8 @@ rule merge_quality_metrics:
         nextclade="results/{subtype}/{segment}/nextclade.tsv"
     output:
         metadata_merged="results/{subtype}/{segment}/metadata_merged.tsv"
+    log: 
+        "logs/merge_quality_metrics-{subtype}_{segment}.txt"
     run:
         import pandas as pd
 
@@ -149,6 +158,8 @@ rule augur_filter:
     params:
         min_length=lambda wildcards: min_lengths.get(wildcards.segment, 0),  # Get min length for the segment
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
+    log:
+        "logs/augur_filter_{subtype}_{segment}.txt"
     shell:
         """
         augur filter \
@@ -157,12 +168,16 @@ rule augur_filter:
             --query "(coverage >= 0.9) & ((qc_overallStatus == 'good') | (qc_overallStatus == 'mediocre'))" \
             --min-length {params.min_length} \
             --exclude {params.exclude} \
-            --metadata-id-columns sequence_ID \
+            --metadata-id-columns sample_ID \
             --output-sequences {output.filtered_sequences} \
             --output-metadata {output.filtered_metadata}
         """
 
 rule align:
+    message:
+        """
+        Aligning sequences to {input.reference}
+        """
     input:
         filtered_sequences="results/{subtype}/{segment}/filtered.fasta",
         reference="config/{subtype}/reference_{segment}.gb"
@@ -170,6 +185,8 @@ rule align:
         aligned_sequences="results/{subtype}/{segment}/aligned.fasta"
     params:
         nthreads=8
+    log:
+        "logs/align_{subtype}_{segment}.txt"
     shell:
         """
         augur align \
@@ -182,6 +199,7 @@ rule align:
         """
 
 rule raw_tree:
+    message: "Building raw trees"
     input:
         alignment=rules.align.output.aligned_sequences
     output:
@@ -256,6 +274,8 @@ rule refine:
         clock_filter_iqd = 4,
         clock_rate = clock_rate,  # Function reference to calculate clock rate dynamically
         clock_std_dev = clock_std_dev  # Function reference to calculate clock std dev dynamically
+    log:
+        "logs/refine_{subtype}_{segment}.txt"
     shell:
         """
         # Run augur refine with conditional clock-rate and clock-std-dev arguments
@@ -263,7 +283,7 @@ rule refine:
             --tree {input.tree} \
             --alignment {input.alignment} \
             --metadata {input.metadata} \
-            --metadata-id-columns sequence_ID \
+            --metadata-id-columns sample_ID \
             --output-tree {output.tree} \
             --output-node-data {output.node_data} \
             --timetree \
@@ -275,9 +295,8 @@ rule refine:
             --clock-std-dev {params.clock_std_dev}
         """
 
-# not run fully yet
-
 rule annotate_traits:
+    message: "Annotating traits"
     input:
         tree = rules.refine.output.tree,
         metadata = rules.augur_filter.output.filtered_metadata,
@@ -290,13 +309,14 @@ rule annotate_traits:
         augur traits \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --metadata-id-columns sequence_ID \
+            --metadata-id-columns sample_ID \
             --output-node-data {output.traits} \
             --columns {params.columns} \
             --confidence
         """
 
 rule infer_ancestral:
+    message: "Reconstructing ancestral sequences and mutations"
     input:
         tree = rules.refine.output.tree,
         alignment = rules.align.output.aligned_sequences
@@ -304,6 +324,8 @@ rule infer_ancestral:
         ancestral="results/{subtype}/{segment}/nt_muts.json"
     params:
         inference="joint"  # Method for ancestral inference
+    log:
+        "logs/infer_ancestral_{subtype}_{segment}.txt"
     shell:
         """
         augur ancestral \
@@ -314,11 +336,14 @@ rule infer_ancestral:
         """
 
 rule translate:
+    message: "Translate mutations"
     input:
         tree = rules.refine.output.tree,
         ancestral = rules.infer_ancestral.output.ancestral, 
         reference_sequence=lambda wildcards: f"config/{wildcards.subtype}/genome_annotation_ha.gff"
         if wildcards.segment == "ha" else f"config/{wildcards.subtype}/reference_{wildcards.segment}.gb"
+    log: 
+        "logs/translate_{subtype}_{segment}.txt"
     output:
         aa_muts="results/{subtype}/{segment}/aa_muts.json"
     shell:
@@ -361,7 +386,7 @@ rule export:
             --metadata {input.metadata} \
             --description {input.description} \
             --node-data {params.node_data} \
-            --metadata-id-columns sequence_ID \
+            --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
             --output {output.auspice_json}
         """

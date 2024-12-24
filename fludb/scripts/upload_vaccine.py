@@ -1,5 +1,6 @@
 """
-Requires a FASTA from GISAID with the following header format: Isolate name | Isolate ID | Collection date | Passage details/history | Segment number  | Type | Lineage
+Requires a FASTA from GISAID with the following header format: Isolate name-Passage details/history | Isolate ID | Collection date | Passage details/history | Segment number  | Type | Lineage
+Copy and paste this header format into the GISAID FASTA header field before downloading.
 """
 
 import argparse
@@ -68,8 +69,8 @@ def update_database(db_path, fasta_file):
             fasta_records_skipped += 1
             continue
 
-        sample_id = parts[1].strip() # change to palce the sample ID as the sequence ID
-        sequence_id = parts[0].strip() # change to place sequence ID as the sample ID
+        sample_id = parts[0].strip()
+        sequence_id = parts[1].strip()
         collection_date = format_date(parts[2].strip())
         passage_history = parts[3].strip()
         segment_num = parts[4].strip()

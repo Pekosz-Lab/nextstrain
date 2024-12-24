@@ -4,10 +4,12 @@ This repository houses all scripts, snakefiles, and configuration files for the 
 
 Currently, 24 total builds are maintained for all 8 segments of circulaing H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network supported by [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr). As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipline.
 
-# Quickstart: Getting Started with the 23 segments Builds for H1N1, H3N2 and B/Victoria
+# Quickstart: Getting Started with the 24 segment build for H1N1, H3N2 and B/Victoria
 
 >[!WARNING]
 >For this tutorial, all scripts must be run from the `nextstrain/` home directory. 
+
+**NOTE:** If you already have a `fludb.db` database build, you can skip ahead to [Step 5](## 5. Query genomes and metadata and depost in the `data/` directory using [download.py](fludb/scripts/download.py)
 
 ## 1. Clone this repository setup and activate your environment. 
 
@@ -72,18 +74,21 @@ python scripts/flusort/flusort.py \
 
   1. `JHH_sequences.fasta`: A FASTA file containing influenza genomes by segment in JHH format: 
    - e.g. JH121234_4
-      - JH121234 = sequence_ID
+      - JH121234 = sample_ID
       - _4 = segment 4 (HA)
    
   3. `JHH_metadata.tsv`: A metadata file with the following fields: **WARNING: This file is manually curated**
-     - `sequence_ID` (REQUIRED): JH#
-     - `sample_ID` (REQUIRED): any continuous string without white spaces or tabs is accepted. 
-     - `run` (REQUIRED): THe sequencing run ID - IV{year}Run{number} e.g. IV23Run6
+     - `sequence_ID` (REQUIRED): JH# 
+     - `sample_ID` (REQUIRED): JH# For the seasonal influenza builds, the sample_ID is identical to the sequence ID.
+     - `run` (REQUIRED): The sequencing run ID - IV{year}Run{number} e.g. IV23Run6
      - `date` (REQUIRED): YYYY-MM-DD
      - `passage_history`: e.g. original
      - `study_id`: (OPTIONAL): study_tag
 
 Flusort will append the `JHH_metadata.tsv` with 2 columns specifying the type and subtype in bold below:
+
+>[!NOTE]
+> The `sample_ID` column is used as the value for all `--metadata-id-columns` augur functions when appropriate. 
 
    - **type: InfluenzaA or InfluenzaB** (flusort)
    - **subtype: H1N1, H3N2, Victoria** (flusort) 
@@ -107,7 +112,8 @@ python fludb/scripts/upload_jhh.py \
 ```  
 
 >[!IMPORTANT]
->The `--require-sequence` flag for [upload_JHH.py](fludb/scripts/upload_jhh.py) requires at least one genomic segment to be paired with a meatadata entry to be uploaded to `fludb.db`. If metadata information is availible in the metadata file without complementary sequencing data, it will be ignored.
+>The `--require-sequence` flag for [upload_JHH.py](fludb/scripts/upload_jhh.py) requires at least one genomic segment to be paired with a metadata entry to be uploaded to `fludb.db`. 
+>If JHxx entry is present in the metadata without complementary sequencing data in the FASTA file, it will be ignored.
 
 - Upload Vaccine Strain [upload_vaccine.py]()
 
@@ -117,7 +123,7 @@ python fludb/scripts/upload_vaccine.py \
   -f source/vaccine.fasta
 ```
 
-- (OPTIONAL) Upload GISAID reference data to fludb [upload_gisaid.py](fludb/scripts/upload_gisaid.py) 
+- (**OPTIONAL**) Upload GISAID reference data to fludb [upload_gisaid.py](fludb/scripts/upload_gisaid.py) 
 
 ```shell
 python fludb/scripts/upload_gisaid.py \
@@ -131,19 +137,18 @@ python fludb/scripts/upload_gisaid.py \
 >  `Isolate name | Collection date | Passage details/history | Segment number | Isolate ID`
 
 
-
 ## 5. Query genomes and metadata and depost in the `data/` directory using [download.py](fludb/scripts/download.py)
 
-The [fludb_download_seasonal_build_data.py](scripts/fludb_download_seasonal_build_data.py) script will automatically generate a `data/` directory and populate it with build folders called `h1n1`, `h3n2`, and `vic`. 
+The [fludb_download_seasonal_build_data.py](scripts/fludb_download_seasonal_build.py) script will populate the `data/` with subtype build folders called `h1n1`, `h3n2`, and `vic`. 
 
-- Each build folder will contain 8 segment folders: `pb2`, `pb1`, `pa`, `ha`, `np`, `na`, `mp`, `ns`. 
+- Each subtype build folder will contain 8 segment folders: `pb2`, `pb1`, `pa`, `ha`, `np`, `na`, `mp`, `ns`.
 
-- Each segment will contain the following files: 
+- Each segment will contain the following files:
    - sequences.fasta
    - metadata.tsv 
 
 ```shell
-python scripts/fludb_download_seasonal_build_data.py
+python scripts/fludb_download_seasonal_build.py
 ```
 
 ## CHECKPOINT 
@@ -202,7 +207,7 @@ nextstrain/
 
 ## 6. Execute Snakemake build 
 
-From the `nextstrain/` directory execute:
+From the `nextstrain/` directory execute the following to initiate the build. 
 
 ```
 snakemake --cores 8

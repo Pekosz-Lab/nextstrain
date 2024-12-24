@@ -5,7 +5,8 @@ import subprocess
 db_path = "fludb.db"
 fasta_dir = "data"
 metadata_dir = "data"
-headers = "sequence_ID"
+headers = ["sample_ID"]
+header_delimiter = "_"  # Added header delimiter
 raw_subtypes = ["H1xx", "xxN1", "H3xx", "xxN2", "Victoria"]  # Includes raw subtype patterns from flusort output. 
 segments = ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]
 
@@ -43,7 +44,8 @@ for subtype in set(subtypes):  # Use `set` to avoid redundant processing
             "--db", db_path,
             "--fasta", fasta_file,
             "--metadata", metadata_file,
-            "--headers", headers,
+            "--headers", *headers,
+            "--header-delimiter", header_delimiter,
             "--filters", f"subtype='{subtype}'",
             "--segments", segment
         ]
