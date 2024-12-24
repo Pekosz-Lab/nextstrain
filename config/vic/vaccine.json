@@ -1,6 +1,11 @@
 {
     "nodes": {
-        "B/Austria/1359417/2021": {
+        "B/Austria/1359417/2021-SIAT1": {
+            "vaccine": {
+                "selection_date": "2021-09-24"
+            }
+        },
+        "B/Austria/1359417/2021-E3(Am2/Al1)": {
             "vaccine": {
                 "selection_date": "2021-09-24"
             }
