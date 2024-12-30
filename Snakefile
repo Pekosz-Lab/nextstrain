@@ -148,7 +148,6 @@ rule merge_quality_metrics:
         # Save the merged dataframe to the output file
         merged_df.to_csv(output.metadata_merged, sep='\t', index=False)
 
-    
 rule augur_filter:
     input:
         sequences="data/{subtype}/{segment}/sequences.fasta",
@@ -359,7 +358,7 @@ rule translate:
         """    
 
 rule export:
-    message: "Exporting auspice JSON files for {wildcards.subtype}/{wildcards.segment}"
+    message: "Exporting auspice JSON files for segment build: {wildcards.subtype}/{wildcards.segment}"
     input:
         tree=rules.refine.output.tree,
         metadata=rules.augur_filter.output.filtered_metadata,
@@ -395,3 +394,38 @@ rule export:
             --auspice-config {input.auspice_config} \
             --output {output.auspice_json} | tee {log}
         """
+
+"""
+At this point, I want to begin with the concatenated genome builds. 
+Can we make these rules conditional upon a specific snakemake flag? 
+
+1. Make new sub-directories
+    data/concatenated: where all concatenated fludb queries will go
+    results/concatenated: where all concatenated results will go. 
+2. query fludb 
+    - query with complete-genomes
+3. align seqs with nextclade - no need to call clades again, just pull data from appended database. 
+4. Filter genomes by length
+5. Raw Tree
+6. Refine Branches
+7. Annotate
+8. Ancestral
+9. Translate
+10. tSNE embed 
+11. Add tSNE coordinates
+12. Export segment builds
+13. Export concatenated builds
+"""
+
+"""
+rule concat_fludb:
+    message:
+        """
+        querying complete genomes from fludb
+        """
+    shell:
+        """
+        python scripts/fludb_download_seasonal_build_COMPLETE.py
+        """
+
+"""
