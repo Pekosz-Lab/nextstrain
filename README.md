@@ -295,14 +295,14 @@ For detailed nextstrain group page settings and how to upload data, see the [Off
 ```shell
 nextstrain login
 ```
-## Uploading all 24 pathogen builds constructed in this pipline:
+## Uploading all 24 pathogen builds constructed in this pipline to
 
 ### Private Deployment 
 
-[`nextstrain_upload_public.py`](scripts/nextstrain_upload_public.py)
-
+a custom script has been make to deploy all 24 builds simultaneously 
+- [scripts/nextstrain_upload_private.py](scripts/nextstrain_upload_private.py)
 ```
-python nextstrain_upload_public.py
+python scripts/nextstrain_upload_private.py
 ```
 
 # History

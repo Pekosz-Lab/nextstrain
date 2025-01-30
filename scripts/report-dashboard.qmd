@@ -1,0 +1,128 @@
+---
+title: "JH-CEIRR Flu Sequencing Dashboard"
+author: Elgin Akin
+format: 
+    dashboard:
+        nav-buttons: 
+            - icon: github
+            - href: https://github.com/Pekosz-Lab/nextstrain/blob/main/scripts/build-reports.py
+execute: 
+  echo: false
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+data <- read_tsv("../reports/report.tsv")
+```
+
+## Row {height=20%}
+
+::: {.valuebox icon="arrow-repeat" color="vb-warning"}
+Unique Specimine IDs
+
+`r length(data$sequence_ID)`
+
+:::
+
+::: {.valuebox icon="plus-circle" color="vb-info"}
+Opened
+
+`r length(data)`
+
+:::
+
+
+## Row {height=20%}
+
+```{r}
+library(ggpubr)
+
+# Filter for specific subtypes and date range
+data_filtered <- data %>% 
+  filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"), 
+    as.Date(date) >= as.Date("2023-01-01") & as.Date(date) <= as.Date("2024-12-31")
+  )
+  
+# Prepare data for the donut plot
+donut_data <- data_filtered %>% 
+  group_by(subtype) %>% 
+  summarise(total_count = n(), .groups = "drop") %>% 
+  mutate(percentage = total_count / sum(total_count) * 100)
+
+# Create the donut plot
+donut_plot <- ggdonutchart(
+  data = donut_data,
+  x = "percentage",
+  label = "subtype",
+  fill = "subtype",
+  color = "white",
+  title = "Total Subtype Proportions"
+)
+
+# Print the donut plot
+donut_plot
+
+```
+
+## Row {height=60%}
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+
+# Filter for specific subtypes and date range
+data_filtered <- data %>% 
+  filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"), 
+    as.Date(date) >= as.Date("2023-01-01") & as.Date(date) <= as.Date("2024-12-31")
+  )
+
+# Summarize and prepare data for plotting
+plot_data <- data_filtered %>% 
+  group_by(date, subtype) %>% 
+  summarise(
+    count = n(),
+    sequencing_run = paste(unique(sequencing_run), collapse = "; "), # Combine sequencing runs
+    .groups = "drop"
+  )
+
+# Create the stacked bar graph using plotly
+plotly_plot <- plot_ly(
+  data = plot_data,
+  x = ~date,
+  y = ~count,
+  color = ~subtype,
+  type = 'bar',
+  text = ~paste(
+    "Date:", date, 
+    "<br>Count:", count, 
+    "<br>Subtype:", subtype, 
+    "<br>Sequencing Run:", sequencing_run
+  ),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "Subtype Frequency by Date",
+    xaxis = list(
+      title = "Date",
+      type = "category", # Ensures only unique dates are shown
+      categoryorder = "array",
+      categoryarray = unique(plot_data$date),
+      ticktext = unique(paste(plot_data$date, "\n", plot_data$sequencing_run)),
+      tickvals = unique(plot_data$date)
+    ),
+    yaxis = list(title = "Frequency"),
+    barmode = 'stack'
+  )
+
+# Print the plot
+plotly_plot
+
+
+
+
+```
+
+
