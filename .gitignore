@@ -29,6 +29,10 @@ Thumbs.db
 
 # Sensitive environment variables
 
+# R or Python notebook (jupyter or rmarkdown intermediate files)
+*.vdoc.r
+*.vdoc.python
+
 # All Snakemake files
 .snake*/ 
 

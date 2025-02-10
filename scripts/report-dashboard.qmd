@@ -12,7 +12,7 @@ execute:
 
 ```{r setup, include = FALSE}
 library(tidyverse)
-data <- read_tsv("../reports/report.tsv")
+data <- read_tsv("reports/report.tsv")
 ```
 
 ## Row {height=20%}
@@ -72,11 +72,13 @@ donut_plot
 library(tidyverse)
 library(plotly)
 
+data <- read_tsv("reports/report.tsv")
+
 # Filter for specific subtypes and date range
 data_filtered <- data %>% 
   filter(
     subtype %in% c("H1N1", "H3N2", "Victoria"), 
-    as.Date(date) >= as.Date("2023-01-01") & as.Date(date) <= as.Date("2024-12-31")
+    as.Date(date) >= as.Date("2023-01-01") & as.Date(date) <= as.Date("2025-12-31")
   )
 
 # Summarize and prepare data for plotting
@@ -125,4 +127,228 @@ plotly_plot
 
 ```
 
+# Static Plots
 
+## Working plot
+```{r}
+library(tidyverse)
+
+# Read data
+data <- read_tsv("reports/report.tsv")
+
+# Filter for specified subtypes and date range
+data_filtered <- data %>% 
+  filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"), 
+    date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+  )
+
+# Plot stacked bar chart (only for dates present in the dataset)
+subtype_freq = ggplot(data_filtered, aes(x = factor(date), fill = subtype)) +
+  geom_bar(position = "stack") +
+  labs(title = "Influenza Subtype Frequency Over Time",
+       x = "Date",
+       y = "Frequency",
+       fill = "Subtype") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplotly(subtype_freq)
+
+```
+
+## testing plot
+
+
+```{r}
+library(tidyverse)
+
+# Read data
+data <- read_tsv("reports/report.tsv")
+
+# Filter for specified subtypes and date range
+data_filtered <- data %>% 
+  filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"), 
+    date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+  ) %>%
+  mutate(date_run = paste(date, sequencing_run, sep = " | "))  # Ensure each date-run pair is unique
+
+# Plot stacked bar chart (showing each date-run pair separately)
+ggplot(data_filtered, aes(x = factor(date_run, levels = unique(date_run)), fill = subtype)) +
+  geom_bar(position = "stack") +
+  labs(title = "Influenza Subtype Frequency Over Time",
+       x = "Date | Sequencing Run",
+       y = "Number of Sequences",
+       fill = "Subtype") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))  # Adjust text size for readability
+ 
+```
+
+## Try H3N2 only
+
+
+```{r}
+library(tidyverse)
+
+# Read data
+data <- read_tsv("reports/report.tsv")
+
+# Filter for H3N2 subtypes only
+data_h3n2 <- data %>% 
+  filter(
+    subtype == "H3N2", 
+    date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+  ) %>%
+  mutate(date_run = paste(date, sequencing_run, sep = " | "))  # Ensure each date-run pair is unique
+
+### Plot 1: Clade Frequency Over Time
+h3n2_clades = ggplot(data_h3n2, aes(x = factor(date_run, levels = unique(date_run)), fill = clade)) +
+  geom_bar(position = "stack") +
+  labs(title = "H3N2 Clade Frequency Over Time",
+       x = "Date | Sequencing Run",
+       y = "Frequency",
+       fill = "Clade") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+### Plot 2: Subclade Frequency Over Time
+h3n2_subclades = ggplot(data_h3n2, aes(x = factor(date_run, levels = unique(date_run)), fill = subclade)) +
+  geom_bar(position = "stack") +
+  labs(title = "H3N2 Subclade Frequency Over Time",
+       x = "Date | Sequencing Run",
+       y = "Frequency",
+       fill = "Subclade") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+h3n2_clades
+h3n2_subclades
+```
+
+## Final plots
+
+
+
+
+```{r}
+library(tidyverse)
+
+# Define the clade and subclade color palettes
+clade_colors <- c(
+  # H1N1
+  "6B.1A.5a.2a" = "#a0240e", 
+  "6B.1A.5a.2a.1" = "#6265cd", 
+  # H3N2
+  "3C.2a1b.2a.2a.1b" = "#A4BED5FF",
+  "3C.2a1b.2a.2a.3a.1" = "#CC4C24FF", 
+  "3C.2a1b.2a.2b" = "#32373AFF", 
+  # IBV
+  "V1A" = "#FF4500", 
+  "V1A.3a.2" = "#00CED1"
+)
+
+
+subclade_colors <- c(
+  # H1N1
+  "C.1" = "#9A133DFF", 
+  "C.1.1" = "#B93961FF", 
+  "C.1.7" = "#D8527CFF", 
+  "C.1.7.2" = "#F28AAAFF", 
+  "C.1.8" = "#F9B4C9FF", 
+  "C.1.9" = "#F9E0E8FF", 
+  "D" = "#1A318BFF", 
+  "D.1" = "#4060C8FF", 
+  "D.2" = "#6996E3FF", 
+  "D.3" = "#A1C2EDFF", 
+  "D.4" = "#C5DAF6FF",
+  # IBV
+  "A" = "#FF6347", 
+  "C.3" = "#00CED1", 
+  "C.5" = "#9400D3", 
+  "C.5.1" = "#FF1493", 
+  "C.5.5" = "#FF8C00", 
+  "C.5.6" = "#B0E0E6", 
+  "C.5.7" = "#808000", 
+  # H3N2
+  "G.1.1.2" = "#00496FFF", 
+  "G.2" = "#0F85A0FF", 
+  "J" = "#EDD746FF", 
+  "J.1" = "#ED8B00FF", 
+  "J.2" = "#DD4124FF"
+)
+
+# Read data
+data <- read_tsv("reports/report.tsv")
+
+# Function to generate plots for a given subtype
+generate_plots <- function(df, subtype_name) {
+  df_filtered <- df %>%
+    filter(
+      subtype == subtype_name,
+      date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+    ) %>%
+    mutate(date_run = paste(date, sequencing_run, sep = " | ")) %>%  # Create a unique date-run label
+    arrange(date) %>%  # Ensure data is sorted by date
+    mutate(date_run = factor(date_run, levels = unique(date_run)))  # Set factor levels in time order
+
+  # Clade Frequency Plot
+  clade_plot <- ggplot(df_filtered, aes(x = date_run, fill = clade)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = clade_colors) +  # Apply clade color palette
+    labs(title = paste(subtype_name, "Clade Frequency Over Time"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Clade") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+  # Subclade Frequency Plot
+  subclade_plot <- ggplot(df_filtered, aes(x = date_run, fill = subclade)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = subclade_colors) +  # Apply subclade color palette
+    labs(title = paste(subtype_name, "Subclade Frequency Over Time"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Subclade") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+  return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
+}
+
+
+# Generate plots for each subtype
+h3n2_plots <- generate_plots(data, "H3N2")
+h1n1_plots <- generate_plots(data, "H1N1")
+victoria_plots <- generate_plots(data, "Victoria")
+
+# Display plots
+h3n2_clade = h3n2_plots$clade_plot
+h3n2_subclade = h3n2_plots$subclade_plot
+h1n1_clade = h1n1_plots$clade_plot
+h1n1_subclade = h1n1_plots$subclade_plot
+vic_clade = victoria_plots$clade_plot
+vic_subclade = victoria_plots$subclade_plot
+
+library(plotly)
+ggplotly(h3n2_clade)
+ggplotly(h3n2_subclade)
+ggplotly(h1n1_clade)
+ggplotly(h1n1_subclade)
+ggplotly(vic_clade)
+ggplotly(vic_subclade)
+
+
+
+
+```
+
+
+# Final plots expanded
+
+
+```{r}
+
+```
