@@ -41,6 +41,7 @@ rule all:
         expand("results/{subtype}/{segment}/aa_muts.json", subtype=["h3n2", "h1n1", "vic"], segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]),
         
         # Auspice JSON outputs for visualization
+        expand("auspice/{subtype}/{segment}_tip-frequencies.json", subtype=["h3n2", "h1n1", "vic"], segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]),
         expand("auspice/{subtype}/{segment}.json", subtype=["h3n2", "h1n1", "vic"], segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"])
 
 rule fetch_HANA_datasets:
@@ -394,4 +395,28 @@ rule export:
             --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
             --output {output.auspice_json} | tee {log}
+        """
+
+rule frequency:
+    message: "Calculating segment frequencies"
+    input: 
+        tree=rules.refine.output.tree,
+        metadata=rules.augur_filter.output.filtered_metadata,
+    output:
+        frequencies = "auspice/{subtype}/{segment}_tip-frequencies.json"
+    shell:
+        """
+        augur frequencies \
+            --method kde \
+            --tree {input.tree} \
+            --narrow-bandwidth 0.25 \
+            --wide-bandwidth 0.083 \
+            --proportion-wide 0.0 \
+            --pivot-interval 1 \
+            --min-date 2020.0 \
+            --max-date 2025.0 \
+            --include-internal-nodes \
+            --metadata {input.metadata} \
+            --metadata-id-columns sample_ID \
+            --output {output.frequencies}
         """

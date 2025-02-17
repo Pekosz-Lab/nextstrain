@@ -23,11 +23,13 @@ def nextstrain_login():
 
 def nextstrain_upload(subtype):
     # Construct the nextstrain remote upload command
-    command = [
+    command = ([
         "nextstrain", "remote", "upload",
         f"nextstrain.org/groups/PekoszLab/{subtype}"
-    ] + [f"auspice/{subtype}/{segment}.json" for segment in subtypes[subtype]]
-    
+    ] + 
+    [f"auspice/{subtype}/{segment}.json" for segment in subtypes[subtype]] +
+    [f"auspice/{subtype}/{segment}_tip-frequencies.json" for segment in subtypes[subtype]])
+
     # Print progress message
     print(f"Uploading data for {subtype} to Nextstrain...")
     
