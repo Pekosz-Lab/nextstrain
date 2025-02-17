@@ -31,7 +31,6 @@ Opened
 
 :::
 
-
 ## Row {height=20%}
 
 ```{r}
@@ -188,7 +187,6 @@ ggplot(data_filtered, aes(x = factor(date_run, levels = unique(date_run)), fill 
 
 ## Try H3N2 only
 
-
 ```{r}
 library(tidyverse)
 
@@ -229,9 +227,6 @@ h3n2_subclades
 
 ## Final plots
 
-
-
-
 ```{r}
 library(tidyverse)
 
@@ -248,7 +243,6 @@ clade_colors <- c(
   "V1A" = "#FF4500", 
   "V1A.3a.2" = "#00CED1"
 )
-
 
 subclade_colors <- c(
   # H1N1
@@ -297,27 +291,26 @@ generate_plots <- function(df, subtype_name) {
   clade_plot <- ggplot(df_filtered, aes(x = date_run, fill = clade)) +
     geom_bar(position = "stack") +
     scale_fill_manual(values = clade_colors) +  # Apply clade color palette
-    labs(title = paste(subtype_name, "Clade Frequency Over Time"),
+    labs(title = paste(subtype_name, "Clade Frequency"),
          x = "Date | Sequencing Run",
          y = "Frequency",
          fill = "Clade") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
   # Subclade Frequency Plot
   subclade_plot <- ggplot(df_filtered, aes(x = date_run, fill = subclade)) +
     geom_bar(position = "stack") +
     scale_fill_manual(values = subclade_colors) +  # Apply subclade color palette
-    labs(title = paste(subtype_name, "Subclade Frequency Over Time"),
+    labs(title = paste(subtype_name, "Subclade Frequency"),
          x = "Date | Sequencing Run",
          y = "Frequency",
          fill = "Subclade") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
 
   return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
 }
-
 
 # Generate plots for each subtype
 h3n2_plots <- generate_plots(data, "H3N2")
@@ -332,23 +325,13 @@ h1n1_subclade = h1n1_plots$subclade_plot
 vic_clade = victoria_plots$clade_plot
 vic_subclade = victoria_plots$subclade_plot
 
+
 library(plotly)
 ggplotly(h3n2_clade)
 ggplotly(h3n2_subclade)
-ggplotly(h1n1_clade)
-ggplotly(h1n1_subclade)
-ggplotly(vic_clade)
-ggplotly(vic_subclade)
-
-
-
-
+#ggplotly(h1n1_clade)
+#ggplotly(h1n1_subclade)
+#ggplotly(vic_clade)
+#ggplotly(vic_subclade)
 ```
 
-
-# Final plots expanded
-
-
-```{r}
-
-```
