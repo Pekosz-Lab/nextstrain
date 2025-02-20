@@ -35,10 +35,10 @@ def map_type_and_subtype(type_str, lineage_str):
         return None, None
 
 def update_database(db_path, fasta_file):
-    # Define the segment mapping
+    # Define the segment mapping with normal GISAID IAV numbering
     segment_map = {
-        "1": "pb1",
-        "2": "pb2",
+        "1": "pb2", 
+        "2": "pb1",
         "3": "pa",
         "4": "ha",
         "5": "np",

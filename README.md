@@ -215,6 +215,16 @@ snakemake --cores 8
 
 ## 7. Upload the builds to nextstrain
 
+### Optional Spotcheck - view on local auspice 
+
+```
+auspice view --datasetDir auspice/h1n1
+
+auspice view --datasetDir auspice/h3n2
+
+auspice view --datasetDir auspice/vic
+```
+
 ### Uploading a single build `.json` 
 
 Replace `${YOUR_BUILD_NAME}` with the file name of the build. 
@@ -225,10 +235,22 @@ nextstrain remote upload \
     auspice/${YOUR_BUILD_NAME}.json
 ```
 
-#### Verify The Uploaded Build 
+#### Verify Build Upload
 
 ```shell
 nextstrain remote list nextstrain.org/groups/PekoszLab
+```
+
+# Build Reports
+
+```
+python scripts/build-reports.py \
+   -i fludb.db \
+   -o reports/report.tsv \
+   -e reports/report.xlsx \
+   -h1 results/h1n1/ha/metadata.tsv \
+   -h3 results/h3n2/ha/metadata.tsv \
+   -b results/vic/ha/metadata.tsv
 ```
 
 # Roadmap 
@@ -295,14 +317,14 @@ For detailed nextstrain group page settings and how to upload data, see the [Off
 ```shell
 nextstrain login
 ```
-## Uploading all 24 pathogen builds constructed in this pipline:
+## Uploading all 24 pathogen builds constructed in this pipline to
 
 ### Private Deployment 
 
-[`nextstrain_upload_public.py`](scripts/nextstrain_upload_public.py)
-
+a custom script has been make to deploy all 24 builds simultaneously 
+- [scripts/nextstrain_upload_private.py](scripts/nextstrain_upload_private.py)
 ```
-python nextstrain_upload_public.py
+python scripts/nextstrain_upload_private.py
 ```
 
 # History

@@ -3,17 +3,6 @@ author: Elgin Akin
 description: This script queries fludb and subtype-specific nextclade output and generates a summarized flat table. This can then be piped into PowerBI or quarto report workflows.
 requirements: path to a populated fludb database
 optional: 3 paths to unmodified h1n1, h3n2 or ibv (only victoria supported) nextclade.tsv output tables
-
-example execution: 
-
-python scripts/build-reports.py \
-    -i fludb.db \
-    -o reports/report.tsv \
-    -e reports/report.xlsx \
-    -h1 results/h1n1/ha/nextclade.tsv \
-    -h3 results/h3n2/ha/nextclade.tsv \
-    -b results/vic/ha/nextclade.tsv
-
 """
 
 import sqlite3

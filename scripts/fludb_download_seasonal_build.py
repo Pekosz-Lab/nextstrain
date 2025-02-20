@@ -10,26 +10,32 @@ header_delimiter = "_"  # Added header delimiter
 raw_subtypes = ["H1xx", "xxN1", "H3xx", "xxN2", "Victoria"]  # Includes raw subtype patterns from flusort output. 
 segments = ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]
 
-# rename partial subtypes for consistency 
+# Normalize raw subtypes to standardized values
 def normalize_subtype(subtype):
-    """Normalize raw subtypes to standardized values."""
+    """Normalize raw subtypes to standardized values for filtering."""
     if "H1" in subtype or "N1" in subtype:
-        return "H1N1"
+        return "H1N1"  # Used in --filters flag
     elif "H3" in subtype or "N2" in subtype:
-        return "H3N2"
+        return "H3N2"  # Used in --filters flag
     elif "Victoria" in subtype:
-        return "Victoria"
+        return "Victoria"  # Used in --filters flag
     else:
         raise ValueError(f"Unknown subtype pattern: {subtype}")
 
-# Normalize subtypes list
+# Normalize subtypes list for filtering
 subtypes = [normalize_subtype(subtype) for subtype in raw_subtypes]
 
 # Loop through each subtype and segment
 for subtype in set(subtypes):  # Use `set` to avoid redundant processing
+    # Handle directory name explicitly for 'Victoria' as 'vic'
+    if subtype == "Victoria":
+        dir_subtype = "vic"
+    else:
+        dir_subtype = subtype.lower()
+
     for segment in segments:
-        # Define the directory structure
-        output_dir = f"{fasta_dir}/{subtype}/{segment}"
+        # Define the directory structure using lowercase values for directories
+        output_dir = f"{fasta_dir}/{dir_subtype}/{segment}"
         
         # Ensure the directory exists
         os.makedirs(output_dir, exist_ok=True)
@@ -38,7 +44,7 @@ for subtype in set(subtypes):  # Use `set` to avoid redundant processing
         fasta_file = f"{output_dir}/sequences.fasta"
         metadata_file = f"{output_dir}/metadata.tsv"
         
-        # Construct the command
+        # Construct the command with uppercase subtype for filtering
         cmd = [
             "python", "fludb/scripts/download.py",
             "--db", db_path,
@@ -46,7 +52,7 @@ for subtype in set(subtypes):  # Use `set` to avoid redundant processing
             "--metadata", metadata_file,
             "--headers", *headers,
             "--header-delimiter", header_delimiter,
-            "--filters", f"subtype='{subtype}'",
+            "--filters", f"subtype='{subtype}'",  # Use the uppercase value for filters
             "--segments", segment
         ]
 
@@ -59,25 +65,4 @@ for subtype in set(subtypes):  # Use `set` to avoid redundant processing
             print(f"Data downloaded successfully for {subtype} - {segment} segment.")
         except subprocess.CalledProcessError as e:
             print(f"Error while downloading data for {subtype} - {segment} segment.")
-            print(e)
-
-# Function to rename directories
-def rename_directories(base_dir, subtype_map):
-    for subtype, renamed_subtype in subtype_map.items():
-        old_dir = os.path.join(base_dir, subtype)
-        new_dir = os.path.join(base_dir, renamed_subtype)
-        if os.path.exists(old_dir):
-            print(f"Renaming {old_dir} to {new_dir}")
-            os.rename(old_dir, new_dir)
-        else:
-            print(f"Directory {old_dir} does not exist, skipping.")
-
-# Map of original subtype names to their desired lowercase equivalents
-subtype_map = {
-    "H1N1": "h1n1",
-    "H3N2": "h3n2",
-    "Victoria": "vic"
-}
-
-# Rename the directories after processing
-rename_directories(fasta_dir, subtype_map)
+            print()
