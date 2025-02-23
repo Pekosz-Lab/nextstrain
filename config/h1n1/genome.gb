@@ -1,73 +1,10 @@
-LOCUS       NC_026438              13232 bp    cRNA    linear   VRL 13-AUG-2018
+LOCUS       NC_026438              13232 bp    RNA     linear   UNA 20-FEB-2025
 DEFINITION  Combined references for 8 segments.
 ACCESSION   NC_026438
-VERSION     NC_026438.1
-KEYWORDS    RefSeq.
+VERSION     NC_026438
+KEYWORDS    .
 SOURCE      Influenza A virus (A/California/07/2009(H1N1))
-  ORGANISM  Influenza A virus (A/California/07/2009(H1N1))
-            Viruses; Riboviria; Orthornavirae; Negarnaviricota;
-            Polyploviricotina; Insthoviricetes; Articulavirales;
-            Orthomyxoviridae; Alphainfluenzavirus; Alphainfluenzavirus
-            influenzae.
-REFERENCE   1  (bases 1 to 2280)
-  AUTHORS   Garten,R.J., Davis,C.T., Russell,C.A., Shu,B., Lindstrom,S.,
-            Balish,A., Sessions,W.M., Xu,X., Skepner,E., Deyde,V.,
-            Okomo-Adhiambo,M., Gubareva,L., Barnes,J., Smith,C.B., Emery,S.L.,
-            Hillman,M.J., Rivailler,P., Smagala,J., de Graaf,M., Burke,D.F.,
-            Fouchier,R.A., Pappas,C., Alpuche-Aranda,C.M., Lopez-Gatell,H.,
-            Olivera,H., Lopez,I., Myers,C.A., Faix,D., Blair,P.J., Yu,C.,
-            Keene,K.M., Dotson,P.D. Jr., Boxrud,D., Sambol,A.R., Abid,S.H., St
-            George,K., Bannerman,T., Moore,A.L., Stringer,D.J., Blevins,P.,
-            Demmler-Harrison,G.J., Ginsberg,M., Kriner,P., Waterman,S.,
-            Smole,S., Guevara,H.F., Belongia,E.A., Clark,P.A., Beatrice,S.T.,
-            Donis,R., Katz,J., Finelli,L., Bridges,C.B., Shaw,M., Jernigan,D.B.,
-            Uyeki,T.M., Smith,D.J., Klimov,A.I. and Cox,N.J.
-  TITLE     Antigenic and genetic characteristics of swine-origin 2009 A(H1N1)
-            influenza viruses circulating in humans
-  JOURNAL   Science 325 (5937), 197-201 (2009)
-   PUBMED   19465683
-REFERENCE   2  (bases 1 to 2280)
-  AUTHORS   Shu,B., Balish,A., Garten,R., Smith,C., Emery,S., Barnes,J.,
-            Deyde,V., Klimov,A. and Cox,N.
-  TITLE     Human infection with novel swine H1N1 influenza
-  JOURNAL   Unpublished
-REFERENCE   3  (bases 1 to 2280)
-  CONSRTM   NCBI Genome Project
-  TITLE     Direct Submission
-  JOURNAL   Submitted (06-FEB-2015) National Center for Biotechnology
-            Information, NIH, Bethesda, MD 20894, USA
-REFERENCE   4  (bases 1 to 2280)
-  AUTHORS   Shu,B., Balish,A., Garten,R., Smith,C., Emery,S., Barnes,J.,
-            Deyde,V., Klimov,A. and Cox,N.
-  TITLE     Direct Submission
-  JOURNAL   Submitted (04-MAY-2009) WHO Collaborating Center for Surveillance,
-            Epidemiology and Control of Influenza, Influenza Division, Centers
-            for Disease Control and Prevention, Atlanta, 1600 Clifton Road,
-            N.E., Atlanta, GA 30333, USA
-COMMENT     ##EpifluData-START##
-            Isolate                :: A/California/07/2009
-            Subtype                :: H1N1
-            Segment_name           :: PB2
-            Host_gender            :: M
-            Host_age               :: 54
-            Passage_history        :: E2
-            Adamantane_resistance  :: resistant
-            Zanamivir_resistance   :: sensitive
-            Oseltamivir_resistance :: sensitive
-            Country                :: USA
-            State/Province         :: California state
-            Collection_day         :: 9
-            Collection_month       :: 4
-            Collection_year        :: 2009
-            EPI_accession          :: EPI177327
-            ##EpifluData-END##
-            REVIEWED REFSEQ: This record has been curated by NCBI staff. The
-            reference sequence is identical to FJ984387.
-            Swine influenza A (H1N1) virus isolated during human swine flu
-            outbreak of 2009.  For more information, see http://www.cdc.gov/.
-            Some of the information does not have GenBank feature identifiers
-            and is being provided in the comment section.
-            COMPLETENESS: full length.
+  ORGANISM  Influenza A virus (A/California/07/2009(H1N1)).
 FEATURES             Location/Qualifiers
      source          1..13232
                      /organism="Influenza A virus (A/California/07/2009(H1N1))"
@@ -76,123 +13,105 @@ FEATURES             Location/Qualifiers
                      /serotype="H1N1"
                      /host="Homo sapiens; gender M; age 54"
                      /db_xref="taxon:641809"
-                     /segment="1"
+                     /segment=1
                      /country="USA: California state"
                      /collection_date="09-Apr-2009"
      CDS             1..2280
-                     /ID="cds-YP_009118631.1"
-                     /Dbxref="GenBank:YP_009118631.1,GeneID:23308131"
-                     /Name="PB2"
-                     /gbkey="CDS"
                      /gene="PB2"
                      /locus_tag="PB2"
                      /product="polymerase PB2"
                      /protein_id="YP_009118631.1"
+                     /standard_name="PB2 CDS"
      CDS             2281..4554
-                     /ID="cds-YP_009118628.1"
-                     /Dbxref="GenBank:YP_009118628.1,GeneID:23308122"
-                     /Name="PB1"
-                     /gbkey="CDS"
                      /gene="PB1"
                      /locus_tag="PB1"
                      /product="polymerase PB1"
                      /protein_id="YP_009118628.1"
+                     /standard_name="PB1 CDS"
      CDS             4555..6705
-                     /ID="cds-YP_009118630.1"
-                     /Dbxref="GenBank:YP_009118630.1,GeneID:23308128"
-                     /Name="PA"
-                     /gbkey="CDS"
                      /gene="PA"
                      /locus_tag="PA"
                      /product="polymerase PA"
                      /protein_id="YP_009118630.1"
+                     /standard_name="PA CDS"
      CDS             join(4555..5124,5126..5254)
-                     /ID="cds-YP_009121769.1"
-                     /Dbxref="GenBank:YP_009121769.1,GeneID:23561398"
-                     /Name="PA-X"
                      /exception="ribosomal slippage"
-                     /gbkey="CDS"
                      /gene="PA-X"
                      /locus_tag="PA-X"
                      /product="PA-X protein"
                      /protein_id="YP_009121769.1"
+                     /standard_name="PA-X CDS"
      CDS             6726..8426
                      /gene="HA"
                      /function="receptor binding and fusion protein"
                      /codon_start=1
                      /product="hemagglutinin"
                      /protein_id="AFM72832.1"
-                     /translation="MKAILVVLLYTFATANADTLCIGYHANNSTDTVDTVLEKNVTVTH
-                     SVNLLEDKHNGKLCKLRGVAPLHLGKCNIAGWILGNPECESLSTASSWSYIVETPSSDN
-                     GTCYPGDFIDYEELREQLSSVSSFERFEIFPKTSSWPNHDSNKGVTAACPHAGAKSFYK
-                     NLIWLVKKGNSYPKLSKSYINDKGKEVLVLWGIHHPSTSADQQSLYQNADAYVFVGSSR
-                     YSKKFKPEIAIRPKVRDREGRMNYYWTLVEPGDKITFEATGNLVVPRYAFAMERNAGSG
-                     IIISDTPVHDCNTTCQTPKGAINTSLPFQNIHPITIGKCPKYVKSTKLRLATGLRNIPS
-                     IQSRGLFGAIAGFIEGGWTGMVDGWYGYHHQNEQGSGYAADLKSTQNAIDEITNKVNSV
-                     IEKMNTQFTAVGKEFNHLEKRIENLNKKVDDGFLDIWTYNAELLVLLENERTLDYHDSN
-                     VKNLYEKVRSQLKNNAKEIGNGCFEFYHKCDNTCMESVKNGTYDYPKYSEEAKLNREEI
-                     DGVKLESTRIYQILAIYSTVASSLVLVVSLGAISFWMCSNGSLQCRICI"
+                     /translation="MKAILVVLLYTFATANADTLCIGYHANNSTDTVDTVLEKNVTVT
+                     HSVNLLEDKHNGKLCKLRGVAPLHLGKCNIAGWILGNPECESLSTASSWSYIVETPSS
+                     DNGTCYPGDFIDYEELREQLSSVSSFERFEIFPKTSSWPNHDSNKGVTAACPHAGAKS
+                     FYKNLIWLVKKGNSYPKLSKSYINDKGKEVLVLWGIHHPSTSADQQSLYQNADAYVFV
+                     GSSRYSKKFKPEIAIRPKVRDREGRMNYYWTLVEPGDKITFEATGNLVVPRYAFAMER
+                     NAGSGIIISDTPVHDCNTTCQTPKGAINTSLPFQNIHPITIGKCPKYVKSTKLRLATG
+                     LRNIPSIQSRGLFGAIAGFIEGGWTGMVDGWYGYHHQNEQGSGYAADLKSTQNAIDEI
+                     TNKVNSVIEKMNTQFTAVGKEFNHLEKRIENLNKKVDDGFLDIWTYNAELLVLLENER
+                     TLDYHDSNVKNLYEKVRSQLKNNAKEIGNGCFEFYHKCDNTCMESVKNGTYDYPKYSE
+                     EAKLNREEIDGVKLESTRIYQILAIYSTVASSLVLVVSLGAISFWMCSNGSLQCRICI
+                     "
+                     /standard_name="HA CDS"
+     CDS             6726..6776
+                     /gene="SigPep"
+     CDS             6777..7757
+                     /gene="HA1"
+     CDS             7758..8426
+                     /gene="HA2"
      CDS             8458..9954
-                     /ID="cds-YP_009118629.1"
-                     /Dbxref="GenBank:YP_009118629.1,GeneID:23308125"
-                     /Name="NP"
-                     /gbkey="CDS"
                      /gene="NP"
                      /locus_tag="NP"
                      /product="nucleocapsid protein"
                      /protein_id="YP_009118629.1"
+                     /standard_name="NP CDS"
      CDS             9963..11372
                      /gene="NA"
                      /codon_start=1
                      /product="neuraminidase"
                      /protein_id="QRV63257.1"
-                     /translation="MNPNQKIITIGSICMTIGTANLILQIGNIISIWVSHSIQIGNQSQ
-                     IETCNKSVITYENNTWVNQTFVNISNTNSAARQSVASVKLAGNSSLCPVSGWAIYSKDN
-                     SVRIGSKGDVFVIREPFISCSPLECRTFFLTQGALLNDKHSNGTIKDRSPYRTLMSCPI
-                     GEVPSPYNSRFESVAWSASACHDGTNWLTIGISGPDSGAVAVLKYNGIITDTIKSWRNK
-                     ILRTQESECACVNGSCFTIMTDGPSDGQASYKIFRIEKGKIIKSVEMKAPNYHYEECSC
-                     YPDSSEITCVCRDNWHGSNRPWVSFNQNLEYQMGYICSGVFGDNPRPNDKTGSCGPVSS
-                     NGANGVKGFSFKYGNGVWIGRTKSISSRKGFEMIWDPNGWTGTDNKFSKKQDIVGINEW
-                     SGYSGSFVQHPELTGLNCIRPCFWVELIRGRPEENTIWTSGSSISFCGVDSDIVGWSWP
-                     DGAELPFTIDK"
+                     /translation="MNPNQKIITIGSICMTIGTANLILQIGNIISIWVSHSIQIGNQS
+                     QIETCNKSVITYENNTWVNQTFVNISNTNSAARQSVASVKLAGNSSLCPVSGWAIYSK
+                     DNSVRIGSKGDVFVIREPFISCSPLECRTFFLTQGALLNDKHSNGTIKDRSPYRTLMS
+                     CPIGEVPSPYNSRFESVAWSASACHDGTNWLTIGISGPDSGAVAVLKYNGIITDTIKS
+                     WRNKILRTQESECACVNGSCFTIMTDGPSDGQASYKIFRIEKGKIIKSVEMKAPNYHY
+                     EECSCYPDSSEITCVCRDNWHGSNRPWVSFNQNLEYQMGYICSGVFGDNPRPNDKTGS
+                     CGPVSSNGANGVKGFSFKYGNGVWIGRTKSISSRKGFEMIWDPNGWTGTDNKFSKKQD
+                     IVGINEWSGYSGSFVQHPELTGLNCIRPCFWVELIRGRPEENTIWTSGSSISFCGVDS
+                     DIVGWSWPDGAELPFTIDK"
+                     /standard_name="NA CDS"
      CDS             join(11388..11413,12102..12369)
-                     /ID="cds-YP_009118622.1"
-                     /Dbxref="GenBank:YP_009118622.1,GeneID:23308108"
-                     /Name="M2"
-                     /gbkey="CDS"
                      /gene="M2"
                      /locus_tag="M2"
                      /product="matrix protein 2"
                      /protein_id="YP_009118622.1"
+                     /standard_name="M2 CDS"
      CDS             11388..12146
-                     /ID="cds-YP_009118623.1"
-                     /Dbxref="GenBank:YP_009118623.1,GeneID:23308107"
-                     /Name="M1"
-                     /gbkey="CDS"
                      /gene="M1"
                      /locus_tag="M1"
                      /product="matrix protein 1"
                      /protein_id="YP_009118623.1"
+                     /standard_name="M1 CDS"
      CDS             join(12370..12399,12872..13207)
-                     /ID="cds-YP_009118624.1"
-                     /Dbxref="GenBank:YP_009118624.1,GeneID:23308112"
-                     /Name="NEP"
                      /Note="nonstructural protein 2"
-                     /gbkey="CDS"
                      /gene="NEP"
                      /locus_tag="NEP"
                      /product="nuclear export protein"
                      /protein_id="YP_009118624.1"
+                     /standard_name="NEP CDS"
      CDS             12370..13029
-                     /ID="cds-YP_009118625.1"
-                     /Dbxref="GenBank:YP_009118625.1,GeneID:23308111"
-                     /Name="NS1"
-                     /gbkey="CDS"
                      /gene="NS1"
                      /locus_tag="NS1"
                      /product="nonstructural protein 1"
                      /protein_id="YP_009118625.1"
-ORIGIN
+                     /standard_name="NS1 CDS"
+ORIGIN      
         1 atggagagaa taaaagaact gagagatcta atgtcgcagt cccgcactcg cgagatactc
        61 actaagacca ctgtggacca tatggccata atcaaaaagt acacatcagg aaggcaagag
       121 aagaaccccg cactcagaat gaagtggatg atggcaatga gatacccaat tacagcagac

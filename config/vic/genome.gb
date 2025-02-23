@@ -123,6 +123,12 @@ FEATURES             Location/Qualifiers
                      ELAVLLSNEGIINSEDEHLLALERKLKKMLGPSAVEIGNGCFETKHKCNQTCLDRIAAG
                      TFDAGEFSLPTFDSLNITAASLNDDGLDNHTILLYYSTAASSLAVTLMIAIFVVYMVSR
                      DNVSCSICL"
+     CDS             7104..7148
+                     /gene="SigPep"
+     CDS             7149..8189
+                     /gene="HA1"
+     CDS             8190..8861
+                     /gene="HA2"
      CDS             9016..10698
                      /gene="NP"
                      /codon_start=1

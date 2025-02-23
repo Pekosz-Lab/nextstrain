@@ -16,7 +16,7 @@ rule genome_clades:
 
 # TODO: Add filter step to exclude isolates which deviate from the genome molecular clock and general size.
 
-min_genome_size = 12000
+min_genome_size = 13000
 
 rule genome_filter:
     message: "filtering genomes"
@@ -27,7 +27,7 @@ rule genome_filter:
         filtered_sequences="results/{subtype}/genome/filtered.fasta",
         filtered_metadata="results/{subtype}/genome/filtered.tsv"
     params:
-        min_length= min_genome_size, # Get min length for the segment - where to define genome
+        min_length = min_genome_size, # Get min length for the segment - where to define genome
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     shell:
         """
