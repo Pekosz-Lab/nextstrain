@@ -1,0 +1,39 @@
+subclade_colors <- c(
+  "A" = "#FF6347", 
+  "C.1" = "#32CD32", 
+  "C.1.1" = "#8A2BE2", 
+  "C.1.7" = "#FF4500", 
+  "C.1.7.2" = "#FFD700", 
+  "C.1.8" = "#DC143C", 
+  "C.1.9" = "#228B22", 
+  "C.3" = "#00CED1", 
+  "C.5" = "#9400D3", 
+  "C.5.1" = "#FF1493", 
+  "C.5.5" = "#FF8C00", 
+  "C.5.6" = "#B0E0E6", 
+  "C.5.7" = "#808000", 
+  "D" = "#9932CC", 
+  "D.1" = "#800080", 
+  "D.2" = "#4B0082", 
+  "D.3" = "#8B4513", 
+  "D.4" = "#D2691E", 
+  "G.1.1.2" = "#8B0000", 
+  "G.2" = "#556B2F", 
+  "J" = "#00FF7F", 
+  "J.1" = "#7FFF00", 
+  "J.2" = "#ADFF2F", 
+  NA = "#D3D3D3" # For NA, we assign a light grey color
+)
+
+
+# Define the color palette (matching each clade to a specific color)
+clade_colors <- c(
+  "3C.2a1b.2a.2a.1b" = "#1E90FF", 
+  "3C.2a1b.2a.2a.3a.1" = "#32CD32", 
+  "3C.2a1b.2a.2b" = "#FFD700", 
+  "6B.1A.5a.2a" = "#FF6347", 
+  "6B.1A.5a.2a.1" = "#8A2BE2", 
+  "V1A" = "#FF4500", 
+  "V1A.3a.2" = "#00CED1", 
+  NA = "#D3D3D3" # For NA, we assign a light grey color
+)
