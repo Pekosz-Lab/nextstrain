@@ -327,7 +327,7 @@ nextstrain login
 
 ### Private Deployment 
 
-a custom script has been make to deploy all 24 builds simultaneously 
+a custom script has been made to deploy all 24 builds simultaneously 
 - [scripts/nextstrain_upload_private.py](scripts/nextstrain_upload_private.py)
 ```
 python scripts/nextstrain_upload_private.py
