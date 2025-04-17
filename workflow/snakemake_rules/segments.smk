@@ -372,8 +372,6 @@ rule frequency:
             --wide-bandwidth 0.083 \
             --proportion-wide 0.0 \
             --pivot-interval 1 \
-            --min-date 2020.0 \
-            --max-date 2025.0 \
             --include-internal-nodes \
             --metadata {input.metadata} \
             --metadata-id-columns sample_ID \

@@ -235,6 +235,12 @@ nextstrain remote upload \
     auspice/${YOUR_BUILD_NAME}.json
 ```
 
+### Uploading builds to the private repository for testing
+
+```shell
+python scripts/nextstrain_upload_private_genomes.py
+```
+
 #### Verify Build Upload
 
 ```shell
