@@ -259,6 +259,10 @@ python scripts/build-reports.py \
    -b results/vic/ha/metadata.tsv
 ```
 
+```
+quarto render scripts/report-html-pdf.qmd --to html --output-dir ../reports/ 
+```
+
 # Roadmap 
 
 - [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/)

@@ -61,13 +61,15 @@ rule upload_genomes:
         flusort_completed = "data/flusort_completed.flag"
     output:
         touch("data/genomes_uploaded.flag")
+    log:
+        "logs/fludb_upload_status.txt"
     shell:
         """
         python fludb/scripts/upload_jhh.py \
             -d fludb.db \
             -f {input.sequences} \
             -m {input.metadata} \
-            --require-sequence
+            --require-sequence | tee {log}
         """
 
 rule upload_vaccines:

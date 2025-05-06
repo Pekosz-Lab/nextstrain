@@ -3,6 +3,7 @@ data_dir = config.get("data_dir", "data")
 
 rule fetch_HANA_datasets:
     message: "Downloading updated nextclade datasets"
+    priority: 1
     output:
         ha_dir="nextclade/flu/{subtype}/ha",
         na_dir="nextclade/flu/{subtype}/na"
