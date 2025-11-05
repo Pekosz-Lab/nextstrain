@@ -12,6 +12,7 @@ reports/
 # database files 
 *.db
 **.db
+scripts/flusort/flusort_out/blast_output.txt
 
 # OS Generated #
 *DS_Store
@@ -45,3 +46,8 @@ slurm-*
 
 # flusort diagnostics
 scripts/flusort/flusort_out
+
+# until complete, remove for now
+scripts/flusort/flusort_out/blast_output.txt
+notebooks/tanglegram.ipynb
+

@@ -1,8 +1,8 @@
 # Pekosz Lab Seasonal Influenza Nextstrain Builds 🦠 
 
-This repository houses all scripts, snakefiles, and configuration files for the [Pekosz Lab nextstrain builds](https://nextstrain.org/groups/PekoszLab) 
+This repository houses all scripts, snakefiles, and configuration files for the [Pekosz Lab nextstrain builds](https://nextstrain.org/groups/PekoszLab) in [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr).
 
-Currently, 24 total builds are maintained for all 8 segments of circulaing H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network supported by [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr). As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipline.
+Currently, 24 total builds are maintained for all 8 segments of circulating H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network. As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline.
 
 # Quickstart: Getting Started with the 24 segment build for H1N1, H3N2 and B/Victoria
 
@@ -14,13 +14,19 @@ Currently, 24 total builds are maintained for all 8 segments of circulaing H1N1,
 ## 1. Clone this repository setup and activate your environment. 
 
 >[!NOTE]
-> Dependencies for this build are maintained through `conda`. Download the latest version [here](https://anaconda.org/anaconda/conda). A breif introduction to conda and conda environments can be found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html).
+> Dependencies for this build are maintained through `conda`. Download the latest version [here](https://anaconda.org/anaconda/conda). A brief introduction to `conda` and `conda environments` can be found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html).
 
 - Clone: `git clone https://github.com/Pekosz-Lab/nextstrain.git`
 
-- Navigate to the head directory `cd nextstrain` 
+- Navigate to the head directory `cd nextstrain`
 
-- Build the environment and base dependencies `conda env create -f environment.yml`
+- Build the environment and base dependencies `conda env create -f workflow/envs/environment.yml`
+
+>[Note]
+> The included environment.yml attempts to install blastn and iqtree2 through conda-forge. If you encounter issues with these packages, please install them manually. 
+> blastn installation instructions can be found [here](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and here via [bioconda](https://anaconda.org/bioconda/blast)
+> iqtree2 installation instructions can be found [here](http://www.iqtree.org)
+```
 
 - Activate the environment `conda activate pekosz-nextstrain`
 
@@ -38,7 +44,7 @@ mkdir source data results
 2. JHH_metadata.tsv
 3. vaccines.fasta
 
-The `source/` folder with all build data can be accessed [here](https://livejohnshopkins.sharepoint.com/:f:/r/sites/pekoszlab/Shared%20Documents/%5B02%5D%20Virus-Specific-Data/Seasonal-Influenza/%5B01%5D%20-%20Seasonal_Directories/2023-24_Pekosz_Lab_Influenza/01_mostafa_clinical_sequences/EA20241217_nextstrain/source?csf=1&web=1&e=gl9dV9). 
+The Contact Dr. Heba Mostafa and Dr. Andy Pekosz to access the [source folder data](https://livejohnshopkins-my.sharepoint.com/:f:/r/personal/hmostaf2_jh_edu/Documents/Influenza-Surveillance?csf=1&web=1&e=2sny2s). The `vaccines.fasta` file is manually downloaded and updated directly from GISAID. 
 
 Download the all data in the `source/` folder or overwrite your source folder and moving it to the repo head directory `nextstrain/`. You `nextstrain` directory will now have the following additional folders: 
 
@@ -51,12 +57,12 @@ nextstrain/
    ├── JHH_sequences.fasta
    ├── vaccines.fasta
    └── vaccines.tsv
-├── data/ # This will be empty 
+├── data/ # This will be empty
 ├── results/ # This will be empty
 ```
 
 >[!WARNING]
-> These builds are designed to ingest influenza genome data and metadata originating from [GISAID](https://gisaid.org/) and internally from the Mostafa lab at the Johns Hopkins Hospital (eJHH) network. Due to the [regulated access](https://gisaid.org/terms-of-use/) to all GISAID data, individual crdentials are needed to access these data and cannot be shared publicly. Furthermore, Influenza Genomes from the JHH network accessed ahead of publishing to GISAID are private and cannot be shared publically in this repository.
+> These builds are designed to ingest influenza genome data and metadata e to the [regulated access](https://gisaid.org/terms-of-use/) to all GISAID data, individual credentials are needed to access these data and cannot be shared publicly. Furthermore, Influenza Genomes from the JHH network accessed ahead of publishing to GISAID are private and cannot be shared publicly in this repository.originating from [GISAID](https://gisaid.org/) and internally from the Mostafa lab at the Johns Hopkins Hospital (eJHH) network. Du
 
 
 ## 3. Append type and subtype data to its respective `metadata.tsv`using [flusort](scripts/flusort)
@@ -78,17 +84,17 @@ python scripts/flusort/flusort.py \
       - _4 = segment 4 (HA)
    
   3. `JHH_metadata.tsv`: A metadata file with the following fields: **WARNING: This file is manually curated**
-     - `sequence_ID` (REQUIRED): JH# 
+     - `sequence_ID` (REQUIRED): JH#
      - `sample_ID` (REQUIRED): JH# For the seasonal influenza builds, the sample_ID is identical to the sequence ID.
      - `run` (REQUIRED): The sequencing run ID - IV{year}Run{number} e.g. IV23Run6
      - `date` (REQUIRED): YYYY-MM-DD
      - `passage_history`: e.g. original
      - `study_id`: (OPTIONAL): study_tag
 
-Flusort will append the `JHH_metadata.tsv` with 2 columns specifying the type and subtype in bold below:
+[flusort](scripts/flusort) will append the `JHH_metadata.tsv` with 2 columns specifying the type and subtype in bold below:
 
 >[!NOTE]
-> The `sample_ID` column is used as the value for all `--metadata-id-columns` augur functions when appropriate. 
+> The `sample_ID` column is used as the value for all `--metadata-id-columns` augur functions when appropriate.
 
    - **type: InfluenzaA or InfluenzaB** (flusort)
    - **subtype: H1N1, H3N2, Victoria** (flusort) 
@@ -112,8 +118,8 @@ python fludb/scripts/upload_jhh.py \
 ```  
 
 >[!IMPORTANT]
->The `--require-sequence` flag for [upload_JHH.py](fludb/scripts/upload_jhh.py) requires at least one genomic segment to be paired with a metadata entry to be uploaded to `fludb.db`. 
->If JHxx entry is present in the metadata without complementary sequencing data in the FASTA file, it will be ignored.
+>The `--require-sequence` flag for [upload_JHH.py](fludb/scripts/upload_jhh.py) requires at least one genomic segment to be paired with a metadata entry to be uploaded to `fludb.db`.
+>If JHxxxxx entry is present in the metadata without complementary sequencing data in the FASTA file, it will be ignored.
 
 - Upload Vaccine Strain [upload_vaccine.py]()
 
@@ -153,7 +159,7 @@ python scripts/fludb_download_seasonal_build.py
 
 ## CHECKPOINT 
 
-Below is what your data structure sould look like. Regardless of what sequences are uploaded to fludb, the resulting data/ directory should be structured in the same way each and every time this pipeline is executed.
+Below is what your data structure *should* look like. Regardless of what sequences are uploaded to fludb, the resulting data/ directory should be structured in the same way each and every time this pipeline is executed.
 
 ```
 nextstrain/
@@ -161,10 +167,10 @@ nextstrain/
 │   ├── GISAID_metadata.xls - UNMODIFIED `.xls` file from GISAID. Do not convert to `csv`. 
 │   ├── GISAID_sequences.fasta
 │   ├── JHH_metadata.tsv
-│   ├── flusort_JHH_metadata.tsv - generated from [`flusort.py`](scripts/flusort/flusort.py)
 │   ├── JHH_sequences.fasta - UNMODIFIED 
-│   ├── vaccines.fasta - Manually Curated
-│   └── vaccines.tsv - Manually Curate with column names identical to those in flusort_JHH_metadata.tsv
+│   ├── flusort_JHH_sequences.fasta - generated from [`flusort.py`](scripts/flusort/flusort.py)
+│   ├── flusort_JHH_metadata.tsv - generated from [`flusort.py`](scripts/flusort/flusort.py)
+│   └── vaccines.fasta
 ├── data/
 │   ├── h1n1
 │   │   ├── ha
@@ -207,7 +213,7 @@ nextstrain/
 
 ## 6. Execute Snakemake build 
 
-From the `nextstrain/` directory execute the following to initiate the build. 
+From the `nextstrain/` directory execute the following to initiate the build.
 
 ```
 snakemake --cores 8
@@ -215,7 +221,7 @@ snakemake --cores 8
 
 ## 7. Upload the builds to nextstrain
 
-### Optional Spotcheck - view on local auspice 
+### Optional Spot check - view on local auspice 
 
 ```
 auspice view --datasetDir auspice/h1n1
@@ -227,7 +233,7 @@ auspice view --datasetDir auspice/vic
 
 ### Uploading a single build `.json` 
 
-Replace `${YOUR_BUILD_NAME}` with the file name of the build. 
+Replace `${YOUR_BUILD_NAME}` with the file name of the build along with any additional [sidecar](https://docs.nextstrain.org/en/latest/reference/data-formats.html) files you desire to upload.
 
 ```shell
 nextstrain remote upload \
@@ -247,7 +253,9 @@ python scripts/nextstrain_upload_private_genomes.py
 nextstrain remote list nextstrain.org/groups/PekoszLab
 ```
 
-# Build Reports
+# Building Internal Reports
+
+Following the execution of all 24 builds, summary reports can be generated using the following commands:
 
 ```
 python scripts/build-reports.py \
@@ -259,11 +267,13 @@ python scripts/build-reports.py \
    -b results/vic/ha/metadata.tsv
 ```
 
+To render the HTML report:
+
 ```
 quarto render scripts/report-html-pdf.qmd --to html --output-dir ../reports/ 
 ```
 
-# Roadmap 
+# Peskoz Lab Nextstrain Roadmap
 
 - [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/)
    - Manuscript: https://bedford.io/papers/nanduri-cartography/
