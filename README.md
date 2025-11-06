@@ -26,7 +26,6 @@ Currently, 24 total builds are maintained for all 8 segments of circulating H1N1
 > The included environment.yml attempts to install blastn and iqtree2 through conda-forge. If you encounter issues with these packages, please install them manually. 
 > blastn installation instructions can be found [here](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and here via [bioconda](https://anaconda.org/bioconda/blast)
 > iqtree2 installation instructions can be found [here](http://www.iqtree.org)
-```
 
 - Activate the environment `conda activate pekosz-nextstrain`
 
@@ -62,8 +61,7 @@ nextstrain/
 ```
 
 >[!WARNING]
-> These builds are designed to ingest influenza genome data and metadata e to the [regulated access](https://gisaid.org/terms-of-use/) to all GISAID data, individual credentials are needed to access these data and cannot be shared publicly. Furthermore, Influenza Genomes from the JHH network accessed ahead of publishing to GISAID are private and cannot be shared publicly in this repository.originating from [GISAID](https://gisaid.org/) and internally from the Mostafa lab at the Johns Hopkins Hospital (eJHH) network. Du
-
+>These builds are designed to ingest influenza genome data and metadata obtained from sources with regulated access. Access to all GISAID data requires individual user credentials, which cannot be shared publicly. Additionally, influenza genome data from the Johns Hopkins Hospital (JHH) network that were accessed prior to their release on GISAID are private and cannot be shared publicly through this repository.
 
 ## 3. Append type and subtype data to its respective `metadata.tsv`using [flusort](scripts/flusort)
 
