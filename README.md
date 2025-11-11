@@ -63,161 +63,20 @@ nextstrain/
 >[!WARNING]
 >These builds are designed to ingest influenza genome data and metadata obtained from sources with regulated access. Access to all GISAID data requires individual user credentials, which cannot be shared publicly. Additionally, influenza genome data from the Johns Hopkins Hospital (JHH) network that were accessed prior to their release on GISAID are private and cannot be shared publicly through this repository.
 
-## 3. Append type and subtype data to its respective `metadata.tsv`using [flusort](scripts/flusort)
+## 3. Build all 27 influenza segment and genome builds using Snakemake
 
-```shell
-python scripts/flusort/flusort.py \
-  -db scripts/flusort/blast_database/pyflute_ha_database \
-  -i source/JHH_sequences.fasta \
-  -m source/JHH_metadata.txt \
-  -f source/flusort_JHH_sequences.fasta \
-  -o source/flusort_JHH_metadata.tsv
-```
+As of 9478cb9, manual curation and organization of input sequence.fasta and metadata.tsv files is no longer necessary. An ingest snakemake rule has been constructed to automate the following tasks for all 24 segment builds for H1N1, H3N2, and B/Victoria:
+- Segment typing and subtyping using [flusort](scripts/flusort)
+- uploading all genomes and metadata to [fludb](fludb/), including vaccine strains
+- generation of all build datasets in the `data/` directory using [download.py](fludb/scripts/download.py)
 
-`flusort.py` requires the following 2 input files:
-
-  1. `JHH_sequences.fasta`: A FASTA file containing influenza genomes by segment in JHH format: 
-   - e.g. JH121234_4
-      - JH121234 = sample_ID
-      - _4 = segment 4 (HA)
-   
-  3. `JHH_metadata.tsv`: A metadata file with the following fields: **WARNING: This file is manually curated**
-     - `sequence_ID` (REQUIRED): JH#
-     - `sample_ID` (REQUIRED): JH# For the seasonal influenza builds, the sample_ID is identical to the sequence ID.
-     - `run` (REQUIRED): The sequencing run ID - IV{year}Run{number} e.g. IV23Run6
-     - `date` (REQUIRED): YYYY-MM-DD
-     - `passage_history`: e.g. original
-     - `study_id`: (OPTIONAL): study_tag
-
-[flusort](scripts/flusort) will append the `JHH_metadata.tsv` with 2 columns specifying the type and subtype in bold below:
-
->[!NOTE]
-> The `sample_ID` column is used as the value for all `--metadata-id-columns` augur functions when appropriate.
-
-   - **type: InfluenzaA or InfluenzaB** (flusort)
-   - **subtype: H1N1, H3N2, Victoria** (flusort) 
-
-## 4. Upload all genome and metadata to [`fludb`](fludb/)
-
-- Initiate the database: 
-
-```shell
-python fludb/scripts/fludb_initiate.py
-```
-
-- Upload JHH sequences [upload_JHH.py](fludb/scripts/upload_jhh.py)
-
-```shell
-python fludb/scripts/upload_jhh.py \
-    -d fludb.db \
-    -f source/flusort_JHH_sequences.fasta \
-    -m source/flusort_JHH_metadata.tsv \
-    --require-sequence
-```  
-
->[!IMPORTANT]
->The `--require-sequence` flag for [upload_JHH.py](fludb/scripts/upload_jhh.py) requires at least one genomic segment to be paired with a metadata entry to be uploaded to `fludb.db`.
->If JHxxxxx entry is present in the metadata without complementary sequencing data in the FASTA file, it will be ignored.
-
-- Upload Vaccine Strain [upload_vaccine.py]()
-
-```shell
-python fludb/scripts/upload_vaccine.py \
-  -d fludb.db \
-  -f source/vaccine.fasta
-```
-
-- (**OPTIONAL**) Upload GISAID reference data to fludb [upload_gisaid.py](fludb/scripts/upload_gisaid.py) 
-
-```shell
-python fludb/scripts/upload_gisaid.py \
-    -d fludb.db \
-    -f source/20241021_GISAID_Epiflu_Sequence.fasta \
-    -m source/20241021_GISAID_isolates.xls
-```
-
->[!WARNING]
-> This requires 2 files: 1) an **UNMODIFIED** `.xls` file from GISAID as metadata input. 2) A FASTA file with headers in the following (default) format: 
->  `Isolate name | Collection date | Passage details/history | Segment number | Isolate ID`
-
-
-## 5. Query genomes and metadata and depost in the `data/` directory using [download.py](fludb/scripts/download.py)
-
-The [fludb_download_seasonal_build_data.py](scripts/fludb_download_seasonal_build.py) script will populate the `data/` with subtype build folders called `h1n1`, `h3n2`, and `vic`. 
-
-- Each subtype build folder will contain 8 segment folders: `pb2`, `pb1`, `pa`, `ha`, `np`, `na`, `mp`, `ns`.
-
-- Each segment will contain the following files:
-   - sequences.fasta
-   - metadata.tsv 
-
-```shell
-python scripts/fludb_download_seasonal_build.py
-```
-
-## CHECKPOINT 
-
-Below is what your data structure *should* look like. Regardless of what sequences are uploaded to fludb, the resulting data/ directory should be structured in the same way each and every time this pipeline is executed.
-
-```
-nextstrain/
-│   source/
-│   ├── GISAID_metadata.xls - UNMODIFIED `.xls` file from GISAID. Do not convert to `csv`. 
-│   ├── GISAID_sequences.fasta
-│   ├── JHH_metadata.tsv
-│   ├── JHH_sequences.fasta - UNMODIFIED 
-│   ├── flusort_JHH_sequences.fasta - generated from [`flusort.py`](scripts/flusort/flusort.py)
-│   ├── flusort_JHH_metadata.tsv - generated from [`flusort.py`](scripts/flusort/flusort.py)
-│   └── vaccines.fasta
-├── data/
-│   ├── h1n1
-│   │   ├── ha
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── mp
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── na
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── np
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── ns
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── pa
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   ├── pb1
-│   │   │   ├── metadata.tsv
-│   │   │   └── sequences.fasta
-│   │   └── pb2
-│   │       ├── metadata.tsv
-│   │       └── sequences.fasta
-│   ├── h3n2
-│      ├── {segment} - 1 folder per segment
-│      │   ├── metadata.tsv
-│      │   ├── sequences.fasta 
-│      ├── etc...
-│   ├── vic
-│   │  ├── {segment}  - 1 folder per segment
-│   │  │   ├── metadata.tsv
-│   │  │   └── sequences.fasta
-│      ├── etc...  
-├── results
-
-```
-
-## 6. Execute Snakemake build 
-
-From the `nextstrain/` directory execute the following to initiate the build.
+From the `nextstrain/` directory execute the following to initiate the construction of all builds. 
 
 ```
 snakemake --cores 8
 ```
 
-## 7. Upload the builds to nextstrain
+## 5. Upload the builds to nextstrain
 
 ### Optional Spot check - view on local auspice 
 
@@ -229,15 +88,8 @@ auspice view --datasetDir auspice/h3n2
 auspice view --datasetDir auspice/vic
 ```
 
-### Uploading a single build `.json` 
+If all looks good, proceed to upload the builds to nextstrain.org/groups/PekoszLab
 
-Replace `${YOUR_BUILD_NAME}` with the file name of the build along with any additional [sidecar](https://docs.nextstrain.org/en/latest/reference/data-formats.html) files you desire to upload.
-
-```shell
-nextstrain remote upload \
-    nextstrain.org/groups/PekoszLab/${YOUR_BUILD_NAME} \
-    auspice/${YOUR_BUILD_NAME}.json
-```
 
 ### Uploading builds to the private repository for testing
 
@@ -251,9 +103,22 @@ python scripts/nextstrain_upload_private_genomes.py
 nextstrain remote list nextstrain.org/groups/PekoszLab
 ```
 
-# Building Internal Reports
+### Uploading a single build `.json` 
 
-Following the execution of all 24 builds, summary reports can be generated using the following commands:
+Replace `${YOUR_BUILD_NAME}` with the file name of the build along with any additional [sidecar](https://docs.nextstrain.org/en/latest/reference/data-formats.html) files you desire to upload.
+
+```shell
+nextstrain remote upload \
+    nextstrain.org/groups/PekoszLab/${YOUR_BUILD_NAME} \
+    auspice/${YOUR_BUILD_NAME}.json
+```
+
+# 6. Building Internal Reports
+
+> [!NOTE]  
+> You can safely generate reports **before running the `snapshot_clean` rule** — the `reports/` folder will be archived automatically during the snapshot process.
+
+Following the execution of all builds, summary reports can be generated using the following commands:
 
 ```
 python scripts/build-reports.py \
@@ -265,40 +130,67 @@ python scripts/build-reports.py \
    -b results/vic/ha/metadata.tsv
 ```
 
-To render the HTML report:
-
+Once the summary data are generated, you can render the formatted HTML report using Quarto:
 ```
 quarto render scripts/report-html-pdf.qmd --to html --output-dir ../reports/ 
+```
+The rendered report will be saved in the reports/ folder and can be viewed in any web browser.
+
+## 🧹 7. Create a Build Snapshot and Clean the Working Directory
+
+> [!WARNING] 
+> Before starting a new build with updated data, you **must** run this rule.  
+> It will **archive your current results** and **clean the workspace** to prepare for a fresh build.
+
+### What this rule does
+When executed, the rule:
+
+1. Creates a timestamped backup folder inside `snapshots/` (e.g., `snapshots/20251111T163000/`).
+2. Copies the following directories (if they exist):  
+   `auspice/`, `logs/`, `reports/`, and `source/`.
+3. Compresses the snapshot into a `.tar.gz` archive.
+4. Deletes temporary working folders (`data/`, `results/`, `logs/`, `reports/`) and removes the database file `fludb.db`.
+
+### 🧭 How to run it
+
+You have **two ways** to trigger the `snapshot_clean` rule:
+
+#### Option 1 — Run manually
+Use this when you only want to clean and archive the current build:
+
+```bash
+snakemake snapshot_clean
+```
+
+Option 2 — Run automatically after a successful build
+
+Use this if you’ve added snapshot_clean to the main pipeline and want it to run automatically at the end:
+```
+snakemake --configfile config.yaml --config run_snapshot_clean=true
+```
+
+This approach is recommended if you want every completed build to automatically save a snapshot before cleanup.
+
+📁 Example output structure
+After running the rule, you’ll find a compressed snapshot of your previous build in the snapshots/ folder:
+
+```
+snapshots/
+├── 20251111T163000.tar.gz
 ```
 
 # Peskoz Lab Nextstrain Roadmap
 
-- [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/)
+- [ ] Automated [report generation](scripts/report-html-pdf.qmd) for all builds.
+- [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/).
    - Manuscript: https://bedford.io/papers/nanduri-cartography/
-- [ ] Automated concatenated genome builds for h1n1 and h3n2
-  - Proposed DAG 
-    1.  [fludb](seasonal-flu/sqllitedb/) Query database for segment builds (24 total) including vaccine and previous season data for each subtype.
-       - sequences.fasta 
-       - metadata.fasta
-       - A simple query such as `WHERE segment IN ('pb2', 'pb1', 'pa', 'ha', 'np', 'na', 'mp', 'ns')` should be sufficient.
-    2.  Concatenate reference genomes
-    3.  Concatenate reference annotation files (.gbk)
-    4.  Append HA clade assignment to all segment metadata (left join from segment data)
-    5.  Filter by length using `augur filter`
-        - TODO: How can we simplify whole genome QC pre-concatenation? Add a segment length filter in fludb query? 
-    6.  Index Genomes
-    7.  Align
-    8.  Raw Tree
-    9.  Refine branches
-    10. Annotate
-    11. Infer ancestral sequences
-    12. Translate sequences
-    13. Export (auspice V2)
-
+- [X] Automated concatenated genome builds for h1n1 and h3n2 - Implemented in 9478cb9.
 
 # Build DAG Rulegraph Overview. 
 
-Below is a simplified representation of the rules implemented for each build. Because wildcard constraints have been defined by subtype and segment, this general rulegraph is executed for h1n1, h3n2, and vic for all 8 segments. 
+`snakemake --rulegraph | dot -Tpng > rulegraph.png`
+
+Below is a simplified representation of the rules implemented for each build. Because wildcard constraints have been defined by subtype and segment, this general rulegraph is executed for h1n1, h3n2, and vic for all 8 segments along with the 3 concatenated genome builds. 
 
 ![DAG](rulegraph.png)
 

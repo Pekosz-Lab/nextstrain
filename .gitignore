@@ -8,6 +8,7 @@ auspice/
 figures/
 logs/
 reports/
+snapshots
 
 # database files 
 *.db

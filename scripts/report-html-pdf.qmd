@@ -221,3 +221,17 @@ datatable(
 ) 
 ```
 
+# Roadmap 
+
+- Natural language information at the beggining of the report outlining
+  - the current date range captured in this report
+  - Is influenza a or b dominating 
+  - which subtype is dominating 
+- Table breakdown of influenza subtype and clade/subclade numbers 
+-- Proceed with tables and plots -- 
+- Dataset attributes
+  - Interactive heatmap of samples with the number of present segments availible. 
+
+## Features 
+- Automatic color selection for each clade and subclade within subtypes.  
+  

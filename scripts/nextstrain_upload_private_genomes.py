@@ -30,7 +30,6 @@ def nextstrain_upload(subtype):
 
     print(f"Uploading data for {subtype} to Nextstrain...")
     
-    
     result = subprocess.run(command, capture_output=True, text=True)
     
     if result.returncode != 0:

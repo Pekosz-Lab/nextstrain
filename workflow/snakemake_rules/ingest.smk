@@ -43,13 +43,14 @@ rule flusort:
             -o {output.metadata}
         """
 
-rule fludb_initiate:
+# im sure you looked
+rule fludb_inititate:
     message: "inititate fludb"
     output:
-        touch("data/fludb_initiated.flag")
+        touch("data/fludb_inititated.flag")
     shell:
         """
-        python fludb/scripts/fludb_initiate.py
+        python fludb/scripts/fludb_inititate.py
         """
 
 rule upload_genomes:
@@ -57,7 +58,7 @@ rule upload_genomes:
     input:
         sequences = "source/flusort_JHH_sequences.fasta",
         metadata = "source/flusort_JHH_metadata.tsv",
-        fludb_init = "data/fludb_initiated.flag",
+        fludb_init = "data/fludb_inititated.flag",
         flusort_completed = "data/flusort_completed.flag"
     output:
         touch("data/genomes_uploaded.flag")
@@ -76,7 +77,7 @@ rule upload_vaccines:
     message: "uploading vaccine strains"
     input:
         sequences = "source/vaccine.fasta",
-        fludb_init = "data/fludb_initiated.flag",
+        fludb_init = "data/fludb_inititated.flag",
         flusort_completed = "data/flusort_completed.flag"
     output:
         touch("data/vaccines_uploaded.flag")

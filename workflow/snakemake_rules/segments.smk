@@ -1,46 +1,44 @@
 # define home dir
 data_dir = config.get("data_dir", "data")
 
-rule fetch_HANA_datasets:
-    message: "Downloading updated nextclade datasets"
+rule fetch_hana_datasets:
     priority: 1
+    message: "Downloading updated Nextclade datasets"
+    log: 
+        "logs/nextclade_fetch_datasets.txt"
     output:
-        ha_dir="nextclade/flu/{subtype}/ha",
-        na_dir="nextclade/flu/{subtype}/na"
-    params:
-        datasets={
-            "h3n2": ["flu_h3n2_ha", "flu_h3n2_na"],
-            "h1n1": ["flu_h1n1pdm_ha", "flu_h1n1pdm_na"],
-            "vic": ["flu_vic_ha", "flu_vic_na"]
-        },
-        temp_dir="temp_datasets"  # Temporary location for new dataset downloads
-    run:
-        import subprocess
-        import shutil
+        touch("logs/fetch_hana_datasets.flag")
+    shell:
+        """
+        echo "Clearing Nextclade dataset directories..."
+        for dir in \
+            nextclade/flu/h3n2/ha \
+            nextclade/flu/h1n1/ha \
+            nextclade/flu/vic/ha \
+            nextclade/flu/h3n2/na \
+            nextclade/flu/h1n1/na \
+            nextclade/flu/vic/na; do
+            mkdir -p $dir
+            rm -rf $dir/*
+        done
 
-        datasets = params.datasets[wildcards.subtype]
+        echo "Downloading updated Nextclade datasets..."
+        nextclade dataset get -n flu_h3n2_ha -o nextclade/flu/h3n2/ha
+        nextclade dataset get -n flu_h1n1pdm_ha -o nextclade/flu/h1n1/ha
+        nextclade dataset get -n flu_vic_ha -o nextclade/flu/vic/ha
 
-        for dataset in datasets:
-            temp_output_dir = os.path.join(params.temp_dir, dataset.split('_')[-1])
-            os.makedirs(params.temp_dir, exist_ok=True)
-
-            subprocess.run(["nextclade", "dataset", "get", "-n", dataset, "-o", temp_output_dir])
-
-            target_name = 'ha' if 'ha' in dataset else 'na'
-            target_dir = output.ha_dir if target_name == 'ha' else output.na_dir
-
-            if os.path.exists(target_dir):
-                shutil.rmtree(target_dir)
-            shutil.move(temp_output_dir, target_dir)
-
-        shutil.rmtree(params.temp_dir)
+        nextclade dataset get -n flu_h3n2_na -o nextclade/flu/h3n2/na
+        nextclade dataset get -n flu_h1n1pdm_na -o nextclade/flu/h1n1/na
+        nextclade dataset get -n flu_vic_na -o nextclade/flu/vic/na
+        """
 
 rule nextclade:
     message: "Running nextclade for {input.fasta}"
     input:
         fasta=f"{data_dir}/{{subtype}}/{{segment}}/sequences.fasta",
         ha_dir="nextclade/flu/{subtype}/ha",
-        na_dir="nextclade/flu/{subtype}/na"
+        na_dir="nextclade/flu/{subtype}/na",
+        dataset_ready = "logs/fetch_hana_datasets.flag" #order placeholder
     output:
         nextclade_tsv="results/{subtype}/{segment}/nextclade.tsv",
         nextclade_fasta="results/{subtype}/{segment}/nextclade.aligned.fasta"
@@ -59,7 +57,7 @@ rule nextclade:
         )
 
 rule assign_clades:
-    message: "Appending clade data "
+    message: "Appending clade data"
     input:
         metadata="data/{subtype}/{segment}/metadata.tsv",
         ha_clade="results/{subtype}/ha/nextclade.tsv"

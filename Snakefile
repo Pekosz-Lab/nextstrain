@@ -33,8 +33,53 @@ rule all:
         expand("auspice/{subtype}/genome_tip-frequencies.json", 
                subtype=["h3n2", "h1n1", "vic"]),
         expand("auspice/{subtype}/genome.json", 
-               subtype=["h3n2", "h1n1", "vic"])
+               subtype=["h3n2", "h1n1", "vic"]),
+        lambda wildcards: "logs/snapshot_clean.done" if config.get("snapshot_clean", False) else []
 
 include: "workflow/snakemake_rules/ingest.smk"
 include: "workflow/snakemake_rules/segments.smk"
 include: "workflow/snakemake_rules/genomes.smk"
+
+rule snapshot_clean:
+    """
+    Optionally triggered snapshot-and-clean step.
+    Creates a timestamped local snapshot of outputs and cleans the workspace.
+    """
+    output:
+        touch("logs/snapshot_clean.done")
+    shell:
+        """
+        # Create snapshots directory if it does not exist
+        mkdir -p snapshots
+
+        # Generate local timestamp (ISO-like format)
+        TIMESTAMP=$(date +"%Y%m%dT%H%M%S")
+
+        SNAPSHOT_DIR="snapshots/${{TIMESTAMP}}"
+        mkdir -p "$SNAPSHOT_DIR"
+
+        echo "📸 Creating snapshot in $SNAPSHOT_DIR"
+
+        # Copy key folders if they exist
+        for folder in auspice logs reports source nextclade; do
+            if [ -d "$folder" ]; then
+                echo "→ Copying $folder/"
+                cp -r "$folder" "$SNAPSHOT_DIR/"
+            fi
+        done
+
+        echo "🗜️ Compressing snapshot..."
+        tar -czf "snapshots/${{TIMESTAMP}}.tar.gz" -C "snapshots" "${{TIMESTAMP}}"
+
+        # Optionally remove the uncompressed snapshot folder after compression
+        rm -rf "$SNAPSHOT_DIR"
+
+        echo "🧹 Cleaning up workspace..."
+        rm -rf data results logs reports auspice
+        if [ -f fludb.db ]; then
+            rm -f fludb.db
+        fi
+
+        echo "✅ Snapshot created at snapshots/${{TIMESTAMP}}.tar.gz"
+        echo "✅ Cleanup complete."
+        """
