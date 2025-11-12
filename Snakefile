@@ -40,10 +40,14 @@ include: "workflow/snakemake_rules/ingest.smk"
 include: "workflow/snakemake_rules/segments.smk"
 include: "workflow/snakemake_rules/genomes.smk"
 
+
+
+# snapshot and clean feature 
 rule snapshot_clean:
     """
     Optionally triggered snapshot-and-clean step.
     Creates a timestamped local snapshot of outputs and cleans the workspace.
+    Also removes flusort-related files from the source directory.
     """
     output:
         touch("logs/snapshot_clean.done")
@@ -52,7 +56,7 @@ rule snapshot_clean:
         # Create snapshots directory if it does not exist
         mkdir -p snapshots
 
-        # Generate local timestamp (ISO-like format)
+        # Generate local timestamp (ISO-like format using local time)
         TIMESTAMP=$(date +"%Y%m%dT%H%M%S")
 
         SNAPSHOT_DIR="snapshots/${{TIMESTAMP}}"
@@ -75,9 +79,19 @@ rule snapshot_clean:
         rm -rf "$SNAPSHOT_DIR"
 
         echo "🧹 Cleaning up workspace..."
+
+        # Remove working directories
         rm -rf data results logs reports auspice
+
+        # Remove the database if it exists
         if [ -f fludb.db ]; then
             rm -f fludb.db
+        fi
+
+        # Remove specific flusort-related files but keep the source directory
+        if [ -d source ]; then
+            echo "🗑️  Removing flusort files from source/"
+            rm -f source/flusort_*
         fi
 
         echo "✅ Snapshot created at snapshots/${{TIMESTAMP}}.tar.gz"
