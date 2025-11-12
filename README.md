@@ -2,14 +2,17 @@
 
 This repository houses all scripts, snakefiles, and configuration files for the [Pekosz Lab nextstrain builds](https://nextstrain.org/groups/PekoszLab) in [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr).
 
-Currently, 24 total builds are maintained for all 8 segments of circulating H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network. As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline.
+- Currently, builds are maintained for all 8 segments of circulating H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network. 
+
+- 3 concatenated genome builds are also maintained for H1N1, H3N2, and B/Vic viruses.
+
+- As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline.
 
 # Quickstart: Getting Started with the 24 segment build for H1N1, H3N2 and B/Victoria
 
 >[!WARNING]
 >For this tutorial, all scripts must be run from the `nextstrain/` home directory. 
 
-**NOTE:** If you already have a `fludb.db` database build, you can skip ahead to [Step 5](## 5. Query genomes and metadata and depost in the `data/` directory using [download.py](fludb/scripts/download.py)
 
 ## 1. Clone this repository setup and activate your environment. 
 
@@ -48,6 +51,7 @@ The Contact Dr. Heba Mostafa and Dr. Andy Pekosz to access the [source folder da
 Download the all data in the `source/` folder or overwrite your source folder and moving it to the repo head directory `nextstrain/`. You `nextstrain` directory will now have the following additional folders: 
 
 ```
+
 nextstrain/
 ├── source/
    ├── GISAID_metadata.xls
@@ -136,7 +140,7 @@ quarto render scripts/report-html-pdf.qmd --to html --output-dir ../reports/
 ```
 The rendered report will be saved in the reports/ folder and can be viewed in any web browser.
 
-## 6. Create a Build Snapshot and Clean the Working Directory
+# 6. Create a Build Snapshot and Clean the Working Directory
 
 > [!WARNING] 
 > Before starting a new build with updated data, you **must** run this rule.  
