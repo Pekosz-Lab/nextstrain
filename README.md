@@ -22,7 +22,7 @@ Currently, 24 total builds are maintained for all 8 segments of circulating H1N1
 
 - Build the environment and base dependencies `conda env create -f workflow/envs/environment.yml`
 
->[Note]
+> [!Note]
 > The included environment.yml attempts to install blastn and iqtree2 through conda-forge. If you encounter issues with these packages, please install them manually. 
 > blastn installation instructions can be found [here](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and here via [bioconda](https://anaconda.org/bioconda/blast)
 > iqtree2 installation instructions can be found [here](http://www.iqtree.org)
@@ -65,7 +65,7 @@ nextstrain/
 
 ## 3. Build all 27 influenza segment and genome builds using Snakemake
 
-As of 9478cb9, manual curation and organization of input sequence.fasta and metadata.tsv files is no longer necessary. An ingest snakemake rule has been constructed to automate the following tasks for all 24 segment builds for H1N1, H3N2, and B/Victoria:
+As of [9478cb9](https://github.com/Pekosz-Lab/nextstrain/commit/eed94b43713a34d8e18a9ea030e0d9b1450c0f42), manual curation and organization of input sequence.fasta and metadata.tsv files is no longer necessary. An ingest snakemake rule has been constructed to automate the following tasks for all 24 segment builds for H1N1, H3N2, and B/Victoria:
 - Segment typing and subtyping using [flusort](scripts/flusort)
 - uploading all genomes and metadata to [fludb](fludb/), including vaccine strains
 - generation of all build datasets in the `data/` directory using [download.py](fludb/scripts/download.py)
@@ -76,7 +76,7 @@ From the `nextstrain/` directory execute the following to initiate the construct
 snakemake --cores 8
 ```
 
-## 5. Upload the builds to nextstrain
+## 4. Upload the builds to nextstrain
 
 ### Optional Spot check - view on local auspice 
 
@@ -113,7 +113,7 @@ nextstrain remote upload \
     auspice/${YOUR_BUILD_NAME}.json
 ```
 
-# 6. Building Internal Reports
+# 5. Building Internal Reports
 
 > [!NOTE]  
 > You can safely generate reports **before running the `snapshot_clean` rule** — the `reports/` folder will be archived automatically during the snapshot process.
@@ -136,7 +136,7 @@ quarto render scripts/report-html-pdf.qmd --to html --output-dir ../reports/
 ```
 The rendered report will be saved in the reports/ folder and can be viewed in any web browser.
 
-## 🧹 7. Create a Build Snapshot and Clean the Working Directory
+## 6. Create a Build Snapshot and Clean the Working Directory
 
 > [!WARNING] 
 > Before starting a new build with updated data, you **must** run this rule.  
@@ -162,9 +162,10 @@ Use this when you only want to clean and archive the current build:
 snakemake snapshot_clean
 ```
 
-Option 2 — Run automatically after a successful build
+#### Option 2 — Run automatically after a successful build
 
 Use this if you’ve added snapshot_clean to the main pipeline and want it to run automatically at the end:
+
 ```
 snakemake --configfile config.yaml --config run_snapshot_clean=true
 ```
@@ -194,51 +195,63 @@ Below is a simplified representation of the rules implemented for each build. Be
 
 ![DAG](rulegraph.png)
 
-## Breifly this pipeline performs the following for each segment of each build: 
+## How is clade calling and quality control performed in this pipeline?
 
-1. Download and assign updated Clades with Nextclade
+## How does this pipeline perform clade calling and quality control?
 
-   - Automatically download updated nextclade dataset thus keeping all clade and subclade delineations up-to-date with each build execution. This is a not the way the nextstrain teams assigns clades and is (in my opinion) the most controversial step in this pipeline (see [augur clades](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/clades.html)) My reasoning is: nextclade can immediately provide an appendable table containing several [qc metrics](https://docs.nextstrain.org/projects/nextclade/en/stable/user/algorithm/06-quality-control.html) including missing data, sites, private mutations, clusters, frameshipts, stop codons etc, which we can later filter by [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html) if needed and is metadata-centered. Furthermore, a function for glycosylation site prediction is included. In my opnion, these metrics should be considered at least qualitatively during filtering and later analysus. Thus, adding clades at this stage would reduce an additional `augur clades` step but store clade and subclade information in the metadata. Open to debating this.  
+### 1. Download and assign clades with Nextclade
 
-2. Append HA clade assignment to all segment metadata.
-3. Append quality metrics by segment
-4. Filter by coverage, qc status and length staus using [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html)
+The pipeline automatically downloads the latest Nextclade dataset with each build, ensuring clade and subclade assignments stay current. 
+
+**Why use Nextclade instead of `augur clades`?**
+
+This approach differs from the standard Nextstrain workflow and may be controversial. However, Nextclade offers several advantages:
+
+- **Comprehensive QC metrics**: Provides an appendable table with multiple [quality control metrics](https://docs.nextstrain.org/projects/nextclade/en/stable/user/algorithm/06-quality-control.html), including:
+  - Missing data
+  - Problematic sites
+  - Private mutations
+  - Mutation clusters
+  - Frameshifts
+  - Stop codons
+
+- **Metadata-centric workflow**: Stores clade information directly in metadata, eliminating the need for a separate `augur clades` step
+
+- **Built-in glycosylation prediction**: Includes glycosylation site prediction functionality
+
+- **Flexible filtering**: QC metrics can be filtered downstream using [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html) and inform qualitative decisions during analysis
+
+This approach is open for discussion. See [augur clades documentation](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/clades.html).
+
+### 2. Propagate HA clade assignments
+
+HA clade assignments are appended to metadata for all segments.
+
+### 3. Append segment-specific quality metrics
+
+Quality control metrics are added to each segment's metadata.
+
+### 4. Filter sequences
+
+Sequences are filtered by coverage, QC status, and length using [`augur filter`](https://docs.nextstrain.org/projects/augur/en/stable/usage/cli/filter.html).
+
+
 
 ```shell
 "--query", "(coverage >= 0.9) & (`qc.overallStatus` == 'good')",  # Add qc_overallStatus == 'mediocre' if needed
 "--min-length", str(min_length),
 ```
 
-5.  Align 
-6.  Build Raw Tree 
-7.  Refine branches 
-8.  Annotate 
-9.  Infer ancestral sequences
-10. Translate sequences
-11. Export (auspice V2)
-12. Upload and deploy the builds to [Nextstrain](https://nextstrain.org/groups/PekoszLab)
+1.  Align 
+2.  Build Raw Tree 
+3.  Refine branches 
+4.  Annotate 
+5.  Infer ancestral sequences
+6.  Translate sequences
+7.  Export (auspice V2)
+8.  Upload and deploy the builds to [Nextstrain](https://nextstrain.org/groups/PekoszLab)
 
-# How to upload an auspice build to the group (example):
-
-For detailed nextstrain group page settings and how to upload data, see the [Official Nextrain Documentation](https://docs.nextstrain.org/en/latest/guides/share/groups/index.html). 
-
-## Login to nextstrain cli
-
-```shell
-nextstrain login
-```
-## Uploading all 24 pathogen builds constructed in this pipline to
-
-### Private Deployment 
-
-a custom script has been made to deploy all 24 builds simultaneously 
-- [scripts/nextstrain_upload_private.py](scripts/nextstrain_upload_private.py)
-```
-python scripts/nextstrain_upload_private.py
-```
-
-# History
-- As of November 26, 2024, a Snakemake pipline for all 24 builds has been implemented to increase efficiency and reproducibility for all builds. 
 
 # Acknowledgements
+
 Automation by snakemake has increased our efficiency of these builds. The structure, scripts, and configuration filese herin are inspired tremendously by the [seasonal-flu](https://github.com/nextstrain/seasonal-flu) build maintained by the nextstrain team.
