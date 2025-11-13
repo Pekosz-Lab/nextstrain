@@ -49,8 +49,6 @@ rule snapshot_clean:
     Creates a timestamped local snapshot of outputs and cleans the workspace.
     Also removes flusort-related files from the source directory.
     """
-    output:
-        touch("logs/snapshot_clean.done")
     shell:
         """
         # Create snapshots directory if it does not exist

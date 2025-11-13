@@ -54,6 +54,16 @@
             "vaccine": {
                 "selection_date": "2023-02-24"
             }
+        },
+        "A/Missouri/11/2025-Spf3E1": {
+            "vaccine": {
+                "selection_date": "2023-09-26"
+            }
+        },
+        "A/Missouri/11/2025-S2": {
+            "vaccine": {
+                "selection_date": "2023-02-26"
+            }
         }
     }
 }

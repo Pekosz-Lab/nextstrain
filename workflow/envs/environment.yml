@@ -1,27 +1,26 @@
 name: pekosz-nextstrain
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
+
 dependencies:
-  - snakemake=9.13.5 # check
-  # - auspice=2.32.0 # TODO: how to auto build with nodejs dependency
+  - python=3.10  # more compatible with augur/blast
   - augur=26.0.0
   - awscli=1.27.9
   - epiweeks=2.1.2
-  - iqtree>=2.2.0_beta # change to 2.2.0 or greater
+  - iqtree>=2.2.0
   - mafft=7.526
   - nextclade=3.8.2
-  - python=3.11.*
-  - seaborn>=0.11*
+  - seaborn>=0.11
   - seqkit>=2.2.0
   - csvtk=0.31.0
   - tsv-utils=2.2.3
   - tabulate=0.9.0
   - xlrd=1.*
-  - pip=23.0.1
   - pathogen-embed=3.1.0
-  - libsqlite=3.49 # for blastn compatibility
-  - blastn=2.16.0
+  - blast=2.16.0
+  - pip
 
-  # TODO: iqtree seqkit blastn libsqlite dry run
+  - pip:
+      - snakemake==9.13.5  # installed via pip for latest version

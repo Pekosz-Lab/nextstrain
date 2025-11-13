@@ -129,10 +129,12 @@ python fludb/scripts/upload_gisaid.py \
     -m source/20241021_GISAID_isolates.xls
 ```
 
+Note: Future update should also include compatability with `Isolate ID | Isolate name  | Segment  | Type`
+
 ### [`upload_vaccine.py`](fludb/scripts/upload_vaccine.py)
 
 The `upload_vaccine.py` script **requires only a fasta file** with the following information in the header in this order: 
->`Isolate name | Isolate ID | Collection date | Passage details/history | Segment number  | Type | Lineage`
+>`Isolate name-Passage details/history | Isolate ID | Collection date | Passage details/history | Segment number  | Type | Lineage`
 
 ```shell
 python fludb/scripts/upload_vaccine.py \
