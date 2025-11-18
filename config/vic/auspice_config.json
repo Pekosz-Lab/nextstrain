@@ -2,6 +2,7 @@
   "title": "Johns Hopkins Hospital Network Influenza B/Victoria evolution",
   "maintainers": [
     {"name": "Elgin Akin", "url": "https://elginakin.github.io"},
+    {"name": "Annie Werner"},
     {"name": "The Pekosz Lab", "url": "https://pekoszlab.com"}
   ],
   "data_provenance": [

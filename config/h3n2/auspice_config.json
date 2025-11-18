@@ -2,6 +2,7 @@
   "title": "Johns Hopkins Hospital Network Influenza A/H3N2 evolution",
   "maintainers": [
     {"name": "Elgin Akin", "url": "https://elginakin.github.io"},
+    {"name": "Annie Werner"},
     {"name": "The Pekosz Lab", "url": "https://pekoszlab.com"}
   ],
   "data_provenance": [
