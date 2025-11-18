@@ -5,7 +5,7 @@ channels:
   - defaults
 
 dependencies:
-  - python=3.10  # more compatible with augur/blast
+  - python=3.10  
   - augur=26.0.0
   - awscli=1.27.9
   - epiweeks=2.1.2
@@ -23,4 +23,4 @@ dependencies:
   - pip
 
   - pip:
-      - snakemake==9.13.5  # installed via pip for latest version
+      - snakemake==9.13.5  
