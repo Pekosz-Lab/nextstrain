@@ -1,57 +1,76 @@
+
+
+
 #!/usr/bin/env python3
 
 '''
 2025-11-18 Elgin 
 
-This ingests a multi-fasta file with JHH def-lines and outputs a unique sequence ID list in tsv format 
+This script ingests a multi-fasta file with JHH def-lines and outputs a unique sequence ID list in tsv format 
 
 '''
 
+
 import argparse
+import re
+import sys
 from Bio import SeqIO
-import pandas as pd
+import csv
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Extract unique strain names and segment numbers from FASTA headers like JH251234_1 (ignores segment identifier)"
+    p = argparse.ArgumentParser(
+        description="Extract unique strain IDs from FASTA headers by stripping trailing _<segment#> and deduplicating."
     )
-    parser.add_argument(
-        "-i", "--input",
-        required=True,
-        help="Input multi-FASTA file"
-    )
-    parser.add_argument(
-        "-o", "--output",
-        required=True,
-        help="Output TSV file"
-    )
-    return parser.parse_args()
+    p.add_argument("-i", "--input", required=True, help="Input multi-FASTA file")
+    p.add_argument("-o", "--output", required=True, help="Output TSV file (single column: sequence_ID)")
+    return p.parse_args()
 
+def strip_segment_suffix(seq_id: str) -> str:
+    """
+    Strip a trailing underscore followed by digits from the sequence id.
+    Examples:
+      JH25583_1  -> JH25583
+      JH92010_10 -> JH92010
+      ABC        -> ABC (unchanged if no trailing _digits)
+    """
+    return re.sub(r'_[0-9]+$', '', seq_id)
 
 def main():
     args = parse_args()
 
-    unique_entries = set()
+    try:
+        records = SeqIO.parse(args.input, "fasta")
+    except Exception as e:
+        print(f"Error opening/parsing input FASTA: {e}", file=sys.stderr)
+        sys.exit(1)
 
-    for record in SeqIO.parse(args.input, "fasta"):
-        header = record.id
-        try:
-            strain, segment = header.split("_")
-        except ValueError:
-            raise ValueError(
-                f"Header '{header}' does not match expected format STRAIN_SEGMENT"
-            )
+    initial_count = 0
+    unique_ids = set()
 
-        unique_entries.add((strain, segment))
+    for rec in records:
+        initial_count += 1
+        # SeqIO.record.id gives the first token of the defline (up to first whitespace)
+        raw_id = rec.id
+        cleaned = strip_segment_suffix(raw_id)
+        unique_ids.add(cleaned)
 
-    df = pd.DataFrame(
-        sorted(unique_entries),
-        columns=["strain", "segment"]
-    )
+    unique_list = sorted(unique_ids)
 
-    df.to_csv(args.output, sep="\t", index=False)
-    print(f"✓ Wrote {len(df)} unique entries to {args.output}")
+    # Write TSV with single column 'sequence_ID'
+    try:
+        with open(args.output, "w", newline="") as fh:
+            writer = csv.writer(fh, delimiter="\t")
+            writer.writerow(["sequence_ID"])
+            for sid in unique_list:
+                writer.writerow([sid])
+    except Exception as e:
+        print(f"Error writing output file: {e}", file=sys.stderr)
+        sys.exit(1)
 
+    # Print summary
+    print(f"Input def lines parsed: {initial_count}")
+    print(f"Final unique strains: {len(unique_list)}")
+    print(f"Wrote {len(unique_list)} unique sequence_IDs to {args.output}")
 
 if __name__ == "__main__":
     main()
