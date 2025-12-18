@@ -163,7 +163,7 @@ You have **two ways** to trigger the `snapshot_clean` rule:
 Use this when you only want to clean and archive the current build:
 
 ```bash
-snakemake snapshot_clean
+snakemake --cores 8 snapshot_clean 
 ```
 
 #### Option 2 — Run automatically after a successful build
@@ -171,7 +171,7 @@ snakemake snapshot_clean
 Use this if you’ve added snapshot_clean to the main pipeline and want it to run automatically at the end:
 
 ```
-snakemake --configfile config.yaml --config run_snapshot_clean=true
+snakemake --configfile config.yaml --config run_snapshot_clean=true --cores 8
 ```
 
 This approach is recommended if you want every completed build to automatically save a snapshot before cleanup.

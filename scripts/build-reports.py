@@ -96,7 +96,7 @@ def concatenate_clade_data(h1_file, h3_file, b_file):
     frames = []
     for tsv_file in [h1_file, h3_file, b_file]:
         if tsv_file:
-            df = pd.read_csv(tsv_file, sep="\t", usecols=["seqName", "clade", "subclade"])
+            df = pd.read_csv(tsv_file, sep="\t", usecols=["seqName", "clade", "subclade", "legacy-clade"])
             frames.append(df)
     if frames:
         return pd.concat(frames, ignore_index=True)

@@ -22,7 +22,9 @@ library(tidyverse)
 library(RColorBrewer)
 library(plotly)
 
-data <- read_tsv("../reports/report.tsv")
+
+#data <- read_tsv("../reports/report.tsv")
+data <- read_tsv("reports/report.tsv")
 
 data_filtered <- data %>% 
   dplyr::filter(
@@ -54,8 +56,8 @@ dark2_colors <- brewer.pal(n = 3, name = "Dark2")
 subtype_frequency = ggplot(data_filtered, aes(x = factor(date_run, levels = unique(date_run)), fill = subtype)) +
   geom_bar(position = "stack") +
   scale_fill_manual(values = dark2_colors) +  # Apply Dark2 palette
-  labs(title = "Influenza Subtype Frequency Over Time",
-       x = "Date | Sequencing Run",
+  labs(title = "Johns Hopkins Hospital System - Subtype Frequency",
+       x = "Sequence Date | Sequencing Run #",
        y = "Number of Sequences",
        fill = "Subtype") +
   theme_classic() +
@@ -69,7 +71,7 @@ subtype_frequency = ggplot(data_filtered, aes(x = factor(date_run, levels = uniq
 #| column: screen-inset-shaded 
 ggplotly(subtype_frequency)
 
-ggsave(filename = paste0("../figures/subtype_frequency.png"), plot = subtype_frequency, width = 10, height = 4)
+#ggsave(filename = paste0("../figures/subtype_frequency.png"), plot = subtype_frequency, width = 10, height = 4)
 ```
 
 # Clade and Subclade Frequency
@@ -165,8 +167,8 @@ generate_plots <- function(df, subtype_name) {
                linetype = "dotted", color = "red", size = 1) +
     geom_text(stat = "count", aes(label = ..count..), position = position_stack(vjust = 0.5))
 
-  ggsave(filename = paste0("../figures/", subtype_name, "_clade_plot.png"), plot = clade_plot, width = 10, height = 4)
-  ggsave(filename = paste0("../figures/", subtype_name, "_subclade_plot.png"), plot = subclade_plot, width = 10, height = 4)
+  #ggsave(filename = paste0("../figures/", subtype_name, "_clade_plot.png"), plot = clade_plot, width = 10, height = 4)
+  #ggsave(filename = paste0("../figures/", subtype_name, "_subclade_plot.png"), plot = subclade_plot, width = 10, height = 4)
 
   return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
 }
@@ -175,6 +177,110 @@ generate_plots <- function(df, subtype_name) {
 h3n2_plots <- generate_plots(data, "H3N2")
 h1n1_plots <- generate_plots(data, "H1N1")
 victoria_plots <- generate_plots(data, "Victoria")
+```
+
+
+```{r}
+library(RColorBrewer)
+
+# A convenience function that scales a palette if needed
+generate_palette <- function(n, palette) {
+  max_colors <- brewer.pal.info[palette, "maxcolors"]
+  base_colors <- brewer.pal(min(n, max_colors), palette)
+  if (n <= max_colors) {
+    return(base_colors)
+  } else {
+    return(colorRampPalette(base_colors)(n))
+  }
+}
+
+# Assign palettes per subtype
+clade_palette_map <- list(
+  "H1N1"    = "Dark2",
+  "H3N2"    = "Set2",
+  "Victoria"= "Set1"
+)
+
+subclade_palette_map <- list(
+  "H1N1"    = "Set3",
+  "H3N2"    = "Paired",
+  "Victoria"= "Pastel2"
+)
+
+# Generate clade colors for a given subtype
+get_clade_colors <- function(df, subtype) {
+  palette <- clade_palette_map[[subtype]]
+  
+  clades <- df %>%
+    filter(subtype == subtype, !is.na(`legacy-clade`), clade != "") %>%
+    pull(clade) %>% unique() %>% sort()
+  
+  colors <- generate_palette(length(clades), palette)
+  names(colors) <- clades
+  colors
+}
+
+# Generate subclade colors for a given subtype
+get_subclade_colors <- function(df, subtype) {
+  palette <- subclade_palette_map[[subtype]]
+  
+  subclades <- df %>%
+    filter(subtype == subtype, !is.na(subclade), subclade != "") %>%
+    pull(subclade) %>% unique() %>% sort()
+  
+  colors <- generate_palette(length(subclades), palette)
+  names(colors) <- subclades
+  colors
+}
+
+
+generate_plots <- function(df, subtype_name) {
+  
+  df_filtered <- df %>%
+    filter(
+      subtype == subtype_name,
+      date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31"),
+      !is.na(clade), clade != "",
+      !is.na(subclade), subclade != ""
+    ) %>%
+    mutate(date_run = paste(date, sequencing_run, sep = " | ")) %>%
+    arrange(date) %>%
+    mutate(date_run = factor(date_run, levels = unique(date_run)))
+
+  # *** NEW: subtype-specific palettes ***
+  clade_colors    <- get_clade_colors(df_filtered, subtype_name)
+  subclade_colors <- get_subclade_colors(df_filtered, subtype_name)
+
+  # Clade Frequency Plot
+  clade_plot <- ggplot(df_filtered, aes(x = date_run, fill = `legacy-clade`)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = clade_colors) +
+    labs(title = paste(subtype_name, "Clade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Clade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+  # Subclade Frequency Plot
+  subclade_plot <- ggplot(df_filtered, aes(x = date_run, fill = subclade)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = subclade_colors) +
+    labs(title = paste(subtype_name, "Subclade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Subclade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+  return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
+}
+
+# Generate plots for each subtype
+h3n2_plots <- generate_plots(data, "H3N2")
+h1n1_plots <- generate_plots(data, "H1N1")
+victoria_plots <- generate_plots(data, "Victoria")
+
 ```
 
 ## H3N2
