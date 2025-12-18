@@ -69,7 +69,7 @@ rule assign_clades:
         import pandas as pd
 
         metadata_df = pd.read_csv(input.metadata, sep='\t')
-        clade_df = pd.read_csv(input.ha_clade, sep='\t', usecols=['seqName', 'clade', 'subclade'])
+        clade_df = pd.read_csv(input.ha_clade, sep='\t', usecols=['seqName', 'clade', 'subclade', "legacy-clade"])
 
         merged_df = pd.merge(metadata_df, clade_df, left_on='sample_ID', right_on='seqName', how='left')
 
