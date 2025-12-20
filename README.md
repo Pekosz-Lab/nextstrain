@@ -136,7 +136,7 @@ python scripts/build-reports.py \
 
 Once the summary data are generated, you can render the formatted HTML report using Quarto:
 ```
-quarto render scripts/report-reports.qmd --to html --output-dir ../reports/
+quarto render scripts/render-reports.qmd --to html --output-dir ../reports/
 ```
 The rendered report will be saved in the reports/ folder and can be viewed in any web browser.
 

@@ -1,5 +1,6 @@
 ---
 title: "Johns Hopkins Hospital Influenza Virus Sequencing Frequency Report"
+subtitle: "Consensus sequencing data is provided by Dr. Heba Mostafa"  
 author: Elgin Akin
 date: now
 execute: 
@@ -12,10 +13,29 @@ format:
     code-fold: true
     embed-resources: true
     toc: true
+
+abstract: |
+  **CONFIDENTIAL AND PRIVILEGED INFORMATION**
+  
+  This document contains confidential and privileged information. The data, analyses, and findings presented herein are proprietary and intended solely for authorized personnel and designated recipients. 
+
+  **Source Code:** Available on [Github](https://github.com/Pekosz-Lab/nextstrain/blob/main/scripts/render-reports.qmd)
+
 ---
 
-WARNING: **IV25Run16** Not shown in plots below due to ambiguous date
-WARNING: Omar was kind enough to sequence NH2024-25 genomes in IV25Run17. As of Dec 18, 2025, we have not parsed out which sequences are summer vs fall in origin.
+# Introduction
+
+This report presents a comprehensive analysis of influenza surveillance data from the Johns Hopkins Hospital System, covering genetic characterization and temporal frequency patterns of circulating influenza viruses. The analysis encompasses both influenza A (H1N1pdm09 and H3N2) and influenza B (Victoria lineage) viruses sequenced through the hospital system's surveillance program. 
+
+All sequence data represents clinical specimens processed through the Johns Hopkins Hospital System laboratory network, with comparative analysis including reference sequences from the Global Initiative on Sharing Avian and Human Influenza Data (GISAID) database where appropriate. 
+
+::: {.callout-warning}
+**IV25Run16** Not shown in plots below due to ambiguous date
+:::
+::: {.callout-important}
+Omar was kind enough to sequence NH2024-25 genomes in IV25Run17. As of Dec 18, 2025, we have not parsed out which sequences are summer vs fall in origin.
+:::
+
 
 ```{r}
 #| echo: false
@@ -890,17 +910,17 @@ datatable(
 ```
 
 
-# Roadmap 
-- Natural language information at the beggining of the report outlining
-  - the current date range captured in this report
-  - Is influenza a or b dominating 
-  - which subtype is dominating 
-- Table breakdown of influenza subtype and clade/subclade numbers 
--- Proceed with tables and plots -- 
-- Dataset attributes
-  - Interactive heatmap of samples with the number of present segments availible. 
+#### Methods Summary
+Brief description of sequencing methods, quality control criteria, phylogenetic analysis approaches, and clade/subclade assignment procedures.
 
-## Features 
-- Automatic color selection for each clade and subclade within subtypes.
+#### Key Findings
+- Dominant circulating strains in the current season
+- Notable genetic variants or emerging subclades
+- Comparison with national/regional surveillance data
+- Vaccine strain match assessment
 
-
+#### Surveillance Period Notes
+- Date range covered in analysis
+- Number of sequencing runs included
+- Any data quality considerations or limitations
+- Update frequency of the report
