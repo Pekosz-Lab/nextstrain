@@ -5,7 +5,7 @@ print("Uploading seasonal influenza builds h1n1, h3n2, and vic to the PRIVATE Pe
 subtypes = {
     "h3n2": ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"],
     "h1n1": ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"],
-    "vic": ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns", "genome"]
+    "vic": ["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]
 }
 
 def nextstrain_login():
@@ -23,7 +23,7 @@ def nextstrain_upload(subtype):
     """Upload Nextstrain JSON files for a given subtype."""
     command = ([
         "nextstrain", "remote", "upload",
-        f"nextstrain.org/groups/PekoszLab-Public/mostafa/iav24-25/{subtype}"
+        f"nextstrain.org/groups/PekoszLab-Public/seasonal-flu/{subtype}"
     ] + 
     [f"auspice/{subtype}/{segment}.json" for segment in subtypes[subtype]] +
     [f"auspice/{subtype}/{segment}_tip-frequencies.json" for segment in subtypes[subtype]])

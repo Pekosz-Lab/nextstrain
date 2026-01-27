@@ -1,0 +1,572 @@
+---
+title: "Johns Hopkins Hospital Sequencing Frequency Report"
+author: Elgin Akin
+date: now
+execute: 
+  echo: false
+format: 
+  html:
+    page-layout: full
+    code-fold: true
+    embed-resources: true
+    toc: true
+---
+
+Most recent run: **IV25Run16** Not shown in plots below due to ambiguous date
+
+```{r}
+#| echo: false
+#| output: false 
+
+library(tidyverse)
+library(RColorBrewer)
+library(plotly)
+
+#data <- read_tsv("../reports/report.tsv")
+data <- read_tsv("reports/report.tsv")
+
+data_filtered <- data %>% 
+  dplyr::filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"), 
+    date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+  ) %>%
+  dplyr::mutate(date_run = paste(date, sequencing_run, sep = " | ")) 
+
+# Ensure date_run is ordered chronologically
+data_filtered <- data_filtered %>%
+  mutate(date = as.Date(date)) %>%  # Ensure the date is in Date format
+  arrange(date) %>%  # Sort data by date
+  mutate(date_run = factor(date_run, levels = unique(date_run)))  # Create factor with ordered levels
+
+```
+
+
+## Subtype plot
+
+```{r}
+#| echo: FALSE
+#| output: FALSE 
+#| column: screen-inset-shaded 
+
+# Define Dark2 palette for the subtypes
+dark2_colors <- brewer.pal(n = 3, name = "Dark2")
+
+# Plot stacked bar chart (showing each date-run pair separately)
+subtype_frequency = ggplot(data_filtered, aes(x = factor(date_run, levels = unique(date_run)), fill = subtype)) +
+  geom_bar(position = "stack") +
+  scale_fill_manual(values = dark2_colors) +  # Apply Dark2 palette
+  labs(title = "Johns Hopkins Hospital System - Subtype Frequency",
+       x = "Sequence Date | Sequencing Run #",
+       y = "Number of Sequences",
+       fill = "Subtype") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))  +
+  geom_text(stat = "count", aes(label = after_stat(count)), position = position_stack(vjust = 0.5))
+
+```
+
+```{r}
+#| column: screen-inset-shaded 
+ggplotly(subtype_frequency)
+#ggsave(filename = paste0("../figures/subtype_frequency.png"), plot = subtype_frequency, width = 10, height = 4)
+```
+
+# Clade and Subclade Frequency (depreciated)
+```{r}
+#| echo: false
+#| output: false 
+library(tidyverse)
+
+# Define the clade and subclade color palettes
+clade_colors <- c(
+  # H1N1
+  "6B.1A.5a.2a" = "#a0240e", 
+  "6B.1A.5a.2a.1" = "#6265cd", 
+  # H3N2
+  "3C.2a1b.2a.2a.1b" = "#A4BED5FF",
+  "3C.2a1b.2a.2a.3a.1" = "#CC4C24FF", 
+  "3C.2a1b.2a.2b" = "#32373AFF", 
+  # IBV
+  "V1A" = "#FF4500", 
+  "V1A.3a.2" = "#00CED1"
+)
+
+subclade_colors <- c(
+  # H1N1
+  "C.1" = "#9A133DFF", 
+  "C.1.1" = "#B93961FF", 
+  "C.1.7" = "#D8527CFF", 
+  "C.1.7.2" = "#F28AAAFF", 
+  "C.1.8" = "#F9B4C9FF", 
+  "C.1.9" = "#F9E0E8FF", 
+  "D" = "#1A318BFF", 
+  "D.1" = "#4060C8FF", 
+  "D.2" = "#6996E3FF", 
+  "D.3" = "#A1C2EDFF", 
+  "D.4" = "#C5DAF6FF",
+  # IBV
+  "A" = "#FF6347", 
+  "C.3" = "#00CED1", 
+  "C.5" = "#9400D3", 
+  "C.5.1" = "#FF1493", 
+  "C.5.5" = "#FF8C00", 
+  "C.5.6" = "#B0E0E6", 
+  "C.5.7" = "#808000", 
+  # H3N2
+  "G.1.1.2" = "#00496FFF", 
+  "G.2" = "#0F85A0FF", 
+  "J" = "#EDD746FF", 
+  "J.1" = "#ED8B00FF", 
+  "J.2" = "#DD4124FF"
+)
+
+# Define flu season start date
+flu_season_start <- as.Date("2024-10-01")
+
+# Function to generate plots for a given subtype
+generate_plots <- function(df, subtype_name) {
+  df_filtered <- df %>%
+    filter(
+      subtype == subtype_name,
+      date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31"),
+      !is.na(clade) & clade != "",
+      !is.na(subclade) & subclade != ""
+    ) %>%
+    mutate(date_run = paste(date, sequencing_run, sep = " | ")) %>%  # Create a unique date-run label
+    arrange(date) %>%  # Ensure data is sorted by date
+    mutate(date_run = factor(date_run, levels = unique(date_run)))  # Set factor levels in time order
+
+  # Clade Frequency Plot
+  clade_plot <- ggplot(df_filtered, aes(x = date_run, fill = clade)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = clade_colors) +  # Apply clade color palette
+    labs(title = paste(subtype_name, "Clade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Clade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    geom_vline(xintercept = which(levels(df_filtered$date_run) == as.character(flu_season_start)), 
+               linetype = "dotted", color = "red", size = 1) +
+    geom_text(stat = "count", aes(label = ..count..), position = position_stack(vjust = 0.5))
+
+  # Subclade Frequency Plot
+  subclade_plot <- ggplot(df_filtered, aes(x = date_run, fill = subclade)) +
+    geom_bar(position = "stack") +
+    scale_fill_manual(values = subclade_colors) +  # Apply subclade color palette
+    labs(title = paste(subtype_name, "Subclade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Subclade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+    geom_vline(xintercept = which(levels(df_filtered$date_run) == as.character(flu_season_start)), 
+               linetype = "dotted", color = "red", size = 1) +
+    geom_text(stat = "count", aes(label = ..count..), position = position_stack(vjust = 0.5))
+
+  #ggsave(filename = paste0("../figures/", subtype_name, "_clade_plot.png"), plot = clade_plot, width = 10, height = 4)
+  #ggsave(filename = paste0("../figures/", subtype_name, "_subclade_plot.png"), plot = subclade_plot, width = 10, height = 4)
+
+  return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
+}
+
+# Generate plots for each subtype
+h3n2_plots <- generate_plots(data, "H3N2")
+h1n1_plots <- generate_plots(data, "H1N1")
+victoria_plots <- generate_plots(data, "Victoria")
+```
+
+# Clade and Subclade Frequency
+```{r}
+
+
+```
+
+# Clade and Subclade Frequency v3 
+
+```{r}
+library(RColorBrewer)
+
+### Begin generating color palettes 
+
+generate_palette <- function(n, palette) {
+  max_colors <- brewer.pal.info[palette, "maxcolors"]
+  base_colors <- brewer.pal(min(n, max_colors), palette)
+  if (n <= max_colors) {
+    return(base_colors)
+  } else {
+    return(colorRampPalette(base_colors)(n))
+  }
+}
+
+# Assign palettes per subtype
+clade_palette_map <- list(
+  "H1N1"    = "Dark2",
+  "H3N2"    = "Set2",
+  "Victoria"= "Set1"
+)
+
+subclade_palette_map <- list(
+  "H1N1"    = "Dark2",
+  "H3N2"    = "PairSet2ed",
+  "Victoria"= "Set1"
+)
+
+# Generate clade colors for a given subtype
+get_clade_colors <- function(df, subtype) {
+  palette <- clade_palette_map[[subtype]]
+  
+  clades <- df %>%
+    filter(subtype == subtype, !is.na(`clade`), clade != "") %>%
+    pull(clade) %>% unique() %>% sort()
+  
+  colors <- generate_palette(length(clades), palette)
+  names(colors) <- clades
+  colors
+}
+
+# Generate subclade colors for a given subtype
+get_subclade_colors <- function(df, subtype) {
+  palette <- subclade_palette_map[[subtype]]
+  
+  subclades <- df %>%
+    filter(subtype == subtype, !is.na(subclade), subclade != "") %>%
+    pull(subclade) %>% unique() %>% sort()
+  
+  colors <- generate_palette(length(subclades), palette)
+  names(colors) <- subclades
+  colors
+}
+
+### Begin generating plots 
+
+generate_plots <- function(df, subtype_name) {
+  
+  df_filtered <- df %>%
+    filter(
+      subtype == subtype_name,
+      date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31"),
+      !is.na(clade), clade != "",
+      !is.na(subclade), subclade != ""
+    ) %>%
+    mutate(date_run = paste(date, sequencing_run, sep = " | ")) %>%
+    arrange(date) %>%
+    mutate(date_run = factor(date_run, levels = unique(date_run)))
+
+  # *** NEW: subtype-specific palettes ***
+  clade_colors    <- get_clade_colors(df_filtered, subtype_name)
+  subclade_colors <- get_subclade_colors(df_filtered, subtype_name)
+
+  # Clade Frequency Plot
+  clade_plot <- ggplot(df_filtered, aes(x = date_run, fill = clade)) +
+    geom_bar(position = "stack") +
+    geom_text(stat = "count", aes(label = after_stat(count)), 
+              position = position_stack(vjust = 0.5), 
+              color = "white", fontface = "bold", size = 3) +
+    scale_fill_manual(values = clade_colors) +
+    labs(title = paste(subtype_name, "Clade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Clade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+  # Subclade Frequency Plot
+  subclade_plot <- ggplot(df_filtered, aes(x = date_run, fill = subclade)) +
+    geom_bar(position = "stack") +
+    geom_text(stat = "count", aes(label = after_stat(count)), 
+              position = position_stack(vjust = 0.5), 
+              color = "white", fontface = "bold", size = 3) +
+    scale_fill_manual(values = subclade_colors) +
+    labs(title = paste(subtype_name, "Subclade Frequency"),
+         x = "Date | Sequencing Run",
+         y = "Frequency",
+         fill = "Subclade") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+  return(list(clade_plot = clade_plot, subclade_plot = subclade_plot))
+}
+
+# Generate plots for each subtype
+h3n2_plots <- generate_plots(data, "H3N2")
+h1n1_plots <- generate_plots(data, "H1N1")
+victoria_plots <- generate_plots(data, "Victoria")
+```
+
+## H3N2
+```{r}
+#| column: screen-inset-shaded
+ggplotly(h3n2_plots$clade_plot)
+ggplotly(h3n2_plots$subclade_plot)
+```
+
+## H1N1
+```{r}
+#| column: screen-inset-shaded
+ggplotly(h1n1_plots$clade_plot)
+ggplotly(h1n1_plots$subclade_plot)
+```
+
+## B/Victoria
+```{r}
+#| column: screen-inset-shaded
+ggplotly(victoria_plots$clade_plot)
+ggplotly(victoria_plots$subclade_plot)
+```
+
+# Interactive Tables
+
+## Total Clade and Subclade Summary by Subtype
+
+```{r}
+# Table 1: Overall clade/subclade summary by subtype
+clade_subclade_summary <- data %>%
+  filter(subtype %in% c("H1N1", "H3N2", "Victoria")) %>%
+  group_by(subtype) %>%
+  summarise(
+    total_samples = n(),
+    unique_clades = n_distinct(clade[!is.na(clade) & clade != ""]),
+    unique_subclades = n_distinct(subclade[!is.na(subclade) & subclade != ""]),
+    samples_with_clade = sum(!is.na(clade) & clade != ""),
+    samples_with_subclade = sum(!is.na(subclade) & subclade != ""),
+    clade_coverage = round((samples_with_clade / total_samples) * 100, 1),
+    subclade_coverage = round((samples_with_subclade / total_samples) * 100, 1),
+    .groups = 'drop'
+  )
+
+datatable(
+  clade_subclade_summary,
+  caption = "Clade and Subclade Summary by Subtype",
+  extensions = 'Buttons',
+  options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'print'),
+    scrollX = TRUE
+  )) %>%
+  formatStyle(columns = c('clade_coverage', 'subclade_coverage'), 
+              backgroundColor = styleInterval(c(50, 80), c('lightcoral', 'lightyellow', 'lightgreen')))
+```
+
+## Seasonal Clade and Subclade Summary (October-September Seasons)
+
+```{r}
+# Table 2: Seasonal summary (Oct-Sep seasons)
+seasonal_summary <- data %>%
+  filter(
+    subtype %in% c("H1N1", "H3N2", "Victoria"),
+    !is.na(date)
+  ) %>%
+  mutate(
+    # Create flu season (Oct-Sep)
+    flu_season = case_when(
+      month(date) >= 10 ~ paste0(year(date), "-", year(date) + 1),
+      month(date) < 10 ~ paste0(year(date) - 1, "-", year(date)),
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(flu_season)) %>%
+  group_by(flu_season, subtype) %>%
+  summarise(
+    total_samples = n(),
+    unique_clades = n_distinct(clade[!is.na(clade) & clade != ""]),
+    unique_subclades = n_distinct(subclade[!is.na(subclade) & subclade != ""]),
+    samples_with_clade = sum(!is.na(clade) & clade != ""),
+    samples_with_subclade = sum(!is.na(subclade) & subclade != ""),
+    clade_coverage = round((samples_with_clade / total_samples) * 100, 1),
+    subclade_coverage = round((samples_with_subclade / total_samples) * 100, 1),
+    .groups = 'drop'
+  ) %>%
+  arrange(flu_season, subtype)
+
+datatable(
+  seasonal_summary,
+  caption = "Seasonal Clade and Subclade Summary (October-September Seasons)",
+  extensions = 'Buttons',
+  filter = list(position = 'top', clear = FALSE),
+  options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'print'),
+    scrollX = TRUE,
+    pageLength = 15
+  )
+) %>%
+  formatStyle(columns = c('clade_coverage', 'subclade_coverage'), 
+              backgroundColor = styleInterval(c(50, 80), c('lightcoral', 'lightyellow', 'lightgreen')))
+```
+
+## Genome Completeness 
+```{r}
+# Table 3: Genome completeness summary by subtype (incorporating type information)
+# Table 3: Genome completeness summary by subtype (incorporating type information)
+genome_completeness_summary <- data %>%
+  mutate(
+    # Create a more informative subtype category
+    subtype_category = case_when(
+      subtype %in% c("H1N1", "H3N2", "Victoria") ~ subtype,
+      type == "InfluenzaA" & !subtype %in% c("H1N1", "H3N2") ~ paste0("InfluenzaA_", subtype),
+      type == "InfluenzaB" & subtype != "Victoria" ~ paste0("InfluenzaB_", subtype),
+      is.na(subtype) | subtype == "" ~ paste0(type, "_unknown"),
+      TRUE ~ paste0(type, "_", subtype)
+    ),
+    # Subtyping completeness
+    complete_subtype = case_when(
+      type == "InfluenzaA" & subtype %in% c("H1N1", "H3N2") ~ "Complete",
+      type == "InfluenzaB" & subtype == "Victoria" ~ "Complete", 
+      TRUE ~ "Incomplete"
+    )
+  ) %>%
+  group_by(type, subtype_category, complete_subtype) %>%
+  summarise(
+    total_samples = n(),
+    
+    # Segment count statistics
+    mean_segment_count = round(mean(segment_count, na.rm = TRUE), 1),
+    median_segment_count = median(segment_count, na.rm = TRUE),
+    min_segment_count = min(segment_count, na.rm = TRUE),
+    max_segment_count = max(segment_count, na.rm = TRUE),
+    
+    # HA presence
+    has_ha_count = sum(has_ha == "yes", na.rm = TRUE),
+    has_ha_percent = round((has_ha_count / total_samples) * 100, 1),
+    
+    # HA and NA presence
+    has_ha_and_na_count = sum(has_ha_and_na == "yes", na.rm = TRUE),
+    has_ha_and_na_percent = round((has_ha_and_na_count / total_samples) * 100, 1),
+    
+    # Complete genome (8 segments)
+    complete_genome_count = sum(segment_count == 8, na.rm = TRUE),
+    complete_genome_percent = round((complete_genome_count / total_samples) * 100, 1),
+    
+    .groups = 'drop'
+  ) %>%
+  arrange(type, desc(total_samples))
+
+datatable(
+  genome_completeness_summary,
+  caption = "Genome Completeness Summary by Type and Subtype",
+  extensions = 'Buttons',
+  options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'print'),
+    scrollX = TRUE
+  )
+) %>%
+  formatStyle(columns = c('has_ha_percent', 'has_ha_and_na_percent', 'complete_genome_percent'), 
+              backgroundColor = styleInterval(c(50, 80), c('lightcoral', 'lightyellow', 'lightgreen'))) %>%
+  formatStyle(columns = 'complete_subtype',
+              backgroundColor = styleEqual(c('Complete', 'Incomplete'), c('lightgreen', 'lightcoral'))) %>%
+  formatRound(columns = c('mean_segment_count'), digits = 1)
+
+```
+
+## Interactive Table of all frequency data
+```{r}
+#| column: screen-inset-shaded
+library(tidyverse)
+library(DT)
+
+datatable(
+  data, 
+  extensions = 'Buttons', 
+  filter = list(position = 'top', clear = FALSE),
+  options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'print'),
+    scrollX = TRUE # Enables horizontal scrolling
+  )
+) 
+```
+
+```{r}
+# Table 3: Genome completeness summary by subtype (incorporating type information)
+genome_completeness_summary <- data %>%
+  mutate(
+    # Create a more informative subtype category
+    subtype_category = case_when(
+      subtype %in% c("H1N1", "H3N2", "Victoria") ~ subtype,
+      type == "InfluenzaA" & !subtype %in% c("H1N1", "H3N2") ~ paste0("InfluenzaA_", subtype),
+      type == "InfluenzaB" & subtype != "Victoria" ~ paste0("InfluenzaB_", subtype),
+      is.na(subtype) | subtype == "" ~ paste0(type, "_unknown"),
+      TRUE ~ paste0(type, "_", subtype)
+    ),
+    # Subtyping completeness
+    complete_subtype = case_when(
+      type == "InfluenzaA" & subtype %in% c("H1N1", "H3N2") ~ "Complete",
+      type == "InfluenzaB" & subtype == "Victoria" ~ "Complete", 
+      TRUE ~ "Incomplete"
+    )
+  ) %>%
+  group_by(type, subtype_category, complete_subtype) %>%
+  summarise(
+    total_samples = n(),
+    
+    # Segment count statistics
+    mean_segment_count = round(mean(segment_count, na.rm = TRUE), 1),
+    median_segment_count = median(segment_count, na.rm = TRUE),
+    min_segment_count = min(segment_count, na.rm = TRUE),
+    max_segment_count = max(segment_count, na.rm = TRUE),
+    
+    # HA presence
+    has_ha_count = sum(has_ha == "yes", na.rm = TRUE),
+    has_ha_percent = round((has_ha_count / total_samples) * 100, 1),
+    
+    # HA and NA presence
+    has_ha_and_na_count = sum(has_ha_and_na == "yes", na.rm = TRUE),
+    has_ha_and_na_percent = round((has_ha_and_na_count / total_samples) * 100, 1),
+    
+    # Complete genome (8 segments)
+    complete_genome_count = sum(segment_count == 8, na.rm = TRUE),
+    complete_genome_percent = round((complete_genome_count / total_samples) * 100, 1),
+    
+    .groups = 'drop'
+  ) %>%
+  arrange(type, desc(total_samples))
+
+datatable(
+  genome_completeness_summary,
+  caption = "Genome Completeness Summary by Type and Subtype",
+  extensions = 'Buttons',
+  options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'print'),
+    scrollX = TRUE
+  ),
+  colnames = c(
+    'Type' = 'type',
+    'Subtype' = 'subtype_category',
+    'Status' = 'complete_subtype',
+    'N' = 'total_samples',
+    'Mean Seg' = 'mean_segment_count',
+    'Med Seg' = 'median_segment_count',
+    'Min Seg' = 'min_segment_count',
+    'Max Seg' = 'max_segment_count',
+    'HA (n)' = 'has_ha_count',
+    'HA (%)' = 'has_ha_percent',
+    'HA+NA (n)' = 'has_ha_and_na_count',
+    'HA+NA (%)' = 'has_ha_and_na_percent',
+    'Complete (n)' = 'complete_genome_count',
+    'Complete (%)' = 'complete_genome_percent'
+  )
+) %>%
+  formatStyle(columns = c('HA (%)', 'HA+NA (%)', 'Complete (%)'), 
+              backgroundColor = styleInterval(c(50, 80), c('lightcoral', 'lightyellow', 'lightgreen'))) %>%
+  formatStyle(columns = 'Status',
+              backgroundColor = styleEqual(c('Complete', 'Incomplete'), c('lightgreen', 'lightcoral'))) %>%
+  formatRound(columns = c('Mean Seg'), digits = 1)
+```
+
+# Roadmap 
+
+- Natural language information at the beggining of the report outlining
+  - the current date range captured in this report
+  - Is influenza a or b dominating 
+  - which subtype is dominating 
+- Table breakdown of influenza subtype and clade/subclade numbers 
+-- Proceed with tables and plots -- 
+- Dataset attributes
+  - Interactive heatmap of samples with the number of present segments availible. 
+
+## Features 
+- Automatic color selection for each clade and subclade within subtypes.  
+  
