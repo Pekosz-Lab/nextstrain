@@ -75,6 +75,55 @@ rule assign_clades:
 
         merged_df.to_csv(output.metadata_clade, sep='\t', index=False)
 
+
+rule get_glycosylation:
+    message: "Getting glycosylation info"
+    input:
+        nextclade_tsv="results/{subtype}/{segment}/nextclade.tsv"
+    output:
+        nextclade_tsv_with_gly="results/{subtype}/{segment}/nextclade_with_gly.txt.flag"
+    log:
+        "logs/get-glycosylation-clades_{subtype}_{segment}.txt"
+    run:
+        import pandas as pd
+
+
+        nextclade_df = pd.read_csv(input.nextclade_tsv, sep='\t')
+
+
+        for row in nextclade_df.index:
+            if pd.isna(nextclade_df.loc[row, 'glycosylation']) or nextclade_df.loc[row, 'glycosylation'] == "":
+                continue
+            else:
+                gly_lst = nextclade_df.loc[row, 'glycosylation'].split(';')
+                gly_dict = {}
+                for gly in gly_lst:
+                    protein_type = gly.split(':')[0] 
+                    site_mod_info = gly.split(':')[1] + '_' + gly.split(':')[2]
+
+                    if protein_type not in gly_dict.keys():
+                        gly_dict[protein_type] = [site_mod_info]
+                    else:
+                        gly_dict[protein_type].append(site_mod_info)
+                for protein in gly_dict.keys():
+                    gly_lst_individual = gly_dict[protein]
+                    # gly_lst_root = fake_root_gly[protein]
+
+                    # list of glycosylation sites on sequence
+                    total_gly = gly_lst_individual.copy()
+                    total_gly.sort()
+                    total_gly_col_name = protein + '_glycosylation_sites_total'
+                    nextclade_df.loc[row, total_gly_col_name] = str(total_gly)
+                    # count of glycosylation sites on sequence
+                    total_gly_count = len(gly_lst_individual)
+                    total_gly_count_col_name = protein + '_glycosylation_sites_total_count'
+                    nextclade_df.loc[row, total_gly_count_col_name] = str(int(total_gly_count))
+        # nextclade_df.to_csv(output.nextclade_tsv_with_gly, sep='\t', index=False)
+        nextclade_df.to_csv(input.nextclade_tsv, sep='\t', index=False)
+        with open(output.nextclade_tsv_with_gly, 'w') as file:
+            file.write('glycosylation processed')
+
+
 rule merge_quality_metrics:
     input:
         metadata=rules.assign_clades.output.metadata_clade,  # "results/{subtype}/{segment}/metadata_clade.tsv"
