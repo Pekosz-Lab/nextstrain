@@ -28,6 +28,9 @@ rule all:
         expand("auspice/{subtype}/{segment}.json", 
                subtype=["h3n2", "h1n1", "vic"], 
                segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]),
+        expand("results/{subtype}/{segment}/nextclade_with_gly.txt.flag",
+               subtype=["h3n2", "h1n1", "vic"],
+               segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"]),
 
         # Genomes
         expand("auspice/{subtype}/genome_tip-frequencies.json", 
