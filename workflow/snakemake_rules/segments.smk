@@ -152,7 +152,16 @@ rule merge_quality_metrics:
 
         # Load the metadata and nextclade data
         metadata_df = pd.read_csv(input.metadata, sep='\t')
-        nextclade_df = pd.read_csv(input.nextclade, sep='\t', usecols=['seqName', 'qc.overallScore', 'qc.overallStatus', 'coverage'])
+
+        cols_to_merge = ['seqName', 'qc.overallScore', 'qc.overallStatus', 'coverage']
+
+        if wildcards.segment == 'na':
+            cols_to_merge += ['NA_glycosylation_sites_total', 'NA_glycosylation_sites_total_count']
+        if wildcards.segment == 'ha':
+            cols_to_merge += ['HA1_glycosylation_sites_total', 'HA1_glycosylation_sites_total_count', 'HA2_glycosylation_sites_total', 'HA2_glycosylation_sites_total_count', 'HA_glycosylation_sites_total', 'HA_glycosylation_sites_total_count']
+
+
+        nextclade_df = pd.read_csv(input.nextclade, sep='\t', usecols=cols_to_merge)
 
         # Perform the merge operation, merging on the seqName
         merged_df = pd.merge(metadata_df, nextclade_df, left_on='seqName', right_on='seqName', how='left')

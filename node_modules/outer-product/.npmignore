@@ -1,0 +1,9 @@
+# from .gitignore
+node_modules
+*.iml
+.idea
+
+test
+variants
+benchmark.js
+.travis.yml
