@@ -91,46 +91,46 @@ rule get_glycosylation:
 
         nextclade_df = pd.read_csv(input.nextclade_tsv, sep='\t')
 
-        if 'glycosylation' in nextclade_df.columns:
-            for row in nextclade_df.index:
-                if pd.isna(nextclade_df.loc[row, 'glycosylation']) or nextclade_df.loc[row, 'glycosylation'] == "":
-                    continue
-                else:
-                    gly_lst = nextclade_df.loc[row, 'glycosylation'].split(';')
-                    gly_dict = {}
-                    for gly in gly_lst:
-                        protein_type = gly.split(':')[0] 
-                        site_mod_info = gly.split(':')[1] + '_' + gly.split(':')[2]
+        # if 'glycosylation' in nextclade_df.columns:
+        #     for row in nextclade_df.index:
+        #         if pd.isna(nextclade_df.loc[row, 'glycosylation']) or nextclade_df.loc[row, 'glycosylation'] == "":
+        #             continue
+        #         else:
+        #             gly_lst = nextclade_df.loc[row, 'glycosylation'].split(';')
+        #             gly_dict = {}
+        #             for gly in gly_lst:
+        #                 protein_type = gly.split(':')[0] 
+        #                 site_mod_info = gly.split(':')[1] + '_' + gly.split(':')[2]
 
-                        if protein_type not in gly_dict.keys():
-                            gly_dict[protein_type] = [site_mod_info]
-                        else:
-                            gly_dict[protein_type].append(site_mod_info)
-                    for protein in gly_dict.keys():
-                        gly_lst_individual = gly_dict[protein]
-                        # gly_lst_root = fake_root_gly[protein]
+        #                 if protein_type not in gly_dict.keys():
+        #                     gly_dict[protein_type] = [site_mod_info]
+        #                 else:
+        #                     gly_dict[protein_type].append(site_mod_info)
+        #             for protein in gly_dict.keys():
+        #                 gly_lst_individual = gly_dict[protein]
+        #                 # gly_lst_root = fake_root_gly[protein]
 
-                        # list of glycosylation sites on sequence
-                        total_gly = gly_lst_individual.copy()
-                        total_gly.sort()
-                        total_gly_col_name = protein + '_glycosylation_sites_total'
-                        nextclade_df.loc[row, total_gly_col_name] = str(total_gly)
-                        # count of glycosylation sites on sequence
-                        total_gly_count = len(gly_lst_individual)
-                        total_gly_count_col_name = protein + '_glycosylation_sites_total_count'
-                        nextclade_df.loc[row, total_gly_count_col_name] = str(int(total_gly_count))
-                    if 'HA1' in gly_dict.keys():
-                        if 'HA2' in gly_dict.keys():
-                            nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(ast.literal_eval(nextclade_df.loc[row, 'HA1_glycosylation_sites_total']) + ast.literal_eval(nextclade_df.loc[row, 'HA2_glycosylation_sites_total']))
-                            nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = str(int(nextclade_df.loc[row, 'HA1_glycosylation_sites_total_count']) + int(nextclade_df.loc[row, 'HA2_glycosylation_sites_total_count']))
-                        else:
-                            nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(nextclade_df.loc[row, 'HA1_glycosylation_sites_total'])
-                            nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = str(int(nextclade_df.loc[row, 'HA1_glycosylation_sites_total_count']))
-                    elif 'HA2' in gly_dict.keys():
-                        nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(nextclade_df.loc[row, 'HA2_glycosylation_sites_total'])
-                        nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = str(int(nextclade_df.loc[row, 'HA2_glycosylation_sites_total_count']))
-                    else:
-                        continue
+        #                 # list of glycosylation sites on sequence
+        #                 total_gly = gly_lst_individual.copy()
+        #                 total_gly.sort()
+        #                 total_gly_col_name = protein + '_glycosylation_sites_total'
+        #                 nextclade_df.loc[row, total_gly_col_name] = str(total_gly)
+        #                 # count of glycosylation sites on sequence
+        #                 total_gly_count = len(gly_lst_individual)
+        #                 total_gly_count_col_name = protein + '_glycosylation_sites_total_count'
+        #                 nextclade_df.loc[row, total_gly_count_col_name] = (int(total_gly_count))
+        #             if 'HA1' in gly_dict.keys():
+        #                 if 'HA2' in gly_dict.keys():
+        #                     nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(ast.literal_eval(nextclade_df.loc[row, 'HA1_glycosylation_sites_total']) + ast.literal_eval(nextclade_df.loc[row, 'HA2_glycosylation_sites_total']))
+        #                     nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = int(int(nextclade_df.loc[row, 'HA1_glycosylation_sites_total_count']) + int(nextclade_df.loc[row, 'HA2_glycosylation_sites_total_count']))
+        #                 else:
+        #                     nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(nextclade_df.loc[row, 'HA1_glycosylation_sites_total'])
+        #                     nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = (int(nextclade_df.loc[row, 'HA1_glycosylation_sites_total_count']))
+        #             elif 'HA2' in gly_dict.keys():
+        #                 nextclade_df.loc[row, 'HA_glycosylation_sites_total'] = str(nextclade_df.loc[row, 'HA2_glycosylation_sites_total'])
+        #                 nextclade_df.loc[row, 'HA_glycosylation_sites_total_count'] = (int(nextclade_df.loc[row, 'HA2_glycosylation_sites_total_count']))
+        #             else:
+        #                 continue
                         
         # nextclade_df.to_csv(output.nextclade_tsv_with_gly, sep='\t', index=False)
         nextclade_df.to_csv(input.nextclade_tsv, sep='\t', index=False)
@@ -150,32 +150,27 @@ rule merge_quality_metrics:
     run:
         import pandas as pd
 
-        # Load the metadata and nextclade data
         metadata_df = pd.read_csv(input.metadata, sep='\t')
 
         cols_to_merge = ['seqName', 'qc.overallScore', 'qc.overallStatus', 'coverage']
 
-        if wildcards.segment == 'na':
-            cols_to_merge += ['NA_glycosylation_sites_total', 'NA_glycosylation_sites_total_count']
-        if wildcards.segment == 'ha':
-            cols_to_merge += ['HA1_glycosylation_sites_total', 'HA1_glycosylation_sites_total_count', 'HA2_glycosylation_sites_total', 'HA2_glycosylation_sites_total_count', 'HA_glycosylation_sites_total', 'HA_glycosylation_sites_total_count']
+        # if wildcards.segment == 'na':
+        #     cols_to_merge += ['NA_glycosylation_sites_total', 'NA_glycosylation_sites_total_count']
+        # if wildcards.segment == 'ha':
+        #     cols_to_merge += ['HA1_glycosylation_sites_total', 'HA1_glycosylation_sites_total_count', 'HA2_glycosylation_sites_total', 'HA2_glycosylation_sites_total_count', 'HA_glycosylation_sites_total', 'HA_glycosylation_sites_total_count']
 
 
         nextclade_df = pd.read_csv(input.nextclade, sep='\t', usecols=cols_to_merge)
 
-        # Perform the merge operation, merging on the seqName
         merged_df = pd.merge(metadata_df, nextclade_df, left_on='seqName', right_on='seqName', how='left')
 
-        # Rename the columns to remove the period
         merged_df.rename(columns={
             'qc.overallScore': 'qc_overallScore',
             'qc.overallStatus': 'qc_overallStatus'
         }, inplace=True)
 
-        # Drop the merge columns (seqName_x and seqName_y) if they exist
         merged_df.drop(columns=['seqName_x', 'seqName_y'], inplace=True, errors='ignore')
 
-        # Save the merged dataframe to the output file
         merged_df.to_csv(output.metadata_merged, sep='\t', index=False)
 
     
@@ -390,6 +385,184 @@ rule translate:
             --output-node-data {output.aa_muts} | tee {log}
         """    
 
+rule write_ancestral_fasta:
+    message: "Writing ancestral nucleotide sequences to FASTA"
+    input:
+        nt_node_data = rules.infer_ancestral.output.ancestral
+    output:
+        fasta = "results/{subtype}/{segment}/ancestral_sequences.fasta"
+    log:
+        "logs/write_ancestral_fasta_{subtype}_{segment}.txt"
+    run:
+        import json
+
+        with open(input.nt_node_data) as f:
+            data = json.load(f)
+
+        with open(output.fasta, "w") as out:
+            for node_name, node_info in data["nodes"].items():
+                if "sequence" in node_info:
+                    out.write(f">{node_name}\n")
+                    out.write(node_info["sequence"] + "\n")
+rule nextclade_ancestral:
+    message: "Running Nextclade on ancestral sequences"
+    input:
+        fasta = rules.write_ancestral_fasta.output.fasta,
+        dataset_ready = "logs/fetch_hana_datasets.flag"
+    output:
+        tsv = "results/{subtype}/{segment}/nextclade_ancestral.tsv"
+    params:
+        dataset = "nextclade/flu/{subtype}/{segment}/"
+    log:
+        "logs/nextclade_ancestral_{subtype}_{segment}.txt"
+    shell:
+        """
+        nextclade run \
+            -D {params.dataset} \
+            --output-tsv {output.tsv} \
+            {input.fasta} | tee {log}
+        """
+
+rule ancestral_glycosylation_to_node_data:
+    message: "Converting ancestral glycosylation TSV to node-data JSON"
+    input:
+        tsv = rules.nextclade_ancestral.output.tsv
+    output:
+        json = "results/{subtype}/{segment}/glycosylation_ancestral.json"
+    run:
+        import pandas as pd
+        import json
+
+        df = pd.read_csv(input.tsv, sep="\t")
+
+        node_data = {"nodes": {}}
+
+        for _, row in df.iterrows():
+            node = row["seqName"]
+
+            glyco = row.get("glycosylation", "")
+
+            if pd.isna(glyco) or glyco == "":
+                sites = []
+            else:
+                gly_lst = glyco.split(";")
+                sites = []
+                for g in gly_lst:
+                    parts = g.split(":")
+                    if len(parts) >= 3:
+                        protein = parts[0]
+                        site = parts[1] + "_" + parts[2]
+                        if protein.lower() == "na":
+                            sites.append(site)
+
+            node_data["nodes"][node] = {
+                "NA_glycosylation_sites_total": {
+                    "value": ",".join(sorted(sites))
+                },
+                "NA_glycosylation_sites_total_count": {
+                    "value": len(sites)
+                }
+            }
+
+        with open(output.json, "w") as out:
+            json.dump(node_data, out)
+
+
+
+rule glycosylation_root_compare:
+    message: "Comparing glycosylation sites to root for {wildcards.segment}"
+    input:
+        ancestral_json=rules.translate.output.aa_muts,
+        nextclade_tsv=rules.nextclade.output.nextclade_tsv
+    output:
+        gly_gain="results/{subtype}/{segment}/glycosylation_gain.json",
+        gly_loss="results/{subtype}/{segment}/glycosylation_loss.json"
+    run:
+        import pandas as pd
+        import json
+
+        segment = wildcards.segment.upper()
+
+        if segment not in ["HA", "NA"]:
+            with open(output.gly_gain, "w") as f:
+                json.dump({"nodes": {}}, f)
+            with open(output.gly_loss, "w") as f:
+                json.dump({"nodes": {}}, f)
+            print(f"No glycosylation info for segment {segment}, skipped.")
+            return
+
+        with open(input.ancestral_json) as f:
+            aa_node_data = json.load(f)
+
+        node_dict = aa_node_data["nodes"]
+
+        root_id = None
+        for name, data in node_dict.items():
+            if "parent" not in data:
+                root_id = name
+                break
+        if root_id is None:
+            raise ValueError("Could not determine root node.")
+
+        tip_gly = pd.read_csv(input.nextclade_tsv, sep="\t")
+        if "glycosylation" not in tip_gly.columns:
+            raise ValueError("No 'glycosylation' column found in nextclade.tsv")
+
+        def parse_glyco_string(gly_string, segment):
+            if pd.isna(gly_string) or gly_string == "":
+                return []
+
+            sites = []
+            entries = gly_string.split(";")
+
+            for entry in entries:
+                parts = entry.split(":")
+                if len(parts) == 3 and parts[0].upper().startswith(segment):
+                    seg = parts[0]
+                    position = parts[1]
+                    motif = parts[2]
+                    sites.append(f"{seg}_{position}_{motif}")
+
+            return sites
+
+
+        root_row = tip_gly[tip_gly["seqName"] == root_id]
+        if root_row.empty:
+            raise ValueError(f"Root '{root_id}' not found in nextclade.tsv")
+        root_gly = parse_glyco_string(root_row["glycosylation"].values[0], segment)
+
+        gly_gain_json = {"nodes": {}}
+        gly_loss_json = {"nodes": {}}
+
+        for _, row in tip_gly.iterrows():
+            node_name = row["seqName"]
+            node_gly = parse_glyco_string(row["glycosylation"], segment)
+
+            gained = [site for site in node_gly if site not in root_gly]
+            lost = [site for site in root_gly if site not in node_gly]
+
+            attr_gain = f"{segment}_glycosylation_gain"
+            attr_loss = f"{segment}_glycosylation_loss"
+            attr_gain_count = f"{segment}_glycosylation_gain_count"
+            attr_loss_count = f"{segment}_glycosylation_loss_count"
+
+            gly_gain_json["nodes"][node_name] = {
+                attr_gain: ",".join(gained),
+                attr_gain_count: len(gained)
+            }
+
+            gly_loss_json["nodes"][node_name] = {
+                attr_loss: ",".join(lost),
+                attr_loss_count: len(lost)
+            }
+
+        with open(output.gly_gain, "w") as f:
+            json.dump(gly_gain_json, f, indent=2)
+
+        with open(output.gly_loss, "w") as f:
+            json.dump(gly_loss_json, f, indent=2)
+
+
 rule export:
     message: "Exporting auspice JSON files for {wildcards.subtype}/{wildcards.segment}"
     input:
@@ -401,20 +574,25 @@ rule export:
         nt_muts=rules.infer_ancestral.output.ancestral,
         aa_muts=rules.translate.output.aa_muts,
         vaccine="config/{subtype}/vaccine.json",
-        auspice_config="config/{subtype}/auspice_config.json"
+        auspice_config="config/{subtype}/auspice_config.json",
+        gly_gain=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_gain.json",
+        gly_loss=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_loss.json"
     output:
         auspice_json="auspice/{subtype}/{segment}.json"
     params:
         colors="config/{subtype}/colors.tsv",
-        # Concatenate all node data inputs dynamically for --node-data flag
-        node_data=lambda wildcards, input: " ".join([
-            input.branch_lengths,
-            input.traits,
-            input.nt_muts,
-            input.aa_muts,
-            input.vaccine
-        ])
-    log: 
+        node_data=lambda wildcards, input: " ".join(
+            f for f in [
+                input.branch_lengths,
+                input.traits,
+                input.nt_muts,
+                input.aa_muts,
+                input.vaccine,
+                input.gly_gain if os.path.exists(input.gly_gain) else None,
+                input.gly_loss if os.path.exists(input.gly_loss) else None
+            ] if f is not None
+        )
+    log:
         "logs/export_{subtype}_{segment}.txt"
     shell:
         """

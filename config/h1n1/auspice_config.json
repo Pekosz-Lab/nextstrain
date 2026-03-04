@@ -41,6 +41,26 @@
       "key": "coverage",
       "title": "coverage",
       "type": "categorical"
+    },
+    {
+      "key": "NA_glycosylation_gain_count",
+      "title": "NA_glycosylation_gain_count",
+      "type": "categorical"
+    }, 
+    {
+      "key": "NA_glycosylation_loss_count",
+      "title": "NA_glycosylation_loss_count",
+      "type": "categorical"
+    },
+    {
+      "key": "HA_glycosylation_gain_count",
+      "title": "HA_glycosylation_gain_count",
+      "type": "categorical"
+    }, 
+    {
+      "key": "HA_glycosylation_loss_count",
+      "title": "HA_glycosylation_loss_count",
+      "type": "categorical"
     }
   ],
   "display_defaults": {
@@ -51,7 +71,11 @@
     "subclade",
     "sequencing_run",
     "qc_overallScore",
-    "qc_overallStatus"
+    "qc_overallStatus",
+    "NA_glycosylation_gain_count", 
+    "NA_glycosylation_loss_count",
+    "HA_glycosylation_gain_count", 
+    "HA_glycosylation_loss_count"
   ],
    "panels": [
     "tree",
