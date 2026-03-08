@@ -469,6 +469,113 @@ rule ancestral_glycosylation_to_node_data:
 
 
 
+# rule glycosylation_root_compare:
+#     message: "Comparing glycosylation sites to root for {wildcards.segment}"
+#     input:
+#         ancestral_json=rules.translate.output.aa_muts,
+#         nextclade_tsv=rules.nextclade.output.nextclade_tsv
+#     output:
+#         gly_gain="results/{subtype}/{segment}/glycosylation_gain.json",
+#         gly_loss="results/{subtype}/{segment}/glycosylation_loss.json",
+#         gly_net="results/{subtype}/{segment}/glycosylation_net.json"
+#     run:
+#         import pandas as pd
+#         import json
+
+#         segment = wildcards.segment.upper()
+
+#         if segment not in ["HA", "NA"]:
+#             with open(output.gly_gain, "w") as f:
+#                 json.dump({"nodes": {}}, f)
+#             with open(output.gly_loss, "w") as f:
+#                 json.dump({"nodes": {}}, f)
+#             with open(output.gly_net, "w") as f:
+#                 json.dump({"nodes": {}}, f)
+#             print(f"No glycosylation info for segment {segment}, skipped.")
+#             return
+
+#         with open(input.ancestral_json) as f:
+#             aa_node_data = json.load(f)
+
+#         node_dict = aa_node_data["nodes"]
+
+#         root_id = None
+#         for name, data in node_dict.items():
+#             if "parent" not in data:
+#                 root_id = name
+#                 break
+#         if root_id is None:
+#             raise ValueError("Could not determine root node.")
+
+#         tip_gly = pd.read_csv(input.nextclade_tsv, sep="\t")
+#         if "glycosylation" not in tip_gly.columns:
+#             raise ValueError("No 'glycosylation' column found in nextclade.tsv")
+
+#         def parse_glyco_string(gly_string, segment):
+#             if pd.isna(gly_string) or gly_string == "":
+#                 return []
+
+#             sites = []
+#             entries = gly_string.split(";")
+
+#             for entry in entries:
+#                 parts = entry.split(":")
+#                 if len(parts) == 3 and parts[0].upper().startswith(segment):
+#                     seg = parts[0]
+#                     position = parts[1]
+#                     motif = parts[2]
+#                     sites.append(f"{seg}_{position}_{motif}")
+
+#             return sites
+
+
+#         root_row = tip_gly[tip_gly["seqName"] == root_id]
+#         if root_row.empty:
+#             raise ValueError(f"Root '{root_id}' not found in nextclade.tsv")
+#         root_gly = parse_glyco_string(root_row["glycosylation"].values[0], segment)
+
+#         gly_gain_json = {"nodes": {}}
+#         gly_loss_json = {"nodes": {}}
+#         gly_net_json = {"nodes": {}}
+
+#         for _, row in tip_gly.iterrows():
+#             node_name = row["seqName"]
+#             node_gly = parse_glyco_string(row["glycosylation"], segment)
+
+#             gained = [site for site in node_gly if site not in root_gly]
+#             lost = [site for site in root_gly if site not in node_gly]
+
+#             attr_gain = f"{segment}_glycosylation_gain"
+#             attr_loss = f"{segment}_glycosylation_loss"
+#             attr_gain_count = f"{segment}_glycosylation_gain_count"
+#             attr_loss_count = f"{segment}_glycosylation_loss_count"
+
+#             gly_gain_json["nodes"][node_name] = {
+#                 attr_gain: ",".join(gained),
+#                 attr_gain_count: len(gained)
+#             }
+
+#             gly_loss_json["nodes"][node_name] = {
+#                 attr_loss: ",".join(lost),
+#                 attr_loss_count: len(lost)
+#             }
+
+#             attr_net_count = f"{segment}_glycosylation_net_change"
+            
+#             gly_net_json["nodes"][node_name] = {
+#                 attr_net_count: '+' + str(len(gained)) + '/-' + str(len(lost))
+#             }
+
+
+#         with open(output.gly_gain, "w") as f:
+#             json.dump(gly_gain_json, f, indent=2)
+
+#         with open(output.gly_loss, "w") as f:
+#             json.dump(gly_loss_json, f, indent=2)
+
+#         with open(output.gly_net, "w") as f:
+#             json.dump(gly_net_json, f, indent=2)
+
 rule glycosylation_root_compare:
     message: "Comparing glycosylation sites to root for {wildcards.segment}"
     input:
@@ -476,7 +583,8 @@ rule glycosylation_root_compare:
         nextclade_tsv=rules.nextclade.output.nextclade_tsv
     output:
         gly_gain="results/{subtype}/{segment}/glycosylation_gain.json",
-        gly_loss="results/{subtype}/{segment}/glycosylation_loss.json"
+        gly_loss="results/{subtype}/{segment}/glycosylation_loss.json",
+        gly_net="results/{subtype}/{segment}/glycosylation_net.json"
     run:
         import pandas as pd
         import json
@@ -487,6 +595,8 @@ rule glycosylation_root_compare:
             with open(output.gly_gain, "w") as f:
                 json.dump({"nodes": {}}, f)
             with open(output.gly_loss, "w") as f:
+                json.dump({"nodes": {}}, f)
+            with open(output.gly_net, "w") as f:
                 json.dump({"nodes": {}}, f)
             print(f"No glycosylation info for segment {segment}, skipped.")
             return
@@ -510,7 +620,7 @@ rule glycosylation_root_compare:
 
         def parse_glyco_string(gly_string, segment):
             if pd.isna(gly_string) or gly_string == "":
-                return []
+                return None
 
             sites = []
             entries = gly_string.split(";")
@@ -529,22 +639,43 @@ rule glycosylation_root_compare:
         root_row = tip_gly[tip_gly["seqName"] == root_id]
         if root_row.empty:
             raise ValueError(f"Root '{root_id}' not found in nextclade.tsv")
+
         root_gly = parse_glyco_string(root_row["glycosylation"].values[0], segment)
 
         gly_gain_json = {"nodes": {}}
         gly_loss_json = {"nodes": {}}
+        gly_net_json = {"nodes": {}}
 
         for _, row in tip_gly.iterrows():
             node_name = row["seqName"]
             node_gly = parse_glyco_string(row["glycosylation"], segment)
 
-            gained = [site for site in node_gly if site not in root_gly]
-            lost = [site for site in root_gly if site not in node_gly]
-
             attr_gain = f"{segment}_glycosylation_gain"
             attr_loss = f"{segment}_glycosylation_loss"
             attr_gain_count = f"{segment}_glycosylation_gain_count"
             attr_loss_count = f"{segment}_glycosylation_loss_count"
+            attr_net_count = f"{segment}_glycosylation_net_change"
+
+            # HANDLE MISSING GLYCOSYLATION DATA
+            if node_gly is None:
+                gly_gain_json["nodes"][node_name] = {
+                    attr_gain: "NA",
+                    attr_gain_count: None
+                }
+
+                gly_loss_json["nodes"][node_name] = {
+                    attr_loss: "NA",
+                    attr_loss_count: None
+                }
+
+                gly_net_json["nodes"][node_name] = {
+                    attr_net_count: "NA"
+                }
+
+                continue
+
+            gained = [site for site in node_gly if site not in root_gly]
+            lost = [site for site in root_gly if site not in node_gly]
 
             gly_gain_json["nodes"][node_name] = {
                 attr_gain: ",".join(gained),
@@ -556,11 +687,19 @@ rule glycosylation_root_compare:
                 attr_loss_count: len(lost)
             }
 
+            gly_net_json["nodes"][node_name] = {
+                attr_net_count: '+' + str(len(gained)) + '/-' + str(len(lost))
+            }
+
+
         with open(output.gly_gain, "w") as f:
             json.dump(gly_gain_json, f, indent=2)
 
         with open(output.gly_loss, "w") as f:
             json.dump(gly_loss_json, f, indent=2)
+
+        with open(output.gly_net, "w") as f:
+            json.dump(gly_net_json, f, indent=2)
 
 
 rule export:
@@ -576,7 +715,8 @@ rule export:
         vaccine="config/{subtype}/vaccine.json",
         auspice_config="config/{subtype}/auspice_config.json",
         gly_gain=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_gain.json",
-        gly_loss=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_loss.json"
+        gly_loss=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_loss.json",
+        gly_net=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_net.json"
     output:
         auspice_json="auspice/{subtype}/{segment}.json"
     params:
@@ -589,7 +729,8 @@ rule export:
                 input.aa_muts,
                 input.vaccine,
                 input.gly_gain if os.path.exists(input.gly_gain) else None,
-                input.gly_loss if os.path.exists(input.gly_loss) else None
+                input.gly_loss if os.path.exists(input.gly_loss) else None,
+                input.gly_net if os.path.exists(input.gly_net) else None
             ] if f is not None
         )
     log:

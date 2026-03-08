@@ -61,6 +61,16 @@
       "key": "HA_glycosylation_loss_count",
       "title": "HA_glycosylation_loss_count",
       "type": "categorical"
+    },
+    {
+      "key": "NA_glycosylation_net_change",
+      "title": "NA_glycosylation_net_change",
+      "type": "categorical"
+    }, 
+    {
+      "key": "HA_glycosylation_net_change",
+      "title": "HA_glycosylation_net_change",
+      "type": "categorical"
     }
   ],
   "display_defaults": {
@@ -75,7 +85,9 @@
     "NA_glycosylation_gain_count", 
     "NA_glycosylation_loss_count",
     "HA_glycosylation_gain_count", 
-    "HA_glycosylation_loss_count"
+    "HA_glycosylation_loss_count",
+    "NA_glycosylation_net_change",
+    "HA_glycosylation_net_change"
   ],
    "panels": [
     "tree",
