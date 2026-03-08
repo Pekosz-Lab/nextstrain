@@ -656,19 +656,19 @@ rule glycosylation_root_compare:
             attr_loss_count = f"{segment}_glycosylation_loss_count"
             attr_net_count = f"{segment}_glycosylation_net_change"
 
-            if node_gly is None:
+            if not node_gly:
                 gly_gain_json["nodes"][node_name] = {
-                    attr_gain: "NA",
+                    attr_gain: "",
                     attr_gain_count: None
                 }
 
                 gly_loss_json["nodes"][node_name] = {
-                    attr_loss: "NA",
+                    attr_loss: "",
                     attr_loss_count: None
                 }
 
                 gly_net_json["nodes"][node_name] = {
-                    attr_net_count: "NA"
+                    attr_net_count: ""
                 }
 
                 continue
@@ -686,9 +686,10 @@ rule glycosylation_root_compare:
                 attr_loss_count: len(lost)
             }
 
-            gly_net_json["nodes"][node_name] = {
-                attr_net_count: '+' + str(len(gained)) + '/-' + str(len(lost))
-            }
+            net_value = '+' + str(len(gained)) + '/-' + str(len(lost))
+            if len(gained) == 0 and len(lost) == 0:
+                net_value = ""
+            gly_net_json["nodes"][node_name] = {attr_net_count: net_value}
 
 
         with open(output.gly_gain, "w") as f:
@@ -715,11 +716,13 @@ rule export:
         auspice_config="config/{subtype}/auspice_config.json",
         gly_gain=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_gain.json",
         gly_loss=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_loss.json",
-        gly_net=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_net.json"
+        gly_net=lambda wildcards: f"results/{wildcards.subtype}/{wildcards.segment}/glycosylation_net.json",
+        gly_colors = "glycosylation_colors.tsv"
     output:
         auspice_json="auspice/{subtype}/{segment}.json"
     params:
         colors="config/{subtype}/colors.tsv",
+        gly_colors=lambda wildcards, input: f"--colors {input.gly_colors}" if wildcards.segment.upper() in ["HA", "NA"] else "",
         node_data=lambda wildcards, input: " ".join(
             f for f in [
                 input.branch_lengths,
@@ -743,6 +746,7 @@ rule export:
             --node-data {params.node_data} \
             --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
+             {params.gly_colors} \
             --output {output.auspice_json} | tee {log}
         """
 
