@@ -619,7 +619,7 @@ rule glycosylation_root_compare:
             raise ValueError("No 'glycosylation' column found in nextclade.tsv")
 
         def parse_glyco_string(gly_string, segment):
-            if pd.isna(gly_string) or gly_string == "":
+            if pd.isna(gly_string) or gly_string in ["", ".", "NA"]:
                 return None
 
             sites = []
@@ -656,7 +656,6 @@ rule glycosylation_root_compare:
             attr_loss_count = f"{segment}_glycosylation_loss_count"
             attr_net_count = f"{segment}_glycosylation_net_change"
 
-            # HANDLE MISSING GLYCOSYLATION DATA
             if node_gly is None:
                 gly_gain_json["nodes"][node_name] = {
                     attr_gain: "NA",
