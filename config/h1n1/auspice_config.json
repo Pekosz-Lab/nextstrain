@@ -71,6 +71,26 @@
       "key": "HA_glycosylation_net_change",
       "title": "HA_glycosylation_net_change",
       "type": "categorical"
+    },
+    {
+      "key": "HA_glycosylation_gain",
+      "title": "HA glycosylation gain",
+      "type": "categorical"
+    },
+    {
+      "key": "HA_glycosylation_loss",
+      "title": "HA glycosylation loss",
+      "type": "categorical"
+    },
+    {
+      "key": "NA_glycosylation_gain",
+      "title": "NA glycosylation gain",
+      "type": "categorical"
+    },
+    {
+      "key": "NA_glycosylation_loss",
+      "title": "NA glycosylation loss",
+      "type": "categorical"
     }
   ],
   "display_defaults": {

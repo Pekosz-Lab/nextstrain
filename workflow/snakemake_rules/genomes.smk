@@ -169,7 +169,10 @@ rule genome_export:
         nt_muts = rules.genome_ancestral.output.nt_muts,
         aa_muts = rules.genome_translate.output.aa_muts,
         config = "config/{subtype}/auspice_config.json",
-        vaccine="config/{subtype}/vaccine.json"
+        vaccine="config/{subtype}/vaccine.json",
+        gly_gain = "results/{subtype}/ha/glycosylation_gain.json",
+        gly_loss = "results/{subtype}/ha/glycosylation_loss.json",
+        gly_net = "results/{subtype}/ha/glycosylation_net.json"
     output:
         auspice = "auspice/{subtype}/genome.json"
     shell:
@@ -185,6 +188,9 @@ rule genome_export:
             {input.nt_muts} \
             {input.aa_muts} \
             {input.vaccine} \
+            {input.gly_gain} \
+            {input.gly_loss} \
+            {input.gly_net} \
             --auspice-config {input.config} \
             --output {output.auspice}
         """
