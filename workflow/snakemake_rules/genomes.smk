@@ -170,11 +170,17 @@ rule genome_export:
         aa_muts = rules.genome_translate.output.aa_muts,
         config = "config/{subtype}/auspice_config.json",
         vaccine="config/{subtype}/vaccine.json",
-        gly_gain = "results/{subtype}/ha/glycosylation_gain.json",
-        gly_loss = "results/{subtype}/ha/glycosylation_loss.json",
-        gly_net = "results/{subtype}/ha/glycosylation_net.json"
+        gly_gain_ha = "results/{subtype}/ha/glycosylation_gain.json",
+        gly_loss_ha = "results/{subtype}/ha/glycosylation_loss.json",
+        gly_net_ha = "results/{subtype}/ha/glycosylation_net.json",
+        gly_gain_na = "results/{subtype}/na/glycosylation_gain.json",
+        gly_loss_na = "results/{subtype}/na/glycosylation_loss.json",
+        gly_net_na = "results/{subtype}/na/glycosylation_net.json",
+        gly_colors = "glycosylation_colors.tsv"
     output:
         auspice = "auspice/{subtype}/genome.json"
+    # params:
+    #     gly_colors=lambda wildcards, input: f"--colors {input.gly_colors}" if wildcards.segment.upper() in ["HA", "NA"] else "",
     shell:
         """
         augur export v2 \
@@ -188,10 +194,14 @@ rule genome_export:
             {input.nt_muts} \
             {input.aa_muts} \
             {input.vaccine} \
-            {input.gly_gain} \
-            {input.gly_loss} \
-            {input.gly_net} \
+            {input.gly_gain_ha} \
+            {input.gly_loss_ha} \
+            {input.gly_net_ha} \
+            {input.gly_gain_na} \
+            {input.gly_loss_na} \
+            {input.gly_net_na} \
             --auspice-config {input.config} \
+            --colors {input.gly_colors} \
             --output {output.auspice}
         """
 
