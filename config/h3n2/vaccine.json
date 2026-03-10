@@ -109,6 +109,16 @@
             "vaccine": {
                 "selection_date": "2025-09-26"
             }
-        }
+        },
+        "A/Darwin/1454/2025-E2": {
+            "vaccine": {
+                "selection_date": "2026-02-27"
+            }
+        },
+        "A/Darwin/1415/2025-SIAT2": {
+            "vaccine": {
+                "selection_date": "2026-02-27"
+            }
+        },
     }
 }
