@@ -367,16 +367,19 @@ rule glycosylation_root_compare:
     message: "Comparing glycosylation sites to root for {wildcards.segment}"
     input:
         ancestral_json=rules.translate.output.aa_muts,
-        nextclade_tsv=rules.nextclade.output.nextclade_tsv
+        nextclade_tsv=rules.nextclade.output.nextclade_tsv,
+        metadata_tsv="results/{subtype}/{segment}/metadata.tsv",
+        gly_colors = "glycosylation_colors.tsv"
     output:
         gly_gain="results/{subtype}/{segment}/glycosylation_gain.json",
         gly_loss="results/{subtype}/{segment}/glycosylation_loss.json",
         gly_net="results/{subtype}/{segment}/glycosylation_net.json",
-        nextclade_tsv_with_gly="results/{subtype}/{segment}/nextclade_with_gly.txt.flag"
+        nextclade_tsv_with_gly="results/{subtype}/{segment}/nextclade_with_gly.txt.flag",
 
     run:
         import pandas as pd
         import json
+        import numpy as np
 
         segment = wildcards.segment.upper()
 
@@ -511,6 +514,39 @@ rule glycosylation_root_compare:
         tip_gly.to_csv(input.nextclade_tsv, sep="\t", index=False)
         with open(output.nextclade_tsv_with_gly, 'w') as file:
             file.write('glycosylation processed')
+
+
+
+        metadata_df = pd.read_csv(input.metadata_tsv, sep='\t')
+
+        metadata_df[f"{segment}_glycosylation_gain"] = ""
+        metadata_df[f"{segment}_glycosylation_gain_count"] = None
+        metadata_df[f"{segment}_glycosylation_loss"] = ""
+        metadata_df[f"{segment}_glycosylation_loss_count"] = None
+        metadata_df[f"{segment}_glycosylation_net_change"] = ""
+
+        for row in metadata_df.index:
+            if metadata_df.loc[row, 'seqName'] in tip_gly['seqName'].values:
+                nextclade_df_index = np.where(tip_gly['seqName'] == metadata_df.loc[row, 'sample_ID'])[0][0]
+
+                metadata_df.loc[row, f"{segment}_glycosylation_gain"] = tip_gly.loc[nextclade_df_index, f"{segment}_glycosylation_gain"]
+                metadata_df.loc[row, f"{segment}_glycosylation_gain_count"] = tip_gly.loc[nextclade_df_index, f"{segment}_glycosylation_gain_count"]
+                metadata_df.loc[row, f"{segment}_glycosylation_loss"] = tip_gly.loc[nextclade_df_index, f"{segment}_glycosylation_loss"]
+                metadata_df.loc[row, f"{segment}_glycosylation_loss_count"] = tip_gly.loc[nextclade_df_index, f"{segment}_glycosylation_loss_count"]
+                metadata_df.loc[row, f"{segment}_glycosylation_net_change"] = tip_gly.loc[nextclade_df_index, f"{segment}_glycosylation_net_change"]
+
+        metadata_df.to_csv(input.metadata_tsv, sep ='\t', index = False)
+
+        colors_info = pd.read_csv(input.gly_colors, sep='\t', header = None)
+
+        net_values = [entry[f"{segment}_glycosylation_net_change"]for entry in gly_net_json["nodes"].values()]
+
+        for val in net_values:
+            if val not in colors_info[1].values:
+                if val != '':
+                    colors_info.loc[len(colors_info)] = [f"{segment}_glycosylation_net_change", val, '#808080']
+
+        colors_info.to_csv(input.gly_colors, sep='\t', index=False, header=None)
 
 
 rule export:
