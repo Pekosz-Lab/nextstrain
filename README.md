@@ -2,11 +2,36 @@
 
 This repository houses all scripts, snakefiles, and configuration files for the [Pekosz Lab nextstrain builds](https://nextstrain.org/groups/PekoszLab) in [JH-CEIRR](https://www.ceirr-network.org/centers/jh-ceirr).
 
+## What is this?
+
+[Nextstrain](https://nextstrain.org) is an open-source platform for real-time tracking of pathogen evolution. It combines phylogenetic analysis with interactive visualization to help researchers understand how viruses spread and evolve. A "build" produces an interactive phylogenetic tree (a JSON file) that can be explored in the browser at [nextstrain.org](https://nextstrain.org) or locally via [Auspice](https://docs.nextstrain.org/projects/auspice/en/stable/).
+
+This repository implements a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline that:
+1. Ingests influenza genome sequences and metadata from the Johns Hopkins Hospital (JHH) network and GISAID vaccine strains.
+2. Types and quality-controls each sequence using [flusort](scripts/flusort) and [Nextclade](https://clades.nextstrain.org/).
+3. Builds separate phylogenetic trees for all 8 genome segments of H1N1, H3N2, and B/Victoria influenza, plus 3 concatenated whole-genome builds (27 builds total).
+4. Exports interactive Auspice JSONs that are uploaded to [nextstrain.org/groups/PekoszLab](https://nextstrain.org/groups/PekoszLab).
+
 - Currently, builds are maintained for all 8 segments of circulating H1N1, H3N2, and B/Vic viruses detected through the Johns Hopkins Hospital (JHH) Network. 
 
 - 3 concatenated genome builds are also maintained for H1N1, H3N2, and B/Vic viruses.
 
 - As of [2024-11-26](#history), all builds are constructed using a simplified [snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline.
+
+## Prerequisites
+
+Before running this pipeline, ensure you have the following installed on your machine:
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) | ≥ 23.x | Manages all pipeline dependencies |
+| [git](https://git-scm.com/downloads) | any | For cloning this repository |
+| Operating System | Linux or macOS | Windows users should use [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) |
+| RAM | ≥ 16 GB | IQ-TREE phylogenetic inference is memory-intensive |
+| Disk space | ≥ 10 GB | For sequence data, intermediate results, and output JSONs |
+
+> [!NOTE]
+> All other software dependencies (augur, iqtree2, mafft, nextclade, blast, snakemake, etc.) are installed automatically via the conda environment in Step 1.
 
 # Quickstart: Getting Started with the 24 segment build for H1N1, H3N2 and B/Victoria
 
@@ -117,7 +142,7 @@ nextstrain remote upload \
     auspice/${YOUR_BUILD_NAME}.json
 ```
 
-# 5. Building Internal Reports
+## 5. Building Internal Reports
 
 > [!NOTE]  
 > You can safely generate reports **before running the `snapshot_clean` rule** — the `reports/` folder will be archived automatically during the snapshot process.
@@ -140,7 +165,7 @@ quarto render scripts/render-reports.qmd --to html --output-dir ../reports/
 ```
 The rendered report will be saved in the reports/ folder and can be viewed in any web browser.
 
-# 6. Create a Build Snapshot and Clean the Working Directory
+## 6. Create a Build Snapshot and Clean the Working Directory
 
 > [!WARNING] 
 > Before starting a new build with updated data, you **must** run this rule.  
@@ -184,7 +209,7 @@ snapshots/
 ├── 20251111T163000.tar.gz
 ```
 
-# Peskoz Lab Nextstrain Roadmap
+# Pekosz Lab Nextstrain Roadmap
 
 - [ ] Automated [report generation](scripts/report-html-pdf.qmd) for all builds.
 - [ ] Add t-SNE implementation for all builds using [pathogen-embed](https://pypi.org/project/pathogen-embed/).
