@@ -38,7 +38,7 @@ rule all:
         # Reports
         "reports/report.tsv",
         "reports/report.xlsx",
-        "reports/render-reports.html",
+        "reports/report.html",
 
         lambda wildcards: "logs/snapshot_clean.done" if config.get("snapshot_clean", False) else []
 

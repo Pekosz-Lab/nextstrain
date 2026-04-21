@@ -33,12 +33,13 @@ rule render_reports:
     input:
         rules.build_reports.output.tsv
     output:
-        "reports/render-reports.html"
+        "reports/report.html"
     log:
         "logs/render_reports.txt"
     shell:
         """
         quarto render scripts/render-reports.qmd \
             --to html \
-            --output-dir ../reports/ 2>&1 | tee {log}
+            --output report.html \
+            --output-dir $(pwd)/reports/ 2>&1 | tee {log}
         """
