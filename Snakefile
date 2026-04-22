@@ -34,11 +34,18 @@ rule all:
                subtype=["h3n2", "h1n1", "vic"]),
         expand("auspice/{subtype}/genome.json", 
                subtype=["h3n2", "h1n1", "vic"]),
+
+        # Reports
+        "reports/report.tsv",
+        "reports/report.xlsx",
+        "reports/report.html",
+
         lambda wildcards: "logs/snapshot_clean.done" if config.get("snapshot_clean", False) else []
 
 include: "workflow/snakemake_rules/ingest.smk"
 include: "workflow/snakemake_rules/segments.smk"
 include: "workflow/snakemake_rules/genomes.smk"
+include: "workflow/snakemake_rules/reports.smk"
 
 
 
