@@ -153,7 +153,8 @@ rule align:
             --reference-sequence {input.reference} \
             --remove-reference \
             --output {output.aligned_sequences} \
-            --fill-gaps | tee {log}
+            --debug \
+            --fill-gaps 2>&1 | tee {log}
         """
 
 rule raw_tree:

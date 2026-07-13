@@ -1,3 +1,14 @@
+## 2026-04-14T11:55:23Z
+
+- Remove empty `nucMutLabelMap` and legacy `nucMutLabelMapReverse`
+- add NA clade annotations to tree
+
+## 2026-01-14T19:24:43Z
+Fix missing clade attributes and export of legacy clade.
+
+## 2026-01-14T08:53:00Z
+Update reference tree.
+
 ## 2025-12-02T12:30:02Z
  - Define subclade [D.3.1.1](https://github.com/influenza-clade-nomenclature/seasonal_A-H1N1pdm_HA/blob/main/subclades/D.3.1.1.yml)
 

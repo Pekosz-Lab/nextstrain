@@ -45,15 +45,6 @@ FEATURES             Location/Qualifiers
                      GPCESNGDKGSGGIKGGFVHQRMESKIGRWYSRTMSKTERMGMGLYVKYDGDPWADSD
                      ALAFSGVMVSMKEPGWYSFGFEIKDKKCDVPCIGIEMVHDGGKETWHSAATAIYCLMG
                      SGQLLWDTVTGVDMAL"
-     gene            <1..296
-                     /gene="NB"
-     CDS             <1..296
-                     /gene="NB"
-                     /codon_start=3
-                     /product="NB protein"
-                     /protein_id="ADN32818.1"
-                     /translation="ATFNYTNVNPISHIRGSIIITICVSFIIILTIFGYIAKILTNRN
-                     NCTNNAIGLCKRIKCSGCEPFCNKRGDTSSPRTGVDIPAFILPGLNLSESTPN"
 ORIGIN      
         1 atgctacctt caactataca aacgttaacc ctatttctca catcaggggg agtattatta
        61 tcactatatg tgtcagcttc attatcatac ttactatatt cggatatatt gctaaaattc

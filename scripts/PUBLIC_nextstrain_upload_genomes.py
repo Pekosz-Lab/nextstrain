@@ -45,3 +45,5 @@ nextstrain_login()
 # Upload data for each subtype
 for subtype in subtypes.keys():
     nextstrain_upload(subtype)
+
+    : https://nextstrain.org/groups/PekoszLab-Public/iav25-26/h3n2/na

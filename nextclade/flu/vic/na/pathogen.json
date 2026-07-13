@@ -25,9 +25,9 @@
   "qc": {
     "privateMutations": {
       "enabled": true,
-      "typical": 5,
-      "cutoff": 15,
-      "weightLabeledSubstitutions": 2,
+      "typical": 10,
+      "cutoff": 30,
+      "weightLabeledSubstitutions": 1,
       "weightReversionSubstitutions": 1,
       "weightUnlabeledSubstitutions": 1
     },
@@ -78,8 +78,6 @@
       "Nextstrain team <https://nextstrain.org>"
     ]
   },
-  "nucMutLabelMap": {},
-  "nucMutLabelMapReverse": {},
   "shortcuts": [
     "flu_vic_na",
     "nextstrain/flu/vic/na",
@@ -403,8 +401,8 @@
     "reference name": "B/Brisbane/60/2008"
   },
   "version": {
-    "updatedAt": "2025-09-09T12:13:13Z",
-    "tag": "2025-09-09--12-13-13Z",
+    "updatedAt": "2026-04-14T11:55:23Z",
+    "tag": "2026-04-14--11-55-23Z",
     "compatibility": {
       "cli": "3.0.0-alpha.0",
       "web": "3.0.0-alpha.0"

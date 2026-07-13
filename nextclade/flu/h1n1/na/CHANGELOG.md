@@ -1,3 +1,11 @@
+## 2026-04-14T11:55:23Z
+ - add subclade [D.3](https://github.com/influenza-clade-nomenclature/seasonal_A-H1N1pdm_NA/blob/main/subclades/D.3.yml)
+ - add HA clade annotations to tree
+
+## 2026-01-14T08:53:00Z
+Update reference tree.
+
+
 ## 2025-09-09T12:13:13Z
 
 Add schema definition url to `pathogen.json`. This is a purely technical change, for convenience of dataset authors. The data itself is not modified.

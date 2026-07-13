@@ -1,3 +1,9 @@
+## 2026-04-14T11:55:23Z
+
+ - Remove empty `nucMutLabelMap` and legacy `nucMutLabelMapReverse`
+ - addition of subclade [C.3.3](https://github.com/influenza-clade-nomenclature/seasonal_B-Vic_HA/blob/main/subclades/C.3.3.yml)
+ - inclusion of older sequences that precede the current subclade system
+
 ## 2025-10-22T18:11:36Z
 
  - make `subclade` the default clade like feature, while including a column `subclade` into the tabular output to maintain backwards compatibility of other pipelines. The previous `clade` that hasn't been updated in for 2y as now `legacy-clade`.

@@ -79,8 +79,6 @@
       "Nextstrain team <https://nextstrain.org>"
     ]
   },
-  "nucMutLabelMap": {},
-  "nucMutLabelMapReverse": {},
   "shortcuts": [
     "flu_h3n2_ha",
     "nextstrain/flu/h3n2",
@@ -191,8 +189,8 @@
     "reference name": "A/Darwin/6/2021"
   },
   "version": {
-    "updatedAt": "2025-11-04T15:46:13Z",
-    "tag": "2025-11-04--15-46-13Z",
+    "updatedAt": "2026-04-14T11:55:23Z",
+    "tag": "2026-04-14--11-55-23Z",
     "compatibility": {
       "cli": "3.0.0-alpha.0",
       "web": "3.0.0-alpha.0"
