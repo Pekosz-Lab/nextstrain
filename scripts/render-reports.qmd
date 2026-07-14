@@ -51,7 +51,7 @@ data <- read_tsv("../reports/report.tsv")
 data_filtered <- data %>% 
   dplyr::filter(
     subtype %in% c("H1N1", "H3N2", "Victoria"), 
-    date >= as.Date("2023-01-01") & date <= as.Date("2025-12-31")
+    date >= as.Date("2023-01-01") #& date <= as.Date("2025-12-31")
   ) %>%
   dplyr::mutate(date_run = paste(date, sequencing_run, sep = " | ")) 
 
@@ -908,7 +908,6 @@ datatable(
   )
 ) 
 ```
-
 
 #### Methods Summary
 Brief description of sequencing methods, quality control criteria, phylogenetic analysis approaches, and clade/subclade assignment procedures.

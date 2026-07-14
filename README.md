@@ -77,22 +77,10 @@ Navigate to the repository directory:
 cd nextstrain
 ```
 
-Install a Nextstrain Runtime 
-
-
-Create the environment and install base dependencies:
-
-```shell
-conda env create -f workflow/envs/environment.yml
-```
+Install a Nextstrain Runtime by following the instructions listed on their [website](https://docs.nextstrain.org/en/latest/install.html). This build has been verified to run using in Docker and Conda runtimes 
 
 > [!NOTE]
-> The included `environment.yml` attempts to install `blastn` and `iqtree2` through `conda-forge`.
->
-> If you encounter issues with these packages, please install them manually:
->
-> - `blastn` installation instructions are available from [NCBI](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and [Bioconda](https://anaconda.org/bioconda/blast).
-> - `iqtree2` installation instructions are available [here](http://www.iqtree.org).
+>  `blastn` is required to assign type and subtypes for ingested segments and must be installed manually. `blastn` installation instructions are available from [NCBI](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and [Bioconda](https://anaconda.org/bioconda/blast).
 
 Activate the environment:
 
@@ -100,8 +88,13 @@ Activate the environment:
 conda activate pekosz-nextstrain
 ```
 
-
 ---
+
+[Verify](https://docs.nextstrain.org/projects/cli/en/stable/commands/check-setup/) your Nextstrain Runtime
+
+```shell
+nextstrain check-setup 
+```
 
 ## 2. Access Genome and Metadata Files from JHH and GISAID
 
@@ -128,8 +121,6 @@ Your `nextstrain/` directory should now contain the following additional folders
 ```text
 nextstrain/
 ├── source/
-│   ├── GISAID_metadata.xls
-│   ├── GISAID_sequences.fasta
 │   ├── JHH_metadata.tsv
 │   ├── JHH_sequences.fasta
 │   ├── vaccines.fasta
