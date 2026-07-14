@@ -82,19 +82,20 @@ Install a Nextstrain Runtime by following the instructions listed on their [webs
 > [!NOTE]
 >  `blastn` is required to assign type and subtypes for ingested segments and must be installed manually. `blastn` installation instructions are available from [NCBI](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and [Bioconda](https://anaconda.org/bioconda/blast).
 
-Activate the environment:
-
-```shell
-conda activate pekosz-nextstrain
-```
-
----
 
 [Verify](https://docs.nextstrain.org/projects/cli/en/stable/commands/check-setup/) your Nextstrain Runtime
 
 ```shell
 nextstrain check-setup 
 ```
+
+Activate the Nextstrain Shell
+
+```shell
+Nextstrain shell .
+```
+
+---
 
 ## 2. Access Genome and Metadata Files from JHH and GISAID
 
@@ -153,6 +154,7 @@ From the `nextstrain/` directory, execute the following command to construct all
 ```shell
 snakemake --cores 8
 ```
+
 
 ---
 

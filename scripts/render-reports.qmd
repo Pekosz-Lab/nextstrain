@@ -36,14 +36,41 @@ All sequence data represents clinical specimens processed through the Johns Hopk
 Omar was kind enough to sequence NH2024-25 genomes in IV25Run17. As of Dec 18, 2025, we have not parsed out which sequences are summer vs fall in origin.
 :::
 
-
 ```{r}
 #| echo: false
 #| output: false 
 
+required_packages <- c(
+  "tidyverse",
+  "RColorBrewer",
+  "plotly",
+  "DT",
+  "knitr",
+  "kableExtra"
+)
+
+
+installed_packages <- rownames(installed.packages())
+
+for (pkg in required_packages) {
+  if (!pkg %in% installed_packages) {
+    install.packages(pkg, dependencies = TRUE)
+  }
+}
+
+# Load the packages
 library(tidyverse)
 library(RColorBrewer)
 library(plotly)
+library(DT)
+library(knitr)
+library(kableExtra)
+
+```
+
+```{r}
+#| echo: false
+#| output: false 
 
 data <- read_tsv("../reports/report.tsv")
 #data <- read_tsv("reports/report.tsv")
