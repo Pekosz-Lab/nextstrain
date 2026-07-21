@@ -58,41 +58,59 @@ This repository contains the scripts, Snakefiles, and configuration files used f
 
 ---
 
+## Before getting started
+
+We recommend downloading the following tools for your convenience. While these are optional, they support ease of use during the build process. 
+
+- [Positron IDE](https://positron.posit.co/) - A text editor 
+  - [Snakemake Language Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=snakemake.snakemake-lang): Supports snakemake language formatting
+  - [SQLite Viewer Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=qwtel.sqlite-viewer) to inspect fludb
+
+
 ## 1. Clone This Repository, Set Up, and Activate Your Environment
 
-> [!NOTE]
-> Dependencies for this build are maintained through `conda`. Download the latest version [here](https://anaconda.org/anaconda/conda).
->
-> A brief introduction to `conda` and `conda environments` is available [here](https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html).
+### Clone the repository:
 
-Clone the repository:
+Open your terminal and navigate to a local directory on your machine where you would like the repository to live. 
 
 ```shell
 git clone https://github.com/Pekosz-Lab/nextstrain.git
 ```
 
-Navigate to the repository directory:
+### Navigate to the repository directory:
 
 ```shell
 cd nextstrain
 ```
 
-Install a Nextstrain Runtime by following the instructions listed on their [website](https://docs.nextstrain.org/en/latest/install.html). This build has been verified to run using in Docker and Conda runtimes 
+### Install a Nextstrain Runtime 
 
-> [!NOTE]
->  `blastn` is required to assign type and subtypes for ingested segments and must be installed manually. `blastn` installation instructions are available from [NCBI](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download) and [Bioconda](https://anaconda.org/bioconda/blast).
+- The most reproducible approach to building a Nextstrain runtime is to follow instructions listed in the Nextstrain [Documentation](https://docs.nextstrain.org/en/latest/install.html).
 
+We recomend installing the Docker runtime for macOS or Windows(WSL). 
 
-[Verify](https://docs.nextstrain.org/projects/cli/en/stable/commands/check-setup/) your Nextstrain Runtime
+### [Verify](https://docs.nextstrain.org/projects/cli/en/stable/commands/check-setup/) your Nextstrain Runtime
 
 ```shell
 nextstrain check-setup 
 ```
 
-Activate the Nextstrain Shell
+### Activate the Nextstrain Shell
 
 ```shell
-Nextstrain shell .
+nextstrain shell .
+```
+
+You should see something similar to the following in your terminal:
+
+```
+❯ nextstrain shell .
+Entering the Nextstrain runtime (docker)
+
+Mapped volumes:
+  /nextstrain/build is from {path/to/local/volume}
+
+Run the command "exit" to leave the runtime.
 ```
 
 ---
@@ -101,19 +119,137 @@ Nextstrain shell .
 
 Create the required `source/`, `data/`, and `results/` directories within the `nextstrain/` directory:
 
+
 ```shell
 mkdir source data results
+Populate the source/ folder with the following required files:
 ```
 
-Populate the `source/` folder with the following required files:
+1. JHH_sequences.fasta
+2. JHH_metadata.tsv
+3. vaccines.fasta
 
-1. `JHH_sequences.fasta`
+### Source file descriptions
+
+1. JHH_sequences.fasta
+
+FASTA file containing nucleotide sequences for influenza genome segments.
+
+Each FASTA header should start with > and use the following format:
+
+```text
+>sequence_ID_segmentNumber
+```
+
+Example:
+
+```text
+>JH23840_1
+ATGGAGAGAATAAAAGAGCTAAGAGACCTAATGTCGCAGTCCCGCACTCGCGAGATACTC...
+>JH23840_2
+ATGGAGAGAATAAAAGAGCTAAGAGACCTAATGTCGCAGTCCCGCACTCGCGAGATACTC
+>JH23840_3
+ATGGAGAGAATAAAAGAGCTAAGAGACCTAATGTCGCAGTCCCGCACTCGCGAGATACTC
+>JH23840_4
+ATGGAGAGAATAAAAGAGCTAAGAGACCTAATGTCGCAGTCCCGCACTCGCGAGATACTC
+```
+
+In this format:
+
+- sequence_ID matches the sequence_ID column in JHH_metadata.tsv
+- segmentNumber indicates the influenza genome segment number
+
+For example:
+
+```text
+>JH23840_4
+represents segment 4 from sequence/sample JH23840.
+```
+
+#### Segment numbering
+
+The meaning of each segment number depends on whether the virus is influenza A virus, IAV, or influenza B virus, IBV.
+
+##### Influenza A virus, IAV
+
+| Segment number | Gene segment |
+|---|---|
+| 1 | PB2 |
+| 2 | PB1 |
+| 3 | PA |
+| 4 | HA |
+| 5 | NP |
+| 6 | NA |
+| 7 | MP |
+| 8 | NS |
+
+##### Influenza B virus, IBV
+
+| Segment number | Gene segment |
+|---|---|
+| 1 | PB1 |
+| 2 | PB2 |
+| 3 | PA |
+| 4 | HA |
+| 5 | NP |
+| 6 | NA |
+| 7 | MP |
+| 8 | NS |
+
+For example, `JH23840_4` represents the HA segment for both IAV and IBV, while `JH23840_1` represents PB2 for IAV but PB1 for IBV. This is a consequence of the genbank reference widely used for IBV genome assembly upstream of this build.
+
 2. `JHH_metadata.tsv`
+
+Tab-delimited metadata file with one row per sample/sequence.
+
+Required columns:
+
+```text
+sequence_ID	sample_ID	sequencing_run	date	passage_history
+JH23595	JH23595	IV23Run6	2023-11-13	vtm
+...
+```
+
+Column descriptions:
+
+- sequence_ID: unique identifier for the sequence
+- sample_ID: sample identifier, e.g. can be same as sequence_ID, NTC, water, etc.
+- sequencing_run: sequencing run name or ID
+- date: sample collection or processing date, formatted as YYYY-MM-DD
+- passage_history: passage or sample history, e.g. vtm
+
 3. `vaccines.fasta`
+FASTA file containing vaccine/reference sequences.
+
+Each FASTA header should start with > and use the same sequence ID plus segment number format:
+
+```text
+>sequence_ID_segmentNumber
+```
+
+Example:
+
+```text
+>JH23840_1
+ATG...
+>JH23840_2
+ATG...
+>JH23840_3
+ATG...
+>JH23840_4
+ATG...
+```
+
+As with JHH_sequences.fasta, the number after the underscore indicates the influenza genome segment number.
 
 Contact Dr. Heba Mostafa and Dr. Andy Pekosz to access the [source folder data](https://livejohnshopkins-my.sharepoint.com/:f:/r/personal/hmostaf2_jh_edu/Documents/Influenza-Surveillance?csf=1&web=1&e=2sny2s).
 
 The `vaccines.fasta` file is manually downloaded and updated directly from GISAID. See [Tutorial: Add Vaccine Strains from GISAID](#tutorial-add-vaccine-strains-from-gisaid) for detailed instructions.
+
+> [!WARNING]
+> The `vaccines.fasta` file is formatted differently that the `JHH_sequences.fasta` file. 
+> The def line of the `vaccines.fasta` uses the following GISAID hader format: 
+> `>Isolate name-Passage details/history | Isolate ID | Collection date | Passage details/history | Segment number | Type | Lineage`
 
 Download all data in the `source/` folder, or overwrite your existing `source/` folder, and move it to the repository head directory, `nextstrain/`.
 
@@ -154,7 +290,6 @@ From the `nextstrain/` directory, execute the following command to construct all
 ```shell
 snakemake --cores 8
 ```
-
 
 ---
 
