@@ -87,7 +87,7 @@ cd nextstrain
 
 - The most reproducible approach to building a Nextstrain runtime is to follow instructions listed in the Nextstrain [Documentation](https://docs.nextstrain.org/en/latest/install.html).
 
-We recomend installing the Docker runtime for macOS or Windows(WSL). 
+We recommend installing the Docker runtime for macOS or Windows(WSL). 
 
 ### [Verify](https://docs.nextstrain.org/projects/cli/en/stable/commands/check-setup/) your Nextstrain Runtime
 

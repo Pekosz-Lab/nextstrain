@@ -10,7 +10,7 @@
       "name": "The Mostafa Lab", "url": "https://profiles.hopkinsmedicine.org/provider/Heba+Mabrouk+Mostafa/2777563"
     }
   ],
-  "build_url": "https://github.com/Pekosz-Lab/nextstrain",
+  "build_url": "https://github.com/Pekosz-Lab/nextstrain", 
   "colorings":[
     {
       "key": "clade",
