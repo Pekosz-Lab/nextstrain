@@ -1,0 +1,2 @@
+# Run snapshot_clean after a successful build.
+snapshot_clean: true

@@ -9,13 +9,13 @@ figures/
 logs/
 reports/
 snapshots/
-tutorial/
 
 # database files 
 *.db
 **.db
 
 # OS Generated #
+.DS_Store
 *DS_Store
 *DS_Store?
 **DS_Store

@@ -24,14 +24,32 @@ final output located at data/{segment OR genome}
 
 """
 
+# Input locations can be overridden by a Snakemake configuration file. The
+# defaults preserve the existing production workflow exactly.
+source_dir = config.get("source_dir", "source")
+jhh_sequences = config.get(
+    "jhh_sequences",
+    f"{source_dir}/JHH_sequences.fasta",
+)
+jhh_metadata = config.get(
+    "jhh_metadata",
+    f"{source_dir}/JHH_metadata.txt",
+)
+vaccine_sequences = config.get(
+    "vaccine_sequences",
+    f"{source_dir}/vaccine.fasta",
+)
+flusort_sequences = f"{source_dir}/flusort_JHH_sequences.fasta"
+flusort_metadata = f"{source_dir}/flusort_JHH_metadata.tsv"
+
 rule flusort:
     message: "Running flusort"
     input:
-        unknown_jhh_sequences = "source/JHH_sequences.fasta",
-        unknown_jhh_metadata = "source/JHH_metadata.txt"
+        unknown_jhh_sequences = jhh_sequences,
+        unknown_jhh_metadata = jhh_metadata
     output:
-        sequences = "source/flusort_JHH_sequences.fasta",
-        metadata = "source/flusort_JHH_metadata.tsv",
+        sequences = flusort_sequences,
+        metadata = flusort_metadata,
         flag = touch("data/flusort_completed.flag")
     shell:
         """
@@ -56,8 +74,8 @@ rule fludb_inititate:
 rule upload_genomes:
     message: "upload sequences to fludb"
     input:
-        sequences = "source/flusort_JHH_sequences.fasta",
-        metadata = "source/flusort_JHH_metadata.tsv",
+        sequences = flusort_sequences,
+        metadata = flusort_metadata,
         fludb_init = "data/fludb_inititated.flag",
         flusort_completed = "data/flusort_completed.flag"
     output:
@@ -76,7 +94,7 @@ rule upload_genomes:
 rule upload_vaccines:
     message: "uploading vaccine strains"
     input:
-        sequences = "source/vaccine.fasta",
+        sequences = vaccine_sequences,
         fludb_init = "data/fludb_inititated.flag",
         flusort_completed = "data/flusort_completed.flag"
     output:

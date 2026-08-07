@@ -34,7 +34,7 @@ rule all:
                subtype=["h3n2", "h1n1", "vic"]),
         expand("auspice/{subtype}/genome.json", 
                subtype=["h3n2", "h1n1", "vic"]),
-        lambda wildcards: "logs/snapshot_clean.done" if config.get("snapshot_clean", False) else []
+        lambda wildcards: "snapshots/snapshot_clean.done" if config.get("snapshot_clean", False) else []
 
 include: "workflow/snakemake_rules/ingest.smk"
 include: "workflow/snakemake_rules/segments.smk"
@@ -42,56 +42,40 @@ include: "workflow/snakemake_rules/genomes.smk"
 
 
 
-# snapshot and clean feature 
+# Manual snapshot-and-clean target. With no output marker, explicitly invoking
+# this rule runs it every time, even when snapshot_clean.done already exists.
 rule snapshot_clean:
     """
-    Optionally triggered snapshot-and-clean step.
-    Creates a timestamped local snapshot of outputs and cleans the workspace.
-    Also removes flusort-related files from the source directory.
+    Create a timestamped snapshot and clean the workspace immediately.
     """
     shell:
-        """
-        # Create snapshots directory if it does not exist
-        mkdir -p snapshots
+        "bash scripts/snapshot_clean.sh"
 
-        # Generate local timestamp (ISO-like format using local time)
-        TIMESTAMP=$(date +"%Y%m%dT%H%M%S")
 
-        SNAPSHOT_DIR="snapshots/${{TIMESTAMP}}"
-        mkdir -p "$SNAPSHOT_DIR"
-
-        echo "📸 Creating snapshot in $SNAPSHOT_DIR"
-
-        # Copy key folders if they exist
-        for folder in auspice logs reports source nextclade; do
-            if [ -d "$folder" ]; then
-                echo "→ Copying $folder/"
-                cp -r "$folder" "$SNAPSHOT_DIR/"
-            fi
-        done
-
-        echo "🗜️ Compressing snapshot..."
-        tar -czf "snapshots/${{TIMESTAMP}}.tar.gz" -C "snapshots" "${{TIMESTAMP}}"
-
-        # Optionally remove the uncompressed snapshot folder after compression
-        rm -rf "$SNAPSHOT_DIR"
-
-        echo "🧹 Cleaning up workspace..."
-
-        # Remove working directories
-        rm -rf data results logs reports auspice
-
-        # Remove the database if it exists
-        if [ -f fludb.db ]; then
-            rm -f fludb.db
-        fi
-
-        # Remove specific flusort-related files but keep the source directory
-        if [ -d source ]; then
-            echo "🗑️  Removing flusort files from source/"
-            rm -f source/flusort_*
-        fi
-
-        echo "✅ Snapshot created at snapshots/${{TIMESTAMP}}.tar.gz"
-        echo "✅ Cleanup complete."
-        """
+# Configuration-driven snapshot target. The completion marker lets rule all
+# depend on cleanup, while the build outputs ensure cleanup runs last and is
+# retriggered after a subsequent build recreates those outputs.
+rule snapshot_clean_after_build:
+    input:
+        expand(
+            "auspice/{subtype}/{segment}_tip-frequencies.json",
+            subtype=["h3n2", "h1n1", "vic"],
+            segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"],
+        ),
+        expand(
+            "auspice/{subtype}/{segment}.json",
+            subtype=["h3n2", "h1n1", "vic"],
+            segment=["pb2", "pb1", "pa", "ha", "np", "na", "mp", "ns"],
+        ),
+        expand(
+            "auspice/{subtype}/genome_tip-frequencies.json",
+            subtype=["h3n2", "h1n1", "vic"],
+        ),
+        expand(
+            "auspice/{subtype}/genome.json",
+            subtype=["h3n2", "h1n1", "vic"],
+        )
+    output:
+        touch("snapshots/snapshot_clean.done")
+    shell:
+        "bash scripts/snapshot_clean.sh"

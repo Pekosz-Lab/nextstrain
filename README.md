@@ -291,6 +291,31 @@ From the `nextstrain/` directory, execute the following command to construct all
 snakemake --cores 8
 ```
 
+This default command reads `JHH_sequences.fasta`, `JHH_metadata.txt`, and
+`vaccine.fasta` from `source/`.
+
+### Run with the tutorial inputs
+
+Generate the downsampled JHH files and place a vaccine FASTA in the tutorial
+folder:
+
+```shell
+python scripts/generate_tutorial_dataset.py
+cp source/vaccine.fasta tutorial/vaccines.fasta
+```
+
+Then select the tutorial configuration when running Snakemake:
+
+```shell
+snakemake --cores 8 --configfile config/tutorial.yaml
+```
+
+With this configuration, the ingest workflow reads all three inputs from
+`tutorial/`. Omitting `--configfile config/tutorial.yaml` restores the
+normal `source/` inputs. Tutorial and production runs use the same downstream
+`data/`, `results/`, `logs/`, and `auspice/` locations, so start with a clean
+workspace when switching between them.
+
 ---
 
 ## 4. Upload the Builds to Nextstrain
@@ -428,12 +453,15 @@ Use this option when you only want to clean and archive the current build:
 snakemake --cores 8 snapshot_clean
 ```
 
+The manual `snapshot_clean` target has no completion marker and runs every time
+you invoke it, allowing multiple snapshots to be created as needed.
+
 #### Option 2: Run Automatically After a Successful Build
 
 Use this option if you have added `snapshot_clean` to the main pipeline and want it to run automatically at the end:
 
 ```shell
-snakemake --configfile config.yaml --config run_snapshot_clean=true --cores 8
+snakemake --cores 8 --configfile config/snapshot_clean.yaml
 ```
 
 This approach is recommended if you want every completed build to automatically save a snapshot before cleanup.
@@ -446,8 +474,13 @@ After running the rule, a compressed snapshot of your previous build will be sav
 
 ```text
 snapshots/
-└── 20251111T163000.tar.gz
+├── 20251111T163000.tar.gz
+└── snapshot_clean.done
 ```
+
+`snapshot_clean.done` is an internal marker used only by
+`config/snapshot_clean.yaml` to order automatic cleanup after a completed
+build. It does not prevent repeated manual `snapshot_clean` runs.
 
 ---
 

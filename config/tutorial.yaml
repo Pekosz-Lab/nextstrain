@@ -1,0 +1,6 @@
+# Select the small tutorial inputs without changing the default workflow.
+snapshot_clean: false
+source_dir: tutorial
+jhh_sequences: tutorial/JHH_sequences.fasta
+jhh_metadata: tutorial/JHH_metadata.txt
+vaccine_sequences: tutorial/vaccines.fasta
