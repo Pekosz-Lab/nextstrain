@@ -51,7 +51,6 @@ rule snapshot_clean:
     shell:
         "bash scripts/snapshot_clean.sh"
 
-
 # Configuration-driven snapshot target. The completion marker lets rule all
 # depend on cleanup, while the build outputs ensure cleanup runs last and is
 # retriggered after a subsequent build recreates those outputs.

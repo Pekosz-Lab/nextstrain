@@ -25,7 +25,7 @@ mkdir -p "$snapshot_dir"
 
 echo "📸 Staging snapshot in temporary storage"
 
-for folder in auspice logs reports source nextclade; do
+for folder in auspice logs reports source nextclade results config; do
     if [[ -d "$folder" ]]; then
         echo "→ Copying $folder/"
         cp -r "$folder" "$snapshot_dir/"
