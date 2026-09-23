@@ -3,7 +3,7 @@ This pipeline accept 3 input sequence files in FASTA format and ingests them to
 influenza genomes filtered to "complete" only by segment and concatenated genome for nextstrain builds
 
 Input: 
-- vaccines.fasta
+- vaccine.fasta
 - JHH_sequences.fasta
 - JHH_metadata.tsv
 

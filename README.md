@@ -127,7 +127,7 @@ Populate the source/ folder with the following required files:
 
 1. JHH_sequences.fasta
 2. JHH_metadata.tsv
-3. vaccines.fasta
+3. vaccine.fasta
 
 ### Source file descriptions
 
@@ -218,7 +218,7 @@ Column descriptions:
 - date: sample collection or processing date, formatted as YYYY-MM-DD
 - passage_history: passage or sample history, e.g. vtm
 
-3. `vaccines.fasta`
+3. `vaccine.fasta`
 FASTA file containing vaccine/reference sequences.
 
 Each FASTA header should start with > and use the same sequence ID plus segment number format:
@@ -244,11 +244,11 @@ As with JHH_sequences.fasta, the number after the underscore indicates the influ
 
 Contact Dr. Heba Mostafa and Dr. Andy Pekosz to access the [source folder data](https://livejohnshopkins-my.sharepoint.com/:f:/r/personal/hmostaf2_jh_edu/Documents/Influenza-Surveillance?csf=1&web=1&e=2sny2s).
 
-The `vaccines.fasta` file is manually downloaded and updated directly from GISAID. See [Tutorial: Add Vaccine Strains from GISAID](#tutorial-add-vaccine-strains-from-gisaid) for detailed instructions.
+The `vaccine.fasta` file is manually downloaded and updated directly from GISAID. See [Tutorial: Add Vaccine Strains from GISAID](#tutorial-add-vaccine-strains-from-gisaid) for detailed instructions.
 
 > [!WARNING]
-> The `vaccines.fasta` file is formatted differently that the `JHH_sequences.fasta` file. 
-> The def line of the `vaccines.fasta` uses the following GISAID hader format: 
+> The `vaccine.fasta` file is formatted differently that the `JHH_sequences.fasta` file. 
+> The def line of the `vaccine.fasta` uses the following GISAID hader format: 
 > `>Isolate name-Passage details/history | Isolate ID | Collection date | Passage details/history | Segment number | Type | Lineage`
 
 Download all data in the `source/` folder, or overwrite your existing `source/` folder, and move it to the repository head directory, `nextstrain/`.
@@ -260,7 +260,7 @@ nextstrain/
 ├── source/
 │   ├── JHH_metadata.tsv
 │   ├── JHH_sequences.fasta
-│   ├── vaccines.fasta
+│   ├── vaccine.fasta
 │   └── vaccines.tsv
 ├── data/    # This will be empty
 └── results/ # This will be empty
@@ -301,7 +301,7 @@ folder:
 
 ```shell
 python scripts/generate_tutorial_dataset.py
-cp source/vaccine.fasta tutorial/vaccines.fasta
+cp source/vaccine.fasta tutorial/vaccine.fasta
 ```
 
 Then select the tutorial configuration when running Snakemake:
@@ -591,7 +591,7 @@ This section describes how to download seasonal influenza vaccine reference sequ
 Vaccine strain sequences are downloaded manually from GISAID and saved in the repository as:
 
 ```text
-source/vaccines.fasta
+source/vaccine.fasta
 ```
 
 These sequences are parsed during the ingest step by:
@@ -615,7 +615,7 @@ Unlike clinical strain headers, vaccine strain headers include passage history i
 After downloading and reformatting vaccine sequences, the final FASTA file should be saved as:
 
 ```text
-source/vaccines.fasta
+source/vaccine.fasta
 ```
 
 The file should contain all vaccine strain segments that should be included in the builds.
@@ -648,7 +648,7 @@ Using a dedicated workset makes it easier to:
 
 - Track which vaccine strains have already been selected
 - Download multiple vaccine strain segments together
-- Update the `vaccines.fasta` file during future build cycles
+- Update the `vaccine.fasta` file during future build cycles
 - Avoid accidentally mixing vaccine references with clinical sequences
 
 ---
@@ -818,10 +818,10 @@ This formatting is required because the vaccine ingest script parses vaccine rec
 After all vaccine sequence headers have been reformatted, save the file as:
 
 ```text
-source/vaccines.fasta
+source/vaccine.fasta
 ```
 
-If a previous `vaccines.fasta` file already exists, replace it only after confirming that the updated file contains all vaccine strains and segments needed for the current build.
+If a previous `vaccine.fasta` file already exists, replace it only after confirming that the updated file contains all vaccine strains and segments needed for the current build.
 
 Recommended checks before saving:
 
@@ -842,16 +842,16 @@ Recommended checks before saving:
 Before running the build, confirm that the file exists:
 
 ```shell
-ls source/vaccines.fasta
+ls source/vaccine.fasta
 ```
 
 You can also inspect the headers with:
 
 ```shell
-grep "^>" source/vaccines.fasta
+grep "^>" source/vaccine.fasta
 ```
 
-Once `source/vaccines.fasta` is present and correctly formatted, continue with the normal build process.
+Once `source/vaccine.fasta` is present and correctly formatted, continue with the normal build process.
 
 ---
 
