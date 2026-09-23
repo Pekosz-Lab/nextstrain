@@ -35,7 +35,7 @@ for a normal production build.
 ```{mermaid}
 flowchart LR
     A[Install Docker] --> B[Open the repository]
-    B --> C[Supply vaccines.fasta]
+    B --> C[Supply vaccine.fasta]
     C --> D[Enter Nextstrain shell]
     D --> E[Dry run]
     E --> F[Run Snakemake]
@@ -124,13 +124,13 @@ All commands that follow assume this is your current directory.
 
 ## GISAID sequences must come from the user
 
-`vaccines.fasta` is not distributed with the tutorial because GISAID data
+`vaccine.fasta` is not distributed with the tutorial because GISAID data
 cannot be openly shared.
 
 Using your own authorized GISAID access:
 
 1. Download and format the vaccine sequences.
-2. Save the file as `tutorial/vaccines.fasta`.
+2. Save the file as `tutorial/vaccine.fasta`.
 3. Do not commit or publicly share it.
 
 Header requirements are documented in the
@@ -142,7 +142,7 @@ The workflow can run without vaccine references, but the expected file must
 still exist:
 
 ```shell
-touch tutorial/vaccines.fasta
+touch tutorial/vaccine.fasta
 ```
 
 An empty file produces the clinical tutorial builds without adding vaccine
@@ -153,7 +153,7 @@ Confirm all three inputs:
 ```shell
 ls -lh tutorial/JHH_sequences.fasta \
   tutorial/JHH_metadata.txt \
-  tutorial/vaccines.fasta
+  tutorial/vaccine.fasta
 ```
 
 ## Verify the Nextstrain runtime
@@ -307,7 +307,7 @@ Common checks:
 
 - Is Docker Desktop running?
 - Are you inside `nextstrain shell .`?
-- Does `tutorial/vaccines.fasta` exist?
+- Does `tutorial/vaccine.fasta` exist?
 - Are you in the repository root?
 
 ## Keep tutorial and production runs separate

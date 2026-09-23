@@ -18,13 +18,13 @@ from this `tutorial/` directory.
 ## Important note about GISAID data
 
 GISAID data cannot be openly redistributed. For that reason,
-`vaccines.fasta` is **not included** in this tutorial.
+`vaccine.fasta` is **not included** in this tutorial.
 
 You must obtain an authorized vaccine FASTA using your own GISAID account and
 place it at exactly:
 
 ```text
-tutorial/vaccines.fasta
+tutorial/vaccine.fasta
 ```
 
 Do not commit or publicly share this file. The FASTA headers must use the
@@ -39,7 +39,7 @@ Before beginning, you need:
 - This repository on your computer
   - `git clone https://github.com/Pekosz-Lab/nextstrain.git` 
   -  navigate to your directory `cd nextstrain`
-- an authorized `vaccines.fasta` from GISAID
+- an authorized `vaccine.fasta` from GISAID
 - [Docker Desktop](https://docs.docker.com/get-started/get-docker/)
 - the [Nextstrain command-line](https://docs.nextstrain.org/en/latest/install.html) 
 - optionally, an IDE such as [Positron](https://positron.posit.co/download.html)
@@ -124,13 +124,13 @@ After downloading and formatting your authorized vaccine sequences, save the
 file as:
 
 ```text
-tutorial/vaccines.fasta
+tutorial/vaccine.fasta
 ```
 
-The pipeline will run as intended and produce all builds with an empty `vaccines.fasta` if you are not able to provide it. Just create a file called `vaccines.fasta` and move it to 
+The pipeline will run as intended and produce all builds with an empty `vaccine.fasta` if you are not able to provide it. Just create a file called `vaccine.fasta` and move it to 
 
 ```text
-tutorial/vaccines.fasta
+tutorial/vaccine.fasta
 ```
 
 Confirm that all three tutorial inputs are present:
@@ -139,7 +139,7 @@ Confirm that all three tutorial inputs are present:
 ls -lh \
   tutorial/JHH_sequences.fasta \
   tutorial/JHH_metadata.txt \
-  tutorial/vaccines.fasta
+  tutorial/vaccine.fasta
 ```
 
 ## 6. Start the Nextstrain shell
@@ -175,7 +175,7 @@ snakemake --dry-run --cores 8 --configfile config/tutorial.yaml
 ```
 
 Review any error before continuing. In particular, a message mentioning
-`tutorial/vaccines.fasta` usually means that the user-supplied GISAID file is
+`tutorial/vaccine.fasta` usually means that the user-supplied GISAID file is
 missing or has the wrong name.
 
 ## 8. Run the tutorial
@@ -256,7 +256,7 @@ Snakemake will reuse completed files and continue the remaining work.
 
 ### The vaccine file is rejected
 
-Check that the file is named exactly `tutorial/vaccines.fasta` and that its
+Check that the file is named exactly `tutorial/vaccine.fasta` and that its
 headers match the required seven-field GISAID format described in the
 [vaccine tutorial](../README.md#required-vaccine-fasta-header-format).
 
