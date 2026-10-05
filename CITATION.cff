@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "Pekosz Lab Seasonal Influenza Nextstrain Builds"
+abstract: >-
+  A Snakemake workflow for reproducible genomic surveillance of seasonal
+  influenza A/H1N1pdm, A/H3N2, and B/Victoria viruses detected through the
+  Johns Hopkins Hospital Network. The pipeline performs BLAST-based segment
+  typing and subtyping, database ingest, Nextclade clade assignment and
+  quality control, filtering, and time-resolved phylogenetic inference with
+  Augur, producing Auspice v2 datasets for all eight genome segments and a
+  concatenated whole-genome build for each lineage.
+type: software
+authors:
+  - given-names: Elgin
+    family-names: Akin
+    email: elgin.akin@gmail.com
+    affiliation: "W. Harry Feinstone Department of Molecular Microbiology and Immunology, Johns Hopkins Bloomberg School of Public Health"
+    orcid: "https://orcid.org/0000-0001-8824-8809" 
+  - given-names: Heba
+    family-names: Mostafa
+    affiliation: "Department of Pathology, Johns Hopkins School of Medicine"
+  - given-names: Andrew
+    family-names: Pekosz
+    affiliation: "W. Harry Feinstone Department of Molecular Microbiology and Immunology, Johns Hopkins Bloomberg School of Public Health"
+repository-code: "https://github.com/Pekosz-Lab/nextstrain"
+url: "https://nextstrain.org/groups/PekoszLab-Public"
+version: 1.0.0
+date-released: "2026-10-05"        
+# doi: "https://doi.org/10.5281/zenodo.23144259"    
+license: MIT
+keywords:
+  - influenza
+  - genomic surveillance
+  - phylogenetics
+  - Nextstrain
+  - Snakemake
+  - bioinformatics
+  - molecular epidemiology
