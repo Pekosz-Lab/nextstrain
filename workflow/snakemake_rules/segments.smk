@@ -49,6 +49,7 @@ rule nextclade:
         nextclade_fasta="results/{subtype}/{segment}/nextclade.aligned.fasta"
     params:
         dataset="nextclade/flu/{subtype}/{segment}/"
+    threads: 4
     log: 
         "logs/nextclade/{subtype}_{segment}.log"
     benchmark:
@@ -58,6 +59,7 @@ rule nextclade:
         exec > {log} 2>&1
         nextclade run \
             -D {params.dataset} \
+            --jobs {threads} \
             --output-fasta {output.nextclade_fasta} \
             --output-tsv {output.nextclade_tsv} \
             {input.fasta}
@@ -127,8 +129,7 @@ rule align:
         reference="config/{subtype}/reference_{segment}.gb"
     output:
         aligned_sequences="results/{subtype}/{segment}/aligned.fasta"
-    params:
-        nthreads=8
+    threads: 8
     log:
         "logs/align/{subtype}_{segment}.log"
     benchmark:
@@ -138,7 +139,7 @@ rule align:
         exec > {log} 2>&1
         augur align \
             --sequences {input.filtered_sequences} \
-            --nthreads {params.nthreads} \
+            --nthreads {threads} \
             --reference-sequence {input.reference} \
             --remove-reference \
             --output {output.aligned_sequences} \

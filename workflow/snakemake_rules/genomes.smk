@@ -57,8 +57,8 @@ rule genome_align:
     output:
         alignment = "results/{subtype}/genome/aligned.fasta"
     params:
-        reference = "config/{subtype}/genome.gb",
-        threads = 80
+        reference = "config/{subtype}/genome.gb"
+    threads: 80  # upper bound; Snakemake caps this at --cores
     log:
         "logs/genome_align/{subtype}.log"
     benchmark:
@@ -72,7 +72,7 @@ rule genome_align:
             --reference-sequence {params.reference} \
             --fill-gaps \
             --remove-reference \
-            --nthreads {params.threads}
+            --nthreads {threads}
         """
 
 rule genome_tree:
@@ -80,9 +80,8 @@ rule genome_tree:
     input:
         alignment = rules.genome_align.output.alignment
     output:
-        tree = "results/{subtype}/genome/tree_raw.mwk"
-    params:
-        threads = 64
+        tree = "results/{subtype}/genome/tree_raw.nwk"
+    threads: 64  # upper bound; Snakemake caps this at --cores
     log:
         "logs/genome_tree/{subtype}.log"
     benchmark:
@@ -91,7 +90,7 @@ rule genome_tree:
         """
         exec > {log} 2>&1
         augur tree \
-            --nthreads {params.threads} \
+            --nthreads {threads} \
             --alignment {input.alignment} \
             --output {output.tree}
         """
