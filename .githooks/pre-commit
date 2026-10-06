@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# Pre-commit guard: keep raw surveillance data in source/ out of git.
+#
+# Blocks a commit if any staged file:
+#   1. lives inside a directory named source/ (at any depth), or
+#   2. is a byte-identical copy of any file in source/, or
+#   3. is a FASTA whose sequence IDs overlap the IDs in source/*.fasta
+#      (catches renamed, reformatted, CRLF-converted or subsampled copies).
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Only bypass (git commit --no-verify) if you are certain the data is public.
+# -----------------------------------------------------------------------------
+set -u
+
+root=$(git rev-parse --show-toplevel)
+src="$root/source"
+fail=0
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/precommit.XXXXXX")
+trap 'rm -rf "$tmp"' EXIT
+
+# First token of each FASTA header, CR-stripped, unique
+fasta_ids() { grep '^>' | tr -d '\r' | sed 's/^>//; s/[|[:space:]].*//' | sort -u; }
+
+# 1. Paths under any source/ directory
+bad=$(printf '%s\n' "$staged" | grep -E '(^|/)source/' || true)
+if [ -n "$bad" ]; then
+    echo "BLOCKED: files inside a source/ directory are staged:"
+    printf '%s\n' "$bad" | sed 's/^/    /'
+    fail=1
+fi
+
+# 2-3. Content checks against the local source/ folder
+if [ -d "$src" ]; then
+    find "$src" -type f ! -name '.DS_Store' -print0 | xargs -0 git hash-object > "$tmp/src_hashes"
+    find "$src" -type f \( -name '*.fasta' -o -name '*.fa' -o -name '*.fna' -o -name '*.fas' \) \
+        -exec cat {} + | fasta_ids > "$tmp/src_ids"
+
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+        blob=$(git rev-parse ":$f" 2>/dev/null) || continue
+
+        if grep -qx "$blob" "$tmp/src_hashes"; then
+            echo "BLOCKED: $f is an exact copy of a file in source/"
+            fail=1
+            continue
+        fi
+
+        case "$f" in
+            *.fasta|*.fa|*.fna|*.fas)
+                [ -s "$tmp/src_ids" ] || continue
+                git cat-file -p "$blob" | fasta_ids > "$tmp/ids"
+                n=$(grep -Fxc -f "$tmp/src_ids" "$tmp/ids" || true)
+                if [ "${n:-0}" -gt 0 ]; then
+                    total=$(wc -l < "$tmp/ids" | tr -d ' ')
+                    echo "BLOCKED: $f shares $n of $total sequence IDs with source/ data"
+                    fail=1
+                fi
+                ;;
+        esac
+    done <<< "$staged"
+else
+    echo "pre-commit: no source/ folder found; only the path check was run." >&2
+fi
+
+if [ "$fail" -ne 0 ]; then
+    echo
+    echo "Unstage with:  git restore --staged <file>"
+    echo "Commit aborted to protect source/ data."
+    exit 1
+fi
+exit 0

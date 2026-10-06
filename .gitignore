@@ -12,6 +12,9 @@ run_logs/
 reports/
 snapshots/
 
+# GISAID-licensed vaccine strains supplied locally for the tutorial (never commit)
+tutorial/vaccine.fasta
+
 # database files 
 *.db
 **.db

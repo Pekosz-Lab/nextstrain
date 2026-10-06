@@ -83,6 +83,18 @@ git clone https://github.com/Pekosz-Lab/nextstrain.git
 cd nextstrain
 ```
 
+### Enable the data-protection commit check (required, once per clone)
+
+`source/` holds unpublished JHH sequences and GISAID-licensed vaccine strains,
+which must never be pushed to this public repository. `.gitignore` already
+excludes `source/`; the pre-commit check in `.githooks/` additionally blocks any
+commit containing a copy, reformatted version or subsample of those files
+anywhere in the repository (for example, `tutorial/vaccine.fasta`):
+
+```shell
+git config core.hooksPath .githooks
+```
+
 ### Install a Nextstrain Runtime 
 
 - The most reproducible approach to building a Nextstrain runtime is to follow instructions listed in the Nextstrain [Documentation](https://docs.nextstrain.org/en/latest/install.html).
