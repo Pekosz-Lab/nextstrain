@@ -63,8 +63,8 @@ This repository contains the scripts, Snakefiles, and configuration files used f
 We recommend downloading the following tools for your convenience. While these are optional, they support ease of use during the build process. 
 
 - [Positron IDE](https://positron.posit.co/) - A text editor 
-  - [Snakemake Language Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=snakemake.snakemake-lang): Supports snakemake language formatting
-  - [SQLite Viewer Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=qwtel.sqlite-viewer) to inspect fludb
+- [Snakemake Language Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=snakemake.snakemake-lang): Supports snakemake language formatting
+- [SQLite Viewer Extension](https://p3m.dev/openvsx/latest/vscode/item?itemName=qwtel.sqlite-viewer) to inspect fludb
 
 
 ## 1. Clone This Repository, Set Up, and Activate Your Environment
@@ -273,7 +273,6 @@ nextstrain/
 │   ├── JHH_metadata.tsv
 │   ├── JHH_sequences.fasta
 │   ├── vaccine.fasta
-│   └── vaccines.tsv
 ├── data/    # This will be empty
 └── results/ # This will be empty
 ```
