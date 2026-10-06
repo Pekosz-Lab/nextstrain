@@ -313,17 +313,51 @@ one fails:
 snakemake --profile profiles/default --cores 8
 ```
 
-#### Logs, benchmarks and run provenance
+#### Logs, benchmarks, run provenance and run reports
 
-| Location | Contents |
-| --- | --- |
-| `logs/{rule}/{subtype}_{segment}.log` | Full stdout + stderr of every job (genome builds: `logs/{rule}/{subtype}.log`) |
-| `benchmarks/{rule}/{subtype}_{segment}.tsv` | Runtime, peak memory and CPU use per job |
-| `run_logs/{RUN_ID}_provenance.txt` | Start time, host, git commit, and augur/nextclade/mafft/iqtree versions for each run |
-| `run_logs/{RUN_ID}_snakemake_{SUCCESS,FAILED}.log` | Copy of Snakemake's main log for each run |
+Everything a run records about itself is collected under one hidden folder,
+`.run/` (git-ignored):
 
-`logs/` and `benchmarks/` are archived and removed by `snapshot_clean`;
-`run_logs/` is archived but kept, so run history persists across cleans.
+```text
+.run/
+├── logs/{rule}/{subtype}_{segment}.log          # stdout + stderr of every job (genome builds: {subtype}.log)
+├── benchmarks/{rule}/{subtype}_{segment}.tsv    # runtime, peak memory and CPU use per job
+├── run_logs/
+│   ├── {RUN_ID}_provenance.txt                  # start/finish (UTC), host, git commit + dirty files, tool versions
+│   └── {RUN_ID}_snakemake_{SUCCESS,FAILED}.log  # copy of Snakemake's main log
+└── reports/
+    ├── index.md                                 # every run: status, start, wall clock, jobs, commit
+    └── {RUN_ID}/
+        ├── report.md                            # summary document for the run
+        ├── figures/                             # timeline, runtime by rule/build, memory, run history (PNG)
+        └── tables/                              # jobs.tsv, rules.tsv, run_history.tsv
+```
+
+`RUN_ID` is the run's start time (`YYYYMMDDTHHMMSS`), so every file from one
+run shares the same prefix.
+
+**Run reports** are built automatically at the end of every run, successful or
+failed, by `scripts/run_report.py`. Each report opens with the run's
+provenance (start/finish time, host, git commit, uncommitted changes, tool
+versions) so its numbers are anchored to a specific run, then summarises job
+timing, runtime and peak memory by rule and by build, failed jobs (with the
+tail of their log) and job logs that mention warnings or errors. Job logs and
+benchmarks are overwritten when a job reruns, so a report only attributes them
+to a run if no later run re-executed that job. Open `report.md` in VS Code's
+Markdown preview (or any Markdown viewer); the figures are plain PNGs.
+
+These reports are separate from Snakemake's native `--report` output and from
+the sequence-data reports in `reports/` (section 5). To rebuild them by hand:
+
+```shell
+python scripts/run_report.py                          # latest run
+python scripts/run_report.py --run-id 20261006T191100 # a specific run
+python scripts/run_report.py --all                    # every run in .run/run_logs/
+```
+
+`.run/logs/` and `.run/benchmarks/` are archived and removed by
+`snapshot_clean`; `.run/run_logs/` and `.run/reports/` are archived but kept,
+so run history persists across cleans.
 Thread counts are set with `threads:` and capped at `--cores`, so pass a larger
 `--cores` on the server to use more threads for the genome alignment and tree.
 
@@ -346,7 +380,7 @@ snakemake --cores 8 --configfile config/tutorial.yaml
 With this configuration, the ingest workflow reads all three inputs from
 `tutorial/`. Omitting `--configfile config/tutorial.yaml` restores the
 normal `source/` inputs. Tutorial and production runs use the same downstream
-`data/`, `results/`, `logs/`, and `auspice/` locations, so start with a clean
+`data/`, `results/`, `.run/`, and `auspice/` locations, so start with a clean
 workspace when switching between them.
 
 ---
@@ -451,9 +485,7 @@ When executed, the `snapshot_clean` rule:
 
    ```text
    auspice/
-   logs/
-   benchmarks/
-   run_logs/
+   .run/
    reports/
    source/
    ```
@@ -464,9 +496,9 @@ When executed, the `snapshot_clean` rule:
    ```text
    data/
    results/
-   logs/
-   benchmarks/
    reports/
+   .run/logs/
+   .run/benchmarks/
    ```
 
 5. Removes the database file:

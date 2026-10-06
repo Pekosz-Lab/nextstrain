@@ -6,9 +6,8 @@ data/
 results/
 auspice/
 figures/
-logs/
-benchmarks/
-run_logs/
+# run logs, benchmarks, provenance and run reports
+.run/
 reports/
 snapshots/
 

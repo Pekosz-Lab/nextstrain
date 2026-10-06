@@ -22,7 +22,7 @@ an equivalent sequences.fasta and metadata.tsv for:
 
 final output located at data/{segment OR genome}
 
-Logging: every rule writes stdout + stderr to logs/{rule}/... via
+Logging: every rule writes stdout + stderr to .run/logs/{rule}/... via
 `exec > {log} 2>&1`. Python scripts run with `-u` (unbuffered) so print()
 output and warnings appear in the log in the order they happened.
 
@@ -56,9 +56,9 @@ rule flusort:
         metadata = flusort_metadata,
         flag = touch("data/flusort_completed.flag")
     log:
-        "logs/flusort/flusort.log"
+        ".run/logs/flusort/flusort.log"
     benchmark:
-        "benchmarks/flusort/flusort.tsv"
+        ".run/benchmarks/flusort/flusort.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -76,7 +76,7 @@ rule fludb_inititate:
     output:
         touch("data/fludb_inititated.flag")
     log:
-        "logs/fludb_inititate/fludb_inititate.log"
+        ".run/logs/fludb_inititate/fludb_inititate.log"
     shell:
         """
         exec > {log} 2>&1
@@ -93,7 +93,7 @@ rule upload_genomes:
     output:
         touch("data/genomes_uploaded.flag")
     log:
-        "logs/upload_genomes/upload_genomes.log"
+        ".run/logs/upload_genomes/upload_genomes.log"
     shell:
         """
         exec > {log} 2>&1
@@ -113,7 +113,7 @@ rule upload_vaccines:
     output:
         touch("data/vaccines_uploaded.flag")
     log:
-        "logs/upload_vaccines/upload_vaccines.log"
+        ".run/logs/upload_vaccines/upload_vaccines.log"
     shell:
         """
         exec > {log} 2>&1
@@ -146,7 +146,7 @@ rule download_segments:
         ns_metadata = "data/{subtype}/ns/metadata.tsv",
         segments_flag = touch("data/{subtype}/segments_downloaded.flag")
     log:
-        "logs/download_segments/{subtype}.log"
+        ".run/logs/download_segments/{subtype}.log"
     shell:
         """
         exec > {log} 2>&1
@@ -163,7 +163,7 @@ rule download_genomes:
         genome = "data/{subtype}/genome/sequences.fasta",
         genome_metadata = "data/{subtype}/genome/metadata.tsv"
     log:
-        "logs/download_genomes/{subtype}.log"
+        ".run/logs/download_genomes/{subtype}.log"
     shell:
         """
         exec > {log} 2>&1

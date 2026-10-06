@@ -1,15 +1,15 @@
 # define home dir
 data_dir = config.get("data_dir", "data")
 
-# Logging: every rule writes stdout + stderr to logs/{rule}/{subtype}_{segment}.log
+# Logging: every rule writes stdout + stderr to .run/logs/{rule}/{subtype}_{segment}.log
 # (`exec > {log} 2>&1` redirects every line of the shell block that follows it),
-# and records runtime / peak memory to benchmarks/{rule}/{subtype}_{segment}.tsv.
+# and records runtime / peak memory to .run/benchmarks/{rule}/{subtype}_{segment}.tsv.
 
 rule fetch_hana_datasets:
     priority: 1
     message: "Downloading updated Nextclade datasets"
     log: 
-        "logs/fetch_hana_datasets/fetch_hana_datasets.log"
+        ".run/logs/fetch_hana_datasets/fetch_hana_datasets.log"
     output:
         touch("data/nextclade_datasets_fetched.flag")
     shell:
@@ -51,9 +51,9 @@ rule nextclade:
         dataset="nextclade/flu/{subtype}/{segment}/"
     threads: 4
     log: 
-        "logs/nextclade/{subtype}_{segment}.log"
+        ".run/logs/nextclade/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/nextclade/{subtype}_{segment}.tsv"
+        ".run/benchmarks/nextclade/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -73,7 +73,7 @@ rule assign_clades:
     output:
         metadata_clade="results/{subtype}/{segment}/metadata.tsv"
     log: 
-        "logs/assign_clades/{subtype}_{segment}.log"
+        ".run/logs/assign_clades/{subtype}_{segment}.log"
     script:
         "../../scripts/assign_clades.py"
 
@@ -85,7 +85,7 @@ rule merge_quality_metrics:
     output:
         metadata_merged="results/{subtype}/{segment}/metadata_merged.tsv"
     log: 
-        "logs/merge_quality_metrics/{subtype}_{segment}.log"
+        ".run/logs/merge_quality_metrics/{subtype}_{segment}.log"
     script:
         "../../scripts/merge_quality_metrics.py"
 
@@ -102,9 +102,9 @@ rule augur_filter:
         min_length=lambda wildcards: min_lengths.get(wildcards.segment, 0),  # Get min length for the segment
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     log:
-        "logs/augur_filter/{subtype}_{segment}.log"
+        ".run/logs/augur_filter/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/augur_filter/{subtype}_{segment}.tsv"
+        ".run/benchmarks/augur_filter/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -131,9 +131,9 @@ rule align:
         aligned_sequences="results/{subtype}/{segment}/aligned.fasta"
     threads: 8
     log:
-        "logs/align/{subtype}_{segment}.log"
+        ".run/logs/align/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/align/{subtype}_{segment}.tsv"
+        ".run/benchmarks/align/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -154,9 +154,9 @@ rule raw_tree:
     output:
         tree="results/{subtype}/{segment}/tree_raw.nwk"
     log:
-        "logs/raw_tree/{subtype}_{segment}.log"
+        ".run/logs/raw_tree/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/raw_tree/{subtype}_{segment}.tsv"
+        ".run/benchmarks/raw_tree/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -231,9 +231,9 @@ rule refine:
         clock_rate = clock_rate,  # Function reference to calculate clock rate dynamically
         clock_std_dev = clock_std_dev  # Function reference to calculate clock std dev dynamically
     log:
-        "logs/refine/{subtype}_{segment}.log"
+        ".run/logs/refine/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/refine/{subtype}_{segment}.tsv"
+        ".run/benchmarks/refine/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -264,9 +264,9 @@ rule annotate_traits:
     params:
         columns=["clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
     log: 
-        "logs/annotate_traits/{subtype}_{segment}.log"
+        ".run/logs/annotate_traits/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/annotate_traits/{subtype}_{segment}.tsv"
+        ".run/benchmarks/annotate_traits/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -289,9 +289,9 @@ rule infer_ancestral:
     params:
         inference="joint"  # Method for ancestral inference
     log:
-        "logs/infer_ancestral/{subtype}_{segment}.log"
+        ".run/logs/infer_ancestral/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/infer_ancestral/{subtype}_{segment}.tsv"
+        ".run/benchmarks/infer_ancestral/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -312,9 +312,9 @@ rule translate:
     output:
         aa_muts="results/{subtype}/{segment}/aa_muts.json"
     log: 
-        "logs/translate/{subtype}_{segment}.log"
+        ".run/logs/translate/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/translate/{subtype}_{segment}.tsv"
+        ".run/benchmarks/translate/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -350,9 +350,9 @@ rule export:
             input.vaccine
         ])
     log: 
-        "logs/export/{subtype}_{segment}.log"
+        ".run/logs/export/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/export/{subtype}_{segment}.tsv"
+        ".run/benchmarks/export/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -374,9 +374,9 @@ rule frequency:
     output:
         frequencies = "auspice/{subtype}/{segment}_tip-frequencies.json"
     log:
-        "logs/frequency/{subtype}_{segment}.log"
+        ".run/logs/frequency/{subtype}_{segment}.log"
     benchmark:
-        "benchmarks/frequency/{subtype}_{segment}.tsv"
+        ".run/benchmarks/frequency/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1

@@ -25,7 +25,7 @@ mkdir -p "$snapshot_dir"
 
 echo "📸 Staging snapshot in temporary storage"
 
-for folder in auspice logs benchmarks run_logs reports source nextclade results config; do
+for folder in auspice .run reports source nextclade results config; do
     if [[ -d "$folder" ]]; then
         echo "→ Copying $folder/"
         cp -r "$folder" "$snapshot_dir/"
@@ -44,8 +44,9 @@ mv "$partial_archive" "$final_archive"
 
 echo "🧹 Cleaning up workspace..."
 
-# run_logs/ is intentionally kept so run history persists across cleans.
-rm -rf data results logs benchmarks reports auspice
+# Per-job logs and benchmarks are cleared; .run/run_logs/ and .run/reports/
+# are intentionally kept so run history persists across cleans.
+rm -rf data results reports auspice .run/logs .run/benchmarks
 
 if [[ -f fludb.db ]]; then
     rm -f fludb.db

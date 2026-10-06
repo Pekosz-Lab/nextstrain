@@ -220,7 +220,7 @@ and their associated tip-frequency data.
 
 ### A previous production build exists
 
-Tutorial and production runs share `data/`, `results/`, `logs/`, `auspice/`,
+Tutorial and production runs share `data/`, `results/`, `.run/`, `auspice/`,
 and `fludb.db`. Do not mix the two runs. Use a fresh checkout or clean workspace
 for the tutorial.
 

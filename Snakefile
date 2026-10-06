@@ -20,16 +20,19 @@ min_lengths = {
 }
 
 # ---------------------------------------------------------------------------
-# Logging conventions
-#   - Per-job logs:        logs/{rule}/{subtype}_{segment}.log  (stdout + stderr)
-#   - Per-job benchmarks:  benchmarks/{rule}/{subtype}_{segment}.tsv
-#   - Per-run provenance:  run_logs/{RUN_ID}_provenance.txt
-#   - Per-run main log:    run_logs/{RUN_ID}_snakemake_{SUCCESS|FAILED}.log
-# run_logs/ is kept across snapshot_clean so run history persists, and is
-# also copied into every snapshot archive.
+# Run outputs: everything a run writes about itself lives under .run/
+#   - Per-job logs:        .run/logs/{rule}/{subtype}_{segment}.log  (stdout + stderr)
+#   - Per-job benchmarks:  .run/benchmarks/{rule}/{subtype}_{segment}.tsv
+#   - Per-run provenance:  .run/run_logs/{RUN_ID}_provenance.txt
+#   - Per-run main log:    .run/run_logs/{RUN_ID}_snakemake_{SUCCESS|FAILED}.log
+#   - Per-run reports:     .run/reports/{RUN_ID}/report.md (+ figures/, tables/)
+# .run/run_logs/ and .run/reports/ are kept across snapshot_clean so run
+# history persists; .run/logs/ and .run/benchmarks/ are archived and cleared.
+# Run reports are separate from Snakemake's native --report output.
 # ---------------------------------------------------------------------------
 RUN_ID = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-RUN_LOG_DIR = "run_logs"
+RUN_DIR = ".run"
+RUN_LOG_DIR = f"{RUN_DIR}/run_logs"
 
 onstart:
     # shell() fills {RUN_ID}/{RUN_LOG_DIR} from the Snakefile's variables;
@@ -40,8 +43,9 @@ onstart:
         {{
             echo "run_id:     {RUN_ID}"
             echo "started:    $(date)"
+            echo "started_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "host:       $(hostname)"
-            echo "user:       $(whoami)"
+            echo "user:       $(id -un 2>/dev/null || echo "uid $(id -u)")"
             echo "workdir:    $(pwd)"
             echo
             echo "== git =="
@@ -53,18 +57,38 @@ onstart:
             echo "augur:      $(augur --version 2>&1 || echo 'not found')"
             echo "nextclade:  $(nextclade --version 2>&1 || echo 'not found')"
             echo "mafft:      $(mafft --version 2>&1 | head -n 1 || echo 'not found')"
-            echo "iqtree:     $(iqtree2 --version 2>&1 | head -n 1 || echo 'not found')"
+            echo "iqtree:     $( (iqtree2 --version || iqtree --version) 2>/dev/null | grep -m1 -i 'iq-tree' || echo 'not found')"
             echo "python:     $(python --version 2>&1)"
         }} > {RUN_LOG_DIR}/{RUN_ID}_provenance.txt 2>&1
         """
     )
 
+# On finish: stamp the end time into the provenance file, keep a copy of
+# Snakemake's main log (`log`), then build the run report. A report failure
+# only prints a warning; it never changes the run's exit status.
 onsuccess:
-    # `log` is the path to Snakemake's own main log for this run
-    shell("mkdir -p {RUN_LOG_DIR} && cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_SUCCESS.log")
+    shell(
+        """
+        mkdir -p {RUN_LOG_DIR}
+        echo "finished_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> {RUN_LOG_DIR}/{RUN_ID}_provenance.txt
+        echo "status:     SUCCESS" >> {RUN_LOG_DIR}/{RUN_ID}_provenance.txt
+        cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_SUCCESS.log
+        python scripts/run_report.py --run-dir {RUN_DIR} --run-id {RUN_ID} \
+            || echo "WARNING: run report failed; rerun with: python scripts/run_report.py --run-id {RUN_ID}"
+        """
+    )
 
 onerror:
-    shell("mkdir -p {RUN_LOG_DIR} && cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_FAILED.log")
+    shell(
+        """
+        mkdir -p {RUN_LOG_DIR}
+        echo "finished_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> {RUN_LOG_DIR}/{RUN_ID}_provenance.txt
+        echo "status:     FAILED" >> {RUN_LOG_DIR}/{RUN_ID}_provenance.txt
+        cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_FAILED.log
+        python scripts/run_report.py --run-dir {RUN_DIR} --run-id {RUN_ID} \
+            || echo "WARNING: run report failed; rerun with: python scripts/run_report.py --run-id {RUN_ID}"
+        """
+    )
 
 rule all:
     input:
@@ -91,7 +115,7 @@ include: "workflow/snakemake_rules/genomes.smk"
 
 # Manual snapshot-and-clean target. With no output marker, explicitly invoking
 # this rule runs it every time, even when snapshot_clean.done already exists.
-# No log: directive here because the script itself deletes logs/.
+# No log: directive here because the script itself deletes .run/logs/.
 rule snapshot_clean:
     """
     Create a timestamped snapshot and clean the workspace immediately.

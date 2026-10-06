@@ -1,5 +1,5 @@
-# Logging: every rule writes stdout + stderr to logs/{rule}/{subtype}.log and
-# records runtime / peak memory to benchmarks/{rule}/{subtype}.tsv.
+# Logging: every rule writes stdout + stderr to .run/logs/{rule}/{subtype}.log and
+# records runtime / peak memory to .run/benchmarks/{rule}/{subtype}.tsv.
 
 rule genome_clades:
     message: "append nextclade calls to the genome"
@@ -9,7 +9,7 @@ rule genome_clades:
     output:
         clades = "results/{subtype}/genome/nextclade.tsv"
     log:
-        "logs/genome_clades/{subtype}.log"
+        ".run/logs/genome_clades/{subtype}.log"
     shell:
         """
         exec 2> {log}
@@ -34,9 +34,9 @@ rule genome_filter:
         min_length = min_genome_size, # Get min length for the segment - where to define genome
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     log:
-        "logs/genome_filter/{subtype}.log"
+        ".run/logs/genome_filter/{subtype}.log"
     benchmark:
-        "benchmarks/genome_filter/{subtype}.tsv"
+        ".run/benchmarks/genome_filter/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -60,9 +60,9 @@ rule genome_align:
         reference = "config/{subtype}/genome.gb"
     threads: 80  # upper bound; Snakemake caps this at --cores
     log:
-        "logs/genome_align/{subtype}.log"
+        ".run/logs/genome_align/{subtype}.log"
     benchmark:
-        "benchmarks/genome_align/{subtype}.tsv"
+        ".run/benchmarks/genome_align/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -83,9 +83,9 @@ rule genome_tree:
         tree = "results/{subtype}/genome/tree_raw.nwk"
     threads: 64  # upper bound; Snakemake caps this at --cores
     log:
-        "logs/genome_tree/{subtype}.log"
+        ".run/logs/genome_tree/{subtype}.log"
     benchmark:
-        "benchmarks/genome_tree/{subtype}.tsv"
+        ".run/benchmarks/genome_tree/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -108,9 +108,9 @@ rule genome_refine:
         stdev = 0.00211,
         clock_rate = lambda wildcards: {"h3n2": 0.00272, "h1n1": 0.00272, "vic": 0.00127}[wildcards.subtype] # calculated from average of all segment rates
     log:
-        "logs/genome_refine/{subtype}.log"
+        ".run/logs/genome_refine/{subtype}.log"
     benchmark:
-        "benchmarks/genome_refine/{subtype}.tsv"
+        ".run/benchmarks/genome_refine/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -138,9 +138,9 @@ rule genome_traits:
     output:
         node_data = "results/{subtype}/genome/traits.json"
     log:
-        "logs/genome_traits/{subtype}.log"
+        ".run/logs/genome_traits/{subtype}.log"
     benchmark:
-        "benchmarks/genome_traits/{subtype}.tsv"
+        ".run/benchmarks/genome_traits/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -160,9 +160,9 @@ rule genome_ancestral:
     output:
         nt_muts = "results/{subtype}/genome/nt_muts.json"
     log:
-        "logs/genome_ancestral/{subtype}.log"
+        ".run/logs/genome_ancestral/{subtype}.log"
     benchmark:
-        "benchmarks/genome_ancestral/{subtype}.tsv"
+        ".run/benchmarks/genome_ancestral/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -183,9 +183,9 @@ rule genome_translate:
     params:
         reference = "config/{subtype}/genome.gb"
     log:
-        "logs/genome_translate/{subtype}.log"
+        ".run/logs/genome_translate/{subtype}.log"
     benchmark:
-        "benchmarks/genome_translate/{subtype}.tsv"
+        ".run/benchmarks/genome_translate/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -211,9 +211,9 @@ rule genome_export:
     output:
         auspice = "auspice/{subtype}/genome.json"
     log:
-        "logs/genome_export/{subtype}.log"
+        ".run/logs/genome_export/{subtype}.log"
     benchmark:
-        "benchmarks/genome_export/{subtype}.tsv"
+        ".run/benchmarks/genome_export/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -240,9 +240,9 @@ rule genome_frequencies:
     output:
         frequencies = "auspice/{subtype}/genome_tip-frequencies.json"
     log:
-        "logs/genome_frequencies/{subtype}.log"
+        ".run/logs/genome_frequencies/{subtype}.log"
     benchmark:
-        "benchmarks/genome_frequencies/{subtype}.tsv"
+        ".run/benchmarks/genome_frequencies/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
