@@ -51,6 +51,8 @@ rule nextclade:
         dataset="nextclade/flu/{subtype}/{segment}/"
     log: 
         "logs/nextclade/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/nextclade/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -99,6 +101,8 @@ rule augur_filter:
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     log:
         "logs/augur_filter/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/augur_filter/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -127,6 +131,8 @@ rule align:
         nthreads=8
     log:
         "logs/align/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/align/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -148,6 +154,8 @@ rule raw_tree:
         tree="results/{subtype}/{segment}/tree_raw.nwk"
     log:
         "logs/raw_tree/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/raw_tree/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -223,6 +231,8 @@ rule refine:
         clock_std_dev = clock_std_dev  # Function reference to calculate clock std dev dynamically
     log:
         "logs/refine/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/refine/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -254,6 +264,8 @@ rule annotate_traits:
         columns=["clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
     log: 
         "logs/annotate_traits/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/annotate_traits/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -277,6 +289,8 @@ rule infer_ancestral:
         inference="joint"  # Method for ancestral inference
     log:
         "logs/infer_ancestral/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/infer_ancestral/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -298,6 +312,8 @@ rule translate:
         aa_muts="results/{subtype}/{segment}/aa_muts.json"
     log: 
         "logs/translate/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/translate/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -334,6 +350,8 @@ rule export:
         ])
     log: 
         "logs/export/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/export/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -356,6 +374,8 @@ rule frequency:
         frequencies = "auspice/{subtype}/{segment}_tip-frequencies.json"
     log:
         "logs/frequency/{subtype}_{segment}.log"
+    benchmark:
+        "benchmarks/frequency/{subtype}_{segment}.tsv"
     shell:
         """
         exec > {log} 2>&1

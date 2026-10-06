@@ -294,6 +294,28 @@ snakemake --cores 8
 This default command reads `JHH_sequences.fasta`, `JHH_metadata.txt`, and
 `vaccine.fasta` from `source/`.
 
+For day-to-day runs, use the bundled profile, which prints each shell command,
+prints a failed job's log to the console, and lets unaffected builds finish if
+one fails:
+
+```shell
+snakemake --profile profiles/default --cores 8
+```
+
+#### Logs, benchmarks and run provenance
+
+| Location | Contents |
+| --- | --- |
+| `logs/{rule}/{subtype}_{segment}.log` | Full stdout + stderr of every job (genome builds: `logs/{rule}/{subtype}.log`) |
+| `benchmarks/{rule}/{subtype}_{segment}.tsv` | Runtime, peak memory and CPU use per job |
+| `run_logs/{RUN_ID}_provenance.txt` | Start time, host, git commit, and augur/nextclade/mafft/iqtree versions for each run |
+| `run_logs/{RUN_ID}_snakemake_{SUCCESS,FAILED}.log` | Copy of Snakemake's main log for each run |
+
+`logs/` and `benchmarks/` are archived and removed by `snapshot_clean`;
+`run_logs/` is archived but kept, so run history persists across cleans.
+Thread counts are set with `threads:` and capped at `--cores`, so pass a larger
+`--cores` on the server to use more threads for the genome alignment and tree.
+
 ### Run with the tutorial inputs
 
 Generate the downsampled JHH files and place a vaccine FASTA in the tutorial
@@ -419,6 +441,8 @@ When executed, the `snapshot_clean` rule:
    ```text
    auspice/
    logs/
+   benchmarks/
+   run_logs/
    reports/
    source/
    ```
@@ -430,6 +454,7 @@ When executed, the `snapshot_clean` rule:
    data/
    results/
    logs/
+   benchmarks/
    reports/
    ```
 

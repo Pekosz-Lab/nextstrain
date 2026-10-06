@@ -7,6 +7,8 @@ results/
 auspice/
 figures/
 logs/
+benchmarks/
+run_logs/
 reports/
 snapshots/
 

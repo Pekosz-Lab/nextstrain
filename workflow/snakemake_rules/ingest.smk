@@ -57,6 +57,8 @@ rule flusort:
         flag = touch("data/flusort_completed.flag")
     log:
         "logs/flusort/flusort.log"
+    benchmark:
+        "benchmarks/flusort/flusort.tsv"
     shell:
         """
         exec > {log} 2>&1

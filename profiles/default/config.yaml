@@ -1,0 +1,9 @@
+# Default Snakemake profile for the Pekosz Lab seasonal Nextstrain builds.
+# Usage:  snakemake --profile profiles/default --cores 8
+# (--cores is left to the command line so the same profile works on a laptop
+#  and on the large-core server.)
+
+printshellcmds: true      # echo each job's resolved shell command
+show-failed-logs: true    # print a failed job's log to the console
+rerun-incomplete: true    # redo jobs interrupted by a crash/kill
+keep-going: true          # let independent subtype/segment builds finish if one fails

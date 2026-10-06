@@ -19,6 +19,53 @@ min_lengths = {
     "ns": 700
 }
 
+# ---------------------------------------------------------------------------
+# Logging conventions
+#   - Per-job logs:        logs/{rule}/{subtype}_{segment}.log  (stdout + stderr)
+#   - Per-job benchmarks:  benchmarks/{rule}/{subtype}_{segment}.tsv
+#   - Per-run provenance:  run_logs/{RUN_ID}_provenance.txt
+#   - Per-run main log:    run_logs/{RUN_ID}_snakemake_{SUCCESS|FAILED}.log
+# run_logs/ is kept across snapshot_clean so run history persists, and is
+# also copied into every snapshot archive.
+# ---------------------------------------------------------------------------
+RUN_ID = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+RUN_LOG_DIR = "run_logs"
+
+onstart:
+    # shell() fills {RUN_ID}/{RUN_LOG_DIR} from the Snakefile's variables;
+    # literal shell braces are escaped as {{ }}.
+    shell(
+        """
+        mkdir -p {RUN_LOG_DIR}
+        {{
+            echo "run_id:     {RUN_ID}"
+            echo "started:    $(date)"
+            echo "host:       $(hostname)"
+            echo "user:       $(whoami)"
+            echo "workdir:    $(pwd)"
+            echo
+            echo "== git =="
+            git rev-parse HEAD 2>/dev/null || echo "not a git repository"
+            git status --short 2>/dev/null || true
+            echo
+            echo "== tool versions =="
+            echo "snakemake:  $(snakemake --version 2>&1 || echo 'not found')"
+            echo "augur:      $(augur --version 2>&1 || echo 'not found')"
+            echo "nextclade:  $(nextclade --version 2>&1 || echo 'not found')"
+            echo "mafft:      $(mafft --version 2>&1 | head -n 1 || echo 'not found')"
+            echo "iqtree:     $(iqtree2 --version 2>&1 | head -n 1 || echo 'not found')"
+            echo "python:     $(python --version 2>&1)"
+        }} > {RUN_LOG_DIR}/{RUN_ID}_provenance.txt 2>&1
+        """
+    )
+
+onsuccess:
+    # `log` is the path to Snakemake's own main log for this run
+    shell("mkdir -p {RUN_LOG_DIR} && cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_SUCCESS.log")
+
+onerror:
+    shell("mkdir -p {RUN_LOG_DIR} && cp {log} {RUN_LOG_DIR}/{RUN_ID}_snakemake_FAILED.log")
+
 rule all:
     input:
         # Individual segments
@@ -44,6 +91,7 @@ include: "workflow/snakemake_rules/genomes.smk"
 
 # Manual snapshot-and-clean target. With no output marker, explicitly invoking
 # this rule runs it every time, even when snapshot_clean.done already exists.
+# No log: directive here because the script itself deletes logs/.
 rule snapshot_clean:
     """
     Create a timestamped snapshot and clean the workspace immediately.

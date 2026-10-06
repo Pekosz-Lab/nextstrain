@@ -35,6 +35,8 @@ rule genome_filter:
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     log:
         "logs/genome_filter/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_filter/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -59,6 +61,8 @@ rule genome_align:
         threads = 80
     log:
         "logs/genome_align/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_align/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -81,6 +85,8 @@ rule genome_tree:
         threads = 64
     log:
         "logs/genome_tree/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_tree/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -104,6 +110,8 @@ rule genome_refine:
         clock_rate = lambda wildcards: {"h3n2": 0.00272, "h1n1": 0.00272, "vic": 0.00127}[wildcards.subtype] # calculated from average of all segment rates
     log:
         "logs/genome_refine/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_refine/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -132,6 +140,8 @@ rule genome_traits:
         node_data = "results/{subtype}/genome/traits.json"
     log:
         "logs/genome_traits/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_traits/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -152,6 +162,8 @@ rule genome_ancestral:
         nt_muts = "results/{subtype}/genome/nt_muts.json"
     log:
         "logs/genome_ancestral/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_ancestral/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -173,6 +185,8 @@ rule genome_translate:
         reference = "config/{subtype}/genome.gb"
     log:
         "logs/genome_translate/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_translate/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -199,6 +213,8 @@ rule genome_export:
         auspice = "auspice/{subtype}/genome.json"
     log:
         "logs/genome_export/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_export/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
@@ -226,6 +242,8 @@ rule genome_frequencies:
         frequencies = "auspice/{subtype}/genome_tip-frequencies.json"
     log:
         "logs/genome_frequencies/{subtype}.log"
+    benchmark:
+        "benchmarks/genome_frequencies/{subtype}.tsv"
     shell:
         """
         exec > {log} 2>&1
