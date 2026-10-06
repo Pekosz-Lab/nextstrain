@@ -22,6 +22,10 @@ an equivalent sequences.fasta and metadata.tsv for:
 
 final output located at data/{segment OR genome}
 
+Logging: every rule writes stdout + stderr to logs/{rule}/... via
+`exec > {log} 2>&1`. Python scripts run with `-u` (unbuffered) so print()
+output and warnings appear in the log in the order they happened.
+
 """
 
 # Input locations can be overridden by a Snakemake configuration file. The
@@ -51,9 +55,12 @@ rule flusort:
         sequences = flusort_sequences,
         metadata = flusort_metadata,
         flag = touch("data/flusort_completed.flag")
+    log:
+        "logs/flusort/flusort.log"
     shell:
         """
-        python scripts/flusort/flusort.py \
+        exec > {log} 2>&1
+        python -u scripts/flusort/flusort.py \
             -db scripts/flusort/blast_database/pyflute_ha_database \
             -i {input.unknown_jhh_sequences} \
             -m {input.unknown_jhh_metadata} \
@@ -66,9 +73,12 @@ rule fludb_inititate:
     message: "inititate fludb"
     output:
         touch("data/fludb_inititated.flag")
+    log:
+        "logs/fludb_inititate/fludb_inititate.log"
     shell:
         """
-        python fludb/scripts/fludb_inititate.py
+        exec > {log} 2>&1
+        python -u fludb/scripts/fludb_inititate.py
         """
 
 rule upload_genomes:
@@ -81,14 +91,15 @@ rule upload_genomes:
     output:
         touch("data/genomes_uploaded.flag")
     log:
-        "logs/fludb_upload_status.txt"
+        "logs/upload_genomes/upload_genomes.log"
     shell:
         """
-        python fludb/scripts/upload_jhh.py \
+        exec > {log} 2>&1
+        python -u fludb/scripts/upload_jhh.py \
             -d fludb.db \
             -f {input.sequences} \
             -m {input.metadata} \
-            --require-sequence | tee {log}
+            --require-sequence
         """
 
 rule upload_vaccines:
@@ -99,9 +110,12 @@ rule upload_vaccines:
         flusort_completed = "data/flusort_completed.flag"
     output:
         touch("data/vaccines_uploaded.flag")
+    log:
+        "logs/upload_vaccines/upload_vaccines.log"
     shell:
         """
-        python fludb/scripts/upload_vaccine.py \
+        exec > {log} 2>&1
+        python -u fludb/scripts/upload_vaccine.py \
             -d fludb.db \
             -f {input.sequences}
         """
@@ -129,8 +143,13 @@ rule download_segments:
         mp_metadata = "data/{subtype}/mp/metadata.tsv",
         ns_metadata = "data/{subtype}/ns/metadata.tsv",
         segments_flag = touch("data/{subtype}/segments_downloaded.flag")
+    log:
+        "logs/download_segments/{subtype}.log"
     shell:
-        "python scripts/fludb_download_seasonal_build.py"
+        """
+        exec > {log} 2>&1
+        python -u scripts/fludb_download_seasonal_build.py
+        """
 
 rule download_genomes:
     message: "Downloading genomes"
@@ -141,8 +160,13 @@ rule download_genomes:
     output:
         genome = "data/{subtype}/genome/sequences.fasta",
         genome_metadata = "data/{subtype}/genome/metadata.tsv"
+    log:
+        "logs/download_genomes/{subtype}.log"
     shell:
-        "python scripts/fludb_download_seasonal_build_genomes.py"
+        """
+        exec > {log} 2>&1
+        python -u scripts/fludb_download_seasonal_build_genomes.py
+        """
 
 rule ingest_complete:
     message: "All ingest steps completed"

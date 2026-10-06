@@ -1,15 +1,20 @@
 # define home dir
 data_dir = config.get("data_dir", "data")
 
+# Logging: every rule writes stdout + stderr to logs/{rule}/{subtype}_{segment}.log
+# (`exec > {log} 2>&1` redirects every line of the shell block that follows it),
+# and records runtime / peak memory to benchmarks/{rule}/{subtype}_{segment}.tsv.
+
 rule fetch_hana_datasets:
     priority: 1
     message: "Downloading updated Nextclade datasets"
     log: 
-        "logs/nextclade_fetch_datasets.txt"
+        "logs/fetch_hana_datasets/fetch_hana_datasets.log"
     output:
-        touch("logs/fetch_hana_datasets.flag")
+        touch("data/nextclade_datasets_fetched.flag")
     shell:
         """
+        exec > {log} 2>&1
         echo "Clearing Nextclade dataset directories..."
         for dir in \
             nextclade/flu/h3n2/ha \
@@ -38,23 +43,23 @@ rule nextclade:
         fasta=f"{data_dir}/{{subtype}}/{{segment}}/sequences.fasta",
         ha_dir="nextclade/flu/{subtype}/ha",
         na_dir="nextclade/flu/{subtype}/na",
-        dataset_ready = "logs/fetch_hana_datasets.flag" #order placeholder
+        dataset_ready = "data/nextclade_datasets_fetched.flag" #order placeholder
     output:
         nextclade_tsv="results/{subtype}/{segment}/nextclade.tsv",
         nextclade_fasta="results/{subtype}/{segment}/nextclade.aligned.fasta"
-    log: 
-        "logs/nextclade_{subtype}_{segment}.txt"
     params:
         dataset="nextclade/flu/{subtype}/{segment}/"
-    run:
-        shell(
-            f"nextclade run "
-            f"-D {params.dataset} "
-            f"--output-fasta {output.nextclade_fasta} "
-            f"--output-tsv {output.nextclade_tsv} "
-            f"{input.fasta}" 
-            f"| tee {log}"
-        )
+    log: 
+        "logs/nextclade/{subtype}_{segment}.log"
+    shell:
+        """
+        exec > {log} 2>&1
+        nextclade run \
+            -D {params.dataset} \
+            --output-fasta {output.nextclade_fasta} \
+            --output-tsv {output.nextclade_tsv} \
+            {input.fasta}
+        """
 
 rule assign_clades:
     message: "Appending clade data"
@@ -64,49 +69,25 @@ rule assign_clades:
     output:
         metadata_clade="results/{subtype}/{segment}/metadata.tsv"
     log: 
-        "logs/assign-clades_{subtype}_{segment}.txt"
-    run:
-        import pandas as pd
-
-        metadata_df = pd.read_csv(input.metadata, sep='\t')
-        clade_df = pd.read_csv(input.ha_clade, sep='\t', usecols=['seqName', 'clade', 'subclade', "legacy-clade"])
-
-        merged_df = pd.merge(metadata_df, clade_df, left_on='sample_ID', right_on='seqName', how='left')
-
-        merged_df.to_csv(output.metadata_clade, sep='\t', index=False)
+        "logs/assign_clades/{subtype}_{segment}.log"
+    script:
+        "../../scripts/assign_clades.py"
 
 rule merge_quality_metrics:
+    message: "Merging nextclade QC metrics into metadata"
     input:
-        metadata=rules.assign_clades.output.metadata_clade,  # "results/{subtype}/{segment}/metadata_clade.tsv"
+        metadata=rules.assign_clades.output.metadata_clade,  # "results/{subtype}/{segment}/metadata.tsv"
         nextclade="results/{subtype}/{segment}/nextclade.tsv"
     output:
         metadata_merged="results/{subtype}/{segment}/metadata_merged.tsv"
     log: 
-        "logs/merge_quality_metrics-{subtype}_{segment}.txt"
-    run:
-        import pandas as pd
-
-        # Load the metadata and nextclade data
-        metadata_df = pd.read_csv(input.metadata, sep='\t')
-        nextclade_df = pd.read_csv(input.nextclade, sep='\t', usecols=['seqName', 'qc.overallScore', 'qc.overallStatus', 'coverage'])
-
-        # Perform the merge operation, merging on the seqName
-        merged_df = pd.merge(metadata_df, nextclade_df, left_on='seqName', right_on='seqName', how='left')
-
-        # Rename the columns to remove the period
-        merged_df.rename(columns={
-            'qc.overallScore': 'qc_overallScore',
-            'qc.overallStatus': 'qc_overallStatus'
-        }, inplace=True)
-
-        # Drop the merge columns (seqName_x and seqName_y) if they exist
-        merged_df.drop(columns=['seqName_x', 'seqName_y'], inplace=True, errors='ignore')
-
-        # Save the merged dataframe to the output file
-        merged_df.to_csv(output.metadata_merged, sep='\t', index=False)
+        "logs/merge_quality_metrics/{subtype}_{segment}.log"
+    script:
+        "../../scripts/merge_quality_metrics.py"
 
     
 rule augur_filter:
+    message: "Filtering {wildcards.subtype}/{wildcards.segment}"
     input:
         sequences="data/{subtype}/{segment}/sequences.fasta",
         metadata= rules.merge_quality_metrics.output.metadata_merged #"results/{subtype}/{segment}/metadata_merged.tsv"
@@ -117,9 +98,10 @@ rule augur_filter:
         min_length=lambda wildcards: min_lengths.get(wildcards.segment, 0),  # Get min length for the segment
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
     log:
-        "logs/augur_filter_{subtype}_{segment}.txt"
+        "logs/augur_filter/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur filter \
             --sequences {input.sequences} \
             --metadata {input.metadata} \
@@ -128,7 +110,7 @@ rule augur_filter:
             --exclude {params.exclude} \
             --metadata-id-columns sample_ID \
             --output-sequences {output.filtered_sequences} \
-            --output-metadata {output.filtered_metadata} | tee {log}
+            --output-metadata {output.filtered_metadata}
         """
 
 rule align:
@@ -144,9 +126,10 @@ rule align:
     params:
         nthreads=8
     log:
-        "logs/align_{subtype}_{segment}.txt"
+        "logs/align/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur align \
             --sequences {input.filtered_sequences} \
             --nthreads {params.nthreads} \
@@ -154,7 +137,7 @@ rule align:
             --remove-reference \
             --output {output.aligned_sequences} \
             --debug \
-            --fill-gaps 2>&1 | tee {log}
+            --fill-gaps
         """
 
 rule raw_tree:
@@ -163,11 +146,14 @@ rule raw_tree:
         alignment=rules.align.output.aligned_sequences
     output:
         tree="results/{subtype}/{segment}/tree_raw.nwk"
+    log:
+        "logs/raw_tree/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur tree \
             --alignment {input.alignment} \
-            --output {output.tree} | tee {log}
+            --output {output.tree}
         """
 
 # TODO: identify more rigorous rates for h3n2 mp,ns h1n1 mp and vic mp,ns. 
@@ -236,9 +222,10 @@ rule refine:
         clock_rate = clock_rate,  # Function reference to calculate clock rate dynamically
         clock_std_dev = clock_std_dev  # Function reference to calculate clock std dev dynamically
     log:
-        "logs/refine_{subtype}_{segment}.txt"
+        "logs/refine/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         # Run augur refine with conditional clock-rate and clock-std-dev arguments
         augur refine \
             --tree {input.tree} \
@@ -253,7 +240,7 @@ rule refine:
             --date-inference {params.date_inference} \
             --clock-filter-iqd {params.clock_filter_iqd} \
             --clock-rate {params.clock_rate}  \
-            --clock-std-dev {params.clock_std_dev} | tee {log}
+            --clock-std-dev {params.clock_std_dev}
         """
 
 rule annotate_traits:
@@ -266,16 +253,17 @@ rule annotate_traits:
     params:
         columns=["clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
     log: 
-        "logs/annotate_traits_{subtype}_{segment}.txt"
+        "logs/annotate_traits/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur traits \
             --tree {input.tree} \
             --metadata {input.metadata} \
             --metadata-id-columns sample_ID \
             --output-node-data {output.traits} \
             --columns {params.columns} \
-            --confidence | tee {log}
+            --confidence
         """
 
 rule infer_ancestral:
@@ -288,14 +276,15 @@ rule infer_ancestral:
     params:
         inference="joint"  # Method for ancestral inference
     log:
-        "logs/infer_ancestral_{subtype}_{segment}.txt"
+        "logs/infer_ancestral/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur ancestral \
             --tree {input.tree} \
             --alignment {input.alignment} \
             --output-node-data {output.ancestral} \
-            --inference {params.inference} | tee {log}
+            --inference {params.inference}
         """
 
 rule translate:
@@ -305,17 +294,18 @@ rule translate:
         ancestral = rules.infer_ancestral.output.ancestral, 
         reference_sequence=lambda wildcards: f"config/{wildcards.subtype}/genome_annotation_ha.gff"
         if wildcards.segment == "ha" else f"config/{wildcards.subtype}/reference_{wildcards.segment}.gb"
-    log: 
-        "logs/translate_{subtype}_{segment}.txt"
     output:
         aa_muts="results/{subtype}/{segment}/aa_muts.json"
+    log: 
+        "logs/translate/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur translate \
             --tree {input.tree} \
             --ancestral-sequences {input.ancestral} \
             --reference-sequence {input.reference_sequence} \
-            --output-node-data {output.aa_muts} | tee {log}
+            --output-node-data {output.aa_muts}
         """    
 
 rule export:
@@ -343,9 +333,10 @@ rule export:
             input.vaccine
         ])
     log: 
-        "logs/export_{subtype}_{segment}.txt"
+        "logs/export/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
@@ -353,7 +344,7 @@ rule export:
             --node-data {params.node_data} \
             --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
-            --output {output.auspice_json} | tee {log}
+            --output {output.auspice_json}
         """
 
 rule frequency:
@@ -363,8 +354,11 @@ rule frequency:
         metadata=rules.augur_filter.output.filtered_metadata,
     output:
         frequencies = "auspice/{subtype}/{segment}_tip-frequencies.json"
+    log:
+        "logs/frequency/{subtype}_{segment}.log"
     shell:
         """
+        exec > {log} 2>&1
         augur frequencies \
             --method kde \
             --tree {input.tree} \
