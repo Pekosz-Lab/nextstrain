@@ -140,8 +140,12 @@ def main():
         lambda x: 'Complete' if len(x.split(', ')) == 8 else 'Incomplete'
     )
 
-    grouped_df['H_Subtype'].replace('', 'xx', inplace=True)
-    grouped_df['N_Subtype'].replace('', 'xx', inplace=True)
+    grouped_df['H_Subtype'] = grouped_df['H_Subtype'].replace('', pd.NA).fillna(
+        grouped_df['N_Subtype'].str.split(', ').str[0].map({'N1': 'H1', 'N2': 'H3'})
+    )
+    grouped_df['N_Subtype'] = grouped_df['N_Subtype'].replace('', pd.NA).fillna(
+        grouped_df['H_Subtype'].str.split(', ').str[0].map({'H1': 'N1', 'H3': 'N2'})
+    )
     grouped_df['subtype'] = grouped_df['H_Subtype'] + grouped_df['N_Subtype']
     grouped_df.loc[grouped_df['type'] == 'InfluenzaB', 'subtype'] = 'Victoria'
 
