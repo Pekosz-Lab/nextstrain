@@ -1,24 +1,59 @@
+# Conda environment for the Pekosz Lab Nextstrain builds and reports.
+#
+# Create it with the setup script (recommended; it checks the result):
+#     bash scripts/build_env.sh
+# or by hand:
+#     CONDA_CHANNEL_PRIORITY=strict conda env create -f workflow/envs/environment.yml
+#     bash scripts/build_env.sh --check
+# or with mamba / micromamba:
+#     CONDA_CHANNEL_PRIORITY=strict mamba env create -f workflow/envs/environment.yml
+#     micromamba create -n pekosz-nextstrain -f workflow/envs/environment.yml
+# For exact, tested versions use the lockfile:
+#     bash scripts/build_env.sh --lock      # (re)generate workflow/envs/conda-lock.yml
+#     bash scripts/build_env.sh --locked    # build from it
+#
+# Works on macOS (Apple Silicon and Intel) and on Linux, including Windows via
+# WSL2. All packages come from conda-forge and bioconda only (`nodefaults`
+# keeps the Anaconda `defaults` channel out, which also avoids its licence
+# terms). Strict channel priority is required: it stops conda mixing
+# conda-forge and bioconda builds of the same library.
+#
+# Versions are bounded to the releases the pipeline was tested with (the
+# Nextstrain Docker runtime of October 2026: augur 34, nextclade 3.21,
+# snakemake 9.17, Python 3.11). Raise a bound deliberately and re-run
+# `bash scripts/build_env.sh --check` plus the tutorial.
 name: pekosz-nextstrain
 channels:
   - conda-forge
   - bioconda
+  - nodefaults
 dependencies:
-  - augur=31.4.0
-  - auspice=2.73.0
-  - awscli=1.27.9
-  - epiweeks=2.1.2
-  - nextclade=3.15.3
-  - python=3.11.*
-  - seaborn>=0.11*
-  - seqkit=2.13.0
-  - csvtk
-  - tsv-utils=2.2.3
-  - tabulate=0.9.0
-  - xlrd=1.*
-  - pip=23.0.1
-  - pathogen-embed=3.1.0
-  - jinja2=3.1.2
-  - blast=2.16.0
-  - pip:
-    - rethinkdb==2.3.0.post6
-    - snakemake==9.13.5  
+  - python =3.11
+  - pip
+
+  # --- Workflow and phylogenetics -------------------------------------------
+  - snakemake-minimal >=9.13,<10
+  - augur >=34.0,<35        # brings mafft, iqtree, fasttree, raxml, vcftools, seqkit
+  - nextclade >=3.21,<4
+  - mafft >=7.5
+  - iqtree >=2.3
+  - seqkit >=2.10           # required by augur >= 25 for FASTA handling
+  - blast >=2.16,<3         # flusort (BLAST typing of segments)
+  - csvtk >=0.30            # genome_clades rule
+  - nextstrain-cli >=10     # `nextstrain remote upload` (no runtime needed)
+  - auspice >=2.60          # optional: `auspice view` to spot-check builds locally
+
+  # --- Python libraries used by the pipeline scripts ------------------------
+  - pandas >=2.2,<3         # augur 34 requires pandas < 3
+  - biopython >=1.80
+  - matplotlib-base >=3.8   # scripts/run_report.py
+  - pyyaml >=6
+
+  # --- Surveillance report (scripts/report.py) --------------------------------
+  - altair >=5.5
+  - vl-convert-python >=1.7 # static PNG export of Altair charts (no browser needed)
+  - marimo >=0.14           # interactive app: marimo run scripts/report.py
+  - itables >=2.5           # interactive tables in the HTML report (bundled offline)
+  - python-pptx >=1.0       # PowerPoint deck
+  - openpyxl >=3.1          # Excel workbook
+  - pillow >=10
