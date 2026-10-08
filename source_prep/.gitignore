@@ -1,0 +1,21 @@
+# =============================================================================
+# source_prep/.gitignore: keeps the JHH data in this folder out of git.
+#
+# runs/, output/ and run_dates.csv hold unpublished JHH sequences and run
+# details. Only README.md and this file are tracked. The empty runs/ and
+# output/ folders are created on your computer by `bash scripts/build_env.sh`
+# (and by scripts/prepare_source.py if they are missing), never by git.
+# Do not edit; never force-add (git add -f) anything from here.
+# =============================================================================
+runs/
+output/
+run_dates.csv
+*.csv
+*.xlsx
+*.xls
+*.fasta
+*.fa
+*.fas
+*.fna
+*.txt
+*.partial
