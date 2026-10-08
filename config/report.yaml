@@ -1,0 +1,52 @@
+# Options for scripts/report.py (the surveillance report built at
+# the end of every run). Everything here is optional; anything left out uses
+# the defaults in DEFAULT_CONFIG at the top of the script.
+
+title: "Johns Hopkins Hospital Influenza Virus Sequencing Frequency Report"
+subtitle: "Consensus sequencing data is provided by Dr. Heba Mostafa"
+author: "Pekosz Lab"
+confidentiality: >-
+  CONFIDENTIAL AND PRIVILEGED INFORMATION. This document contains confidential
+  and privileged information. The data, analyses, and findings presented herein
+  are proprietary and intended solely for authorized personnel and designated
+  recipients.
+source_url: "https://github.com/Pekosz-Lab/nextstrain/blob/main/scripts/report.py"
+
+# fludb `database_origin` value of JHH specimens (GISAID vaccine references are
+# kept out of the frequency statistics).
+lab_origin: mostafa_lab
+
+# Frequency plots: date window and runs to leave out (e.g. ambiguous dates).
+plot_start_date: "2023-01-01"
+plot_end_date: null
+exclude_runs_from_plots: []
+#  - IV25Run16
+
+# Seasons are fixed: October 1 to about May 31 (see season_start_for() in
+# scripts/report.py). Pass --as-of YYYY-MM-DD to report on another season.
+
+# Clades/subclades shown individually per subtype before the rest are grouped
+# as "Other" (at most 8 so every colour stays distinguishable).
+top_n_lineages: 8
+
+# sample_ID values matching this regular expression are treated as controls
+# and left out of the QC counts.
+control_pattern: "^(NTC|NEG|POS|PC|NC|BLANK|WATER|H2O)"
+
+# Keep in sync with the augur filter --query in
+# workflow/snakemake_rules/segments.smk. Used to explain QC removals.
+qc_min_coverage: 0.9
+qc_pass_status: [good, mediocre]
+
+# Rows per table slide in the PowerPoint deck.
+pptx_table_rows: 14
+
+# Callouts shown at the top of the report and on a slide in the deck.
+# kind: note | warning | important
+notes: []
+# Notes carried over from render-reports.qmd (December 2025). Uncomment and
+# edit if they still apply:
+#  - kind: warning
+#    text: "**IV25Run16** is not shown in the plots because of an ambiguous date."
+#  - kind: important
+#    text: "Omar sequenced NH2024-25 genomes in IV25Run17. As of Dec 18, 2025, summer and fall specimens have not been separated."

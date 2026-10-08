@@ -97,7 +97,10 @@ rule augur_filter:
         metadata= rules.merge_quality_metrics.output.metadata_merged #"results/{subtype}/{segment}/metadata_merged.tsv"
     output:
         filtered_sequences="results/{subtype}/{segment}/filtered.fasta",
-        filtered_metadata="results/{subtype}/{segment}/filtered.tsv"
+        filtered_metadata="results/{subtype}/{segment}/filtered.tsv",
+        # Which strains were removed and by which filter. Not used by the build
+        # itself; the surveillance report (reports.smk) reads it for its QC section.
+        filter_log="results/{subtype}/{segment}/filter_log.tsv"
     params:
         min_length=lambda wildcards: min_lengths.get(wildcards.segment, 0),  # Get min length for the segment
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
@@ -116,7 +119,8 @@ rule augur_filter:
             --exclude {params.exclude} \
             --metadata-id-columns sample_ID \
             --output-sequences {output.filtered_sequences} \
-            --output-metadata {output.filtered_metadata}
+            --output-metadata {output.filtered_metadata} \
+            --output-log {output.filter_log}
         """
 
 rule align:

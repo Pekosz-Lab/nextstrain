@@ -29,7 +29,10 @@ rule genome_filter:
         metadata = rules.genome_clades.output.clades
     output:
         filtered_sequences="results/{subtype}/genome/filtered.fasta",
-        filtered_metadata="results/{subtype}/genome/filtered.tsv"
+        filtered_metadata="results/{subtype}/genome/filtered.tsv",
+        # Which strains were removed and by which filter. Not used by the build
+        # itself; the surveillance report (reports.smk) reads it for its QC section.
+        filter_log="results/{subtype}/genome/filter_log.tsv"
     params:
         min_length = min_genome_size, # Get min length for the segment - where to define genome
         exclude="config/exclude.tsv" # manually pruned for sequences outside of molecular clock bounds.
@@ -47,7 +50,8 @@ rule genome_filter:
             --exclude {params.exclude} \
             --metadata-id-columns sample_ID \
             --output-sequences {output.filtered_sequences} \
-            --output-metadata {output.filtered_metadata}
+            --output-metadata {output.filtered_metadata} \
+            --output-log {output.filter_log}
         """
 
 rule genome_align:
