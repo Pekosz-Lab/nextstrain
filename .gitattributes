@@ -1,0 +1,9 @@
+# Keep Unix line endings for everything that runs in a shell, so a checkout
+# made on Windows still works inside WSL.
+*.sh   text eol=lf
+*.py   text eol=lf
+*.smk  text eol=lf
+Snakefile text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.tsv  text eol=lf

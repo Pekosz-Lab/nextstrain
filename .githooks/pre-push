@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# Pre-push guard: second line of defence after pre-commit. Checks every commit
+# about to be sent to GitHub (including commits made with --no-verify or on a
+# clone without the hooks) and refuses the push if any of them contains
+# GISAID data, unpublished JHH data or other protected files.
+# All checks live in scripts/data_guard.sh. Never bypass with --no-verify.
+# -----------------------------------------------------------------------------
+root=$(git rev-parse --show-toplevel) || exit 1
+guard="$root/scripts/data_guard.sh"
+if [ ! -f "$guard" ]; then
+    echo "pre-push: $guard is missing; refusing to push without the data check." >&2
+    exit 1
+fi
+# git passes "<local ref> <local sha> <remote ref> <remote sha>" lines on stdin.
+exec bash "$guard" --push

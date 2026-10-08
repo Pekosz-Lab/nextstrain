@@ -1,29 +1,75 @@
-# Specify the files that we would like to keep out of the Pekosz Lab Nextstrain repository
+# =============================================================================
+# .gitignore for the Pekosz Lab Nextstrain repository (PUBLIC on GitHub)
+#
+# Anything listed here stays on your computer and is never uploaded.
+# This file is the first line of defence; the pre-commit and pre-push hooks
+# (.githooks/ -> scripts/data_guard.sh) are the second, and they also catch
+# data that was renamed, reformatted or moved into a folder not listed here.
+# Never force-add an ignored file (git add -f). See the wiki: https://github.com/Pekosz-Lab/nextstrain/wiki/Best-Practices
+# =============================================================================
 
-# Sensitive Directories
+# --- Raw input data: GISAID-licensed and unpublished JHH sequences -----------
+# source/ holds JHH_sequences.fasta, JHH_metadata.txt and vaccine.fasta (GISAID).
+# GISAID data may not be redistributed; JHH data is private until released on
+# GISAID. This is the ONLY folder where raw sequence data may live.
 source/
+
+# GISAID-licensed vaccine strains supplied locally for the tutorial
+tutorial/vaccine.fasta
+tutorial/flusort*
+
+# --- Pipeline working folders (rebuilt by Snakemake every run) -------------------
+# Contain copies and derivatives of source/ data, including GISAID vaccine
+# sequences, so they are never tracked.
 data/
 results/
-auspice/
-figures/
-# run logs, benchmarks, provenance and run reports
-.run/
-reports/
-snapshots/
-
-# GISAID-licensed vaccine strains supplied locally for the tutorial (never commit)
-tutorial/vaccine.fasta
-
-# database files 
+# fludb: the SQLite database built from source/ by the ingest rules
 *.db
 **.db
 
-# OS Generated #
+# --- Pipeline outputs ------------------------------------------------------------
+# Auspice JSONs: inspected by a person, then uploaded to Nextstrain by hand.
+auspice/
+# Surveillance report: CONFIDENTIAL, internal distribution only.
+reports/
+# Figures made from build outputs (may show unpublished JHH data).
+figures/
+# Run logs, benchmarks, provenance and run reports (machine and user details).
+.run/
+# Timestamped archives of whole runs, including source/ data.
+snapshots/
+# Snakemake's own state folder.
+.snake*/
+
+# --- No data files at the top level of the repository ----------------------------
+# Sequences and metadata go in source/; outputs go in results/.
+/*.fasta
+/*.fa
+/*.fna
+/*.fas
+/*.tsv
+/*.csv
+/*.xls
+/*.xlsx
+
+# --- Notebooks ---------------------------------------------------------------------
+# Jupyter is not used for new work (marimo or Quarto only), and saved outputs
+# can embed data. Existing tracked notebooks are unaffected.
+*.ipynb
+.ipynb_checkpoints
+# marimo session caches
+__marimo__/
+# Quarto render caches and intermediate files
+.quarto/
+_freeze/
+*.vdoc.r
+*.vdoc.python
+
+# --- Operating system and editor clutter ------------------------------------------
 .DS_Store
 *DS_Store
 *DS_Store?
 **DS_Store
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
@@ -32,28 +78,23 @@ Icon?
 ehthumbs.db
 Thumbs.db
 *~
-
-# Sensitive environment variables
-
-# R or Python notebook (jupyter or rmarkdown intermediate files)
-*.vdoc.r
-*.vdoc.python
-
-# All Snakemake files
-.snake*/ 
-
-#Jupyter 
-.ipynb_checkpoints
 geckodriver.log
 
-# cluster logs
+# --- Personal settings ------------------------------------------------------------
+# Your own agent settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
+# Secrets and credentials never belong in the repository
+.env
+
+# --- Cluster logs ------------------------------------------------------------------
 slurm-*
 
-# flusort diagnostics
+# --- flusort diagnostics (large, regenerated) --------------------------------------
 scripts/flusort/flusort_out
-
-# until complete, remove for now
 scripts/flusort/flusort_out/blast_output.txt
+
+# --- Work in progress, kept out until complete -------------------------------------
 notebooks/reassortment.ipynb
 notebooks/tanglegram.ipynb
 README2.md
+scripts/depreciated
