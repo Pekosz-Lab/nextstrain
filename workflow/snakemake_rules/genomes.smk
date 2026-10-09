@@ -153,7 +153,7 @@ rule genome_traits:
         --metadata {input.metadata} \
         --metadata-id-columns sample_ID \
         --output-node-data {output.node_data} \
-        --columns clade subclade
+        --columns legacy-clade subclade
         """
 
 rule genome_ancestral:
@@ -211,7 +211,8 @@ rule genome_export:
         nt_muts = rules.genome_ancestral.output.nt_muts,
         aa_muts = rules.genome_translate.output.aa_muts,
         config = "config/{subtype}/auspice_config.json",
-        vaccine="config/{subtype}/vaccine.json"
+        vaccine="config/{subtype}/vaccine.json",
+        colors="config/{subtype}/colors.tsv"  # subclade colours, synced by scripts/sync_subclade_colors.py
     output:
         auspice = "auspice/{subtype}/genome.json"
     log:
@@ -233,6 +234,7 @@ rule genome_export:
             {input.aa_muts} \
             {input.vaccine} \
             --auspice-config {input.config} \
+            --colors {input.colors} \
             --output {output.auspice}
         """
 

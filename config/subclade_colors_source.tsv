@@ -1,0 +1,4 @@
+subtype	official_file	official_commit	official_commit_date	synced_on
+h1n1	nextstrain/seasonal-flu/config/h1n1pdm/ha/auspice_config.json	ed72e15	2026-09-24	2026-10-09
+h3n2	nextstrain/seasonal-flu/config/h3n2/ha/auspice_config.json	44b2ab9	2026-08-17	2026-10-09
+vic	nextstrain/seasonal-flu/config/vic/ha/auspice_config.json	ed72e15	2026-09-24	2026-10-09

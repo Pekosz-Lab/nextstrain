@@ -266,7 +266,7 @@ rule annotate_traits:
     output:
         traits = "results/{subtype}/{segment}/traits.json"
     params:
-        columns=["clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
+        columns=["legacy-clade", "subclade", "qc_overallStatus", "qc_overallScore", "coverage", "sequencing_run"]
     log: 
         ".run/logs/annotate_traits/{subtype}_{segment}.log"
     benchmark:
@@ -340,11 +340,11 @@ rule export:
         nt_muts=rules.infer_ancestral.output.ancestral,
         aa_muts=rules.translate.output.aa_muts,
         vaccine="config/{subtype}/vaccine.json",
-        auspice_config="config/{subtype}/auspice_config.json"
+        auspice_config="config/{subtype}/auspice_config.json",
+        colors="config/{subtype}/colors.tsv"  # subclade colours, synced by scripts/sync_subclade_colors.py
     output:
         auspice_json="auspice/{subtype}/{segment}.json"
     params:
-        colors="config/{subtype}/colors.tsv",
         # Concatenate all node data inputs dynamically for --node-data flag
         node_data=lambda wildcards, input: " ".join([
             input.branch_lengths,
@@ -367,6 +367,7 @@ rule export:
             --node-data {params.node_data} \
             --metadata-id-columns sample_ID \
             --auspice-config {input.auspice_config} \
+            --colors {input.colors} \
             --output {output.auspice_json}
         """
 

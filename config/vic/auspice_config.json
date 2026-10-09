@@ -13,7 +13,7 @@
   "build_url": "https://github.com/Pekosz-Lab/nextstrain",
   "colorings":[
     {
-      "key": "clade",
+      "key": "legacy-clade",
       "title": "clade",
       "type": "categorical"
     },
@@ -47,7 +47,7 @@
     "color_by": "subclade"
   },
   "filters": [
-    "clade",
+    "legacy-clade",
     "subclade",
     "sequencing_run",
     "qc_overallScore",
