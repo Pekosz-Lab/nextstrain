@@ -103,7 +103,7 @@ scripts/depreciated/          retired scripts; never called, never edited
 fludb/scripts/                SQLite database: create, upload JHH/vaccine, download per build
 config/                       build settings: per-subtype references, auspice configs, vaccine.json,
                               exclude.tsv, description.md, report.yaml, tutorial.yaml, snapshot_clean.yaml
-nextclade/flu/                Nextclade datasets (HA/NA re-downloaded every run; B/Vic others custom)
+nextclade/flu/                Nextclade datasets (HA/NA re-downloaded every run and git-ignored; B/Vic others custom)
 profiles/default/             Snakemake run options
 notebooks/                    exploratory marimo/Quarto only
 tutorial/                     small public teaching dataset (README points to the wiki)

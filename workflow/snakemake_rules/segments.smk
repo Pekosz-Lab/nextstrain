@@ -35,15 +35,18 @@ rule fetch_hana_datasets:
         nextclade dataset get -n flu_h3n2_na -o nextclade/flu/h3n2/na
         nextclade dataset get -n flu_h1n1pdm_na -o nextclade/flu/h1n1/na
         nextclade dataset get -n flu_vic_na -o nextclade/flu/vic/na
+
+        echo "Dataset versions now in nextclade/flu/:"
+        python -u scripts/record_provenance.py --nextclade-dir nextclade/flu
         """
 
 rule nextclade:
     message: "Running nextclade for {input.fasta}"
     input:
         fasta=f"{data_dir}/{{subtype}}/{{segment}}/sequences.fasta",
-        ha_dir="nextclade/flu/{subtype}/ha",
-        na_dir="nextclade/flu/{subtype}/na",
-        dataset_ready = "data/nextclade_datasets_fetched.flag" #order placeholder
+        # HA/NA datasets are git-ignored and downloaded by fetch_hana_datasets;
+        # this flag makes every nextclade job wait for that download.
+        dataset_ready = "data/nextclade_datasets_fetched.flag"
     output:
         nextclade_tsv="results/{subtype}/{segment}/nextclade.tsv",
         nextclade_fasta="results/{subtype}/{segment}/nextclade.aligned.fasta"

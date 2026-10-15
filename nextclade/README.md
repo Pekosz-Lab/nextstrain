@@ -4,7 +4,9 @@ This repository houses [nextclade](https://github.com/seasonal-flu/nextclade/tre
 
 ## Notes
 
-For Influenza A builds, datasets regularly maintained by the [nextstrain](https://nextstrain.org/)team: (https://github.com/nextstrain/nextclade_data/tree/release/data/nextstrain) are pulled into this repository.
+For Influenza A builds, datasets regularly maintained by the [nextstrain](https://nextstrain.org/) team (https://github.com/nextstrain/nextclade_data/tree/release/data/nextstrain) are pulled into this repository.
+
+The HA and NA datasets for H1N1, H3N2 and B/Victoria (`flu/{h1n1,h3n2,vic}/{ha,na}/`) are **not tracked in git**: rule `fetch_hana_datasets` (`workflow/snakemake_rules/segments.smk`) downloads the latest release at the start of every run, and the version tag of every dataset used is written to `.run/run_logs/{RUN_ID}_provenance.txt` (`== nextclade datasets ==`). All other datasets here are tracked.
 
 For Influenza B builds, all datasets have been created according to specifications found in the [dataset curation guidelines](https://github.com/nextstrain/nextclade_data/blob/release/docs/dataset-curation-guide.md) for [Nexclade CLI](https://docs.nextstrain.org/projects/nextclade/en/stable/user/nextclade-cli/index.html) v3 compatability.
 

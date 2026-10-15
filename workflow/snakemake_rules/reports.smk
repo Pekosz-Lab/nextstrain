@@ -111,7 +111,8 @@ rule surveillance_report:
 #   .run/logs/{rule}/{subtype}_{segment}.log            each job's stdout + stderr
 #   .run/benchmarks/{rule}/{subtype}_{segment}.tsv      each job's runtime and memory
 #   .run/run_logs/{RUN_ID}_provenance.txt               host, git commit, tool versions,
-#                                                       start/finish time, status
+#                                                       input file checksums, Nextclade
+#                                                       dataset tags, start/finish time, status
 #   .run/run_logs/{RUN_ID}_snakemake_{SUCCESS|FAILED}.log   copy of Snakemake's main log
 #   .run/reports/{RUN_ID}/report.md (+ figures/, tables/)   the run report itself
 #
@@ -163,6 +164,14 @@ onstart:
             echo "conda env:  ${{CONDA_DEFAULT_ENV:-none}} (${{CONDA_PREFIX:-no conda prefix}})"
         }} > "{PROVENANCE_FILE}" 2>&1
 
+        # Which input files this run used: record count, size, modified time
+        # and SHA-256 checksum (no sequence content). Ties the build to an
+        # exact vaccine.fasta and JHH release.
+        python scripts/record_provenance.py \
+            --inputs "{jhh_sequences}" "{jhh_metadata}" "{vaccine_sequences}" \
+            >> "{PROVENANCE_FILE}" 2>&1 \
+            || echo "WARNING: could not record input files in {PROVENANCE_FILE}"
+
         # Data protection (never stops the run): warn if GISAID data sits
         # outside source/, or if this clone's commit/push checks are off.
         bash scripts/data_guard.sh --scan || true
@@ -182,6 +191,11 @@ def finish_run_report(status, snakemake_log):
     shell(
         """
         mkdir -p "{RUN_LOG_DIR}"
+        # Version tag of every Nextclade dataset the run used (HA/NA are
+        # re-downloaded each run and are not tracked in git).
+        python scripts/record_provenance.py --nextclade-dir nextclade/flu \
+            >> "{PROVENANCE_FILE}" 2>&1 \
+            || echo "WARNING: could not record Nextclade dataset tags in {PROVENANCE_FILE}"
         echo "finished_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "{PROVENANCE_FILE}"
         echo "status:     {status}" >> "{PROVENANCE_FILE}"
         cp "{snakemake_log}" "{RUN_LOG_DIR}/{RUN_ID}_snakemake_{status}.log"

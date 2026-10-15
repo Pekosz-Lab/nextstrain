@@ -41,6 +41,17 @@ snapshots/
 # Snakemake's own state folder.
 .snake*/
 
+# --- Nextclade HA/NA datasets (downloaded fresh every run) -----------------------
+# Rule fetch_hana_datasets (segments.smk) replaces these at the start of every
+# run, and their version tags are written to .run/run_logs/{RUN_ID}_provenance.txt.
+# The other datasets in nextclade/flu/ are not re-downloaded and stay tracked.
+nextclade/flu/h1n1/ha/
+nextclade/flu/h1n1/na/
+nextclade/flu/h3n2/ha/
+nextclade/flu/h3n2/na/
+nextclade/flu/vic/ha/
+nextclade/flu/vic/na/
+
 # --- No data files at the top level of the repository ----------------------------
 # Sequences and metadata go in source/; outputs go in results/.
 /*.fasta
