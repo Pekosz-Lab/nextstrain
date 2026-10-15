@@ -57,5 +57,12 @@ if [[ -d source ]]; then
     rm -f source/flusort_*
 fi
 
+# Tutorial runs (config/tutorial.yaml, source_dir: tutorial) write flusort
+# output here; the tracked tutorial inputs are left alone.
+if [[ -d tutorial ]]; then
+    echo "🗑️  Removing flusort files from tutorial/"
+    rm -f tutorial/flusort_*
+fi
+
 echo "✅ Snapshot created at $final_archive"
 echo "✅ Cleanup complete."

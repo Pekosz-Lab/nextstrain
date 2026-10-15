@@ -5,7 +5,8 @@ Both rules run scripts/snapshot_clean.sh, which:
   1. archives auspice/, .run/, reports/, source/, nextclade/, results/ and
      config/ into snapshots/{YYYYMMDDTHHMMSS}.tar.gz, then
   2. deletes data/, results/, reports/, auspice/, .run/logs/, .run/benchmarks/,
-     fludb.db and the flusort_* files in source/, so the next run starts clean.
+     fludb.db and the flusort_* files in source/ and tutorial/, so the next
+     run starts clean.
      .run/run_logs/ and .run/reports/ are kept, so run history persists.
 
 There are two ways to trigger it:
