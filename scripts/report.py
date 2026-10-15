@@ -1,10 +1,16 @@
 # ----------------------------------------------------------------------------
-# Authorship
-#   Designed and developed by Elgin Akin (Pekosz Lab, Johns Hopkins Bloomberg
-#   School of Public Health), 2026, with assistance from Claude (Anthropic).
+# AI-assistance disclosure
+#   The initial analysis scripts behind this report (data parsing and the
+#   type, subtype and clade frequency calculations) were written by a human.
+#   Claude (Anthropic), an AI model, was then used to organize that code into
+#   this file and to create the report's visualizations, HTML layout and slide
+#   deck. The same disclosure (AI_DISCLOSURE below) is printed at the bottom of
+#   both outputs.
+#
 #   The attribution line "Developed by Elgin Akin, 2026" (ATTRIBUTION below)
-#   must stay in this file and in both outputs: the build checks the HTML
-#   report and the slide deck for it and fails if it is missing.
+#   appears only at the bottom of each output (HTML footer; "Methods and notes"
+#   slide). The build checks both outputs for the attribution and the
+#   disclosure and fails if either is missing.
 # ----------------------------------------------------------------------------
 """
 Influenza surveillance report for the Pekosz Lab Nextstrain builds.
@@ -75,7 +81,11 @@ scripts/run_report.py.
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="full", app_title="JHH Influenza Surveillance Report")
+app = marimo.App(
+    width="full",
+    app_title="JHH Influenza Surveillance Report",
+    layout_file="layouts/report.slides.json",
+)
 
 with app.setup:
     import argparse
@@ -184,6 +194,11 @@ with app.setup:
     # Wording used in both outputs
     # ------------------------------------------------------------------
     ATTRIBUTION = "Developed by Elgin Akin, 2026"   # required in both outputs (checked)
+    AI_DISCLOSURE = (                               # required in both outputs (checked)
+        "AI-assistance disclosure: the initial analysis scripts behind this report (data parsing "
+        "and the type, subtype and clade frequency calculations) were written by a human. "
+        "Claude (Anthropic), an AI model, was used to organize that code and to create the "
+        "visualizations and layout of this report and slide deck.")
     SUBMITTED_DEFINITION = (
         "“Submitted” means specimens fed into the Nextstrain pipeline (rows of the pipeline's "
         "input metadata), not every specimen collected or sequenced.")
@@ -259,11 +274,6 @@ with app.setup:
     _ = alt.data_transformers.disable_max_rows()
 
 
-# ======================================================================
-# Report building blocks
-# ======================================================================
-
-
 @app.class_definition
 @dataclass
 class Text:
@@ -335,7 +345,7 @@ class Table:
     pptx_columns: list | None = None
     pptx_max_rows: int | None = None
     page_length: int = 10
-    html_df: Any = None          # optional HTML-formatted version for the web page
+    html_df: Any = None
 
 
 @app.class_definition
@@ -366,12 +376,7 @@ class ReportData:
     builds: Any        # one row per build: stage counts
     runs: Any          # one row per sequencing run: QC summary
     run_order: list    # runs sorted by first specimen date
-    run_dates: dict    # run -> first specimen date
-
-
-# ======================================================================
-# Small helpers
-# ======================================================================
+    run_dates: dict
 
 
 @app.function
@@ -389,15 +394,6 @@ def fmt_n_pct(num, den, digits=1):
     """'1,234 (56.7%)' – the convention used in the summary tables."""
     pct = round(100 * num / den, digits) if den else 0
     return f"{int(num):,} ({pct:g}%)"
-
-
-# ---------- Season logic (the single definition used everywhere) ----------
-# A Northern Hemisphere season runs from October 1 of year Y to about May 31
-# of year Y+1. The current season starts October 1 of this year from October
-# onward, otherwise October 1 of last year, so June-September still show the
-# season that just ended. For counting, specimens dated June-September belong
-# to the season that started the previous October (seasons are Oct 1 - Sep 30
-# bins); May 31 is only drawn as a visual marker.
 
 
 @app.function
@@ -502,11 +498,6 @@ def slug(text):
     return re.sub(r"[^a-z0-9]+", "_", str(text).lower()).strip("_")
 
 
-# ======================================================================
-# Configuration and command line
-# ======================================================================
-
-
 @app.function
 def parse_args(argv=None):
     p = argparse.ArgumentParser(
@@ -571,21 +562,25 @@ def resolve_inputs(args):
 
 @app.function
 def prepared_by():
-    """Who ran the pipeline: `nextstrain whoami`, else the OS user, else the
-    host name, else "Unknown". Never raises."""
+    """Who ran the pipeline: the OS account running this process (full name if
+    set, else login name), else the login from the environment, else the host
+    name, else "Unknown". Works the same on macOS, Linux and WSL. Never raises."""
     try:
-        import subprocess
-        out = subprocess.run(["nextstrain", "whoami"], capture_output=True, text=True, timeout=8)
-        if out.returncode == 0:
-            lines = [l.strip() for l in out.stdout.splitlines()
-                     if l.strip() and not l.strip().startswith("#")]
-            if lines and "not logged in" not in out.stdout.lower():
-                return lines[-1]
+        # pwd looks the account up by the process's user id, so it does not
+        # depend on USER/LOGNAME being set. Not available on native Windows.
+        import os
+        import pwd
+        entry = pwd.getpwuid(os.getuid())
+        full_name = entry.pw_gecos.split(",")[0].strip()
+        if full_name:
+            return full_name
+        if entry.pw_name:
+            return entry.pw_name
     except Exception:
         pass
     try:
         import getpass
-        user = getpass.getuser()
+        user: str = getpass.getuser()
         if user:
             return user
     except Exception:
@@ -622,11 +617,6 @@ def read_provenance(run_logs, run_id=None):
         if m:
             info[m.group(1)] = m.group(2).replace(m.group(1), "").strip()
     return info
-
-
-# ======================================================================
-# Data collection
-# ======================================================================
 
 
 @app.function
@@ -985,11 +975,6 @@ def collect(args):
                       run_dates={r: run_dates.loc[r, "min"] for r in run_order})
 
 
-# ======================================================================
-# Frequency data helpers
-# ======================================================================
-
-
 @app.function
 def plot_window(d, df):
     """Rows of `df` inside the configured plotting window (lab specimens of
@@ -1085,15 +1070,6 @@ def stacked_run_chart(df, color_field, domain, colors, width, title_field, norma
                                               color=MUTED, angle=0)
                       .encode(x=xm, y=alt.Y("ypx:Q", scale=None), text="label:N"))
     return alt.layer(*layers).properties(width=width, height=340)
-
-
-# ======================================================================
-# Report items. Each function returns one block (or a short list of blocks).
-# Register new items in report_layout() at the end of this part.
-# ======================================================================
-
-
-# ---------- shared helpers for the items ----------------------------------
 
 
 @app.function
@@ -1206,9 +1182,6 @@ def run_label_map(d):
             for r in d.run_order}
 
 
-# ---------- Overview ----------------------------------------------------
-
-
 @app.function
 def item_at_a_glance(d):
     """Most recent run vs season to date: submitted vs in the final build."""
@@ -1249,9 +1222,6 @@ def item_notes(d):
     return blocks
 
 
-# ---------- Surveillance summary ----------------------------------------
-
-
 @app.function
 def item_season_tables(d):
     """Summary + genetic characterization, one view per season (selector in
@@ -1278,9 +1248,6 @@ def item_season_tables(d):
                   interactive=False, row_styles=gst),
         ]))
     return Choice("Season", options, appendix_title="Appendix – season {label}")
-
-
-# ---------- Frequencies -------------------------------------------------
 
 
 @app.function
@@ -1342,8 +1309,6 @@ def item_lineage_frequency(d):
         return Text("No clade assignments in the plotting window.", kind="note")
     return Tabs(tabs)
 
-
-# ---------- QC: run-level funnel ----------------------------------------
 
 @app.function
 def funnel_frames(d):
@@ -1485,9 +1450,6 @@ def item_run_funnel_table(d):
                  page_length=16, pptx=False)
 
 
-# ---------- QC: per sequencing run --------------------------------------
-
-
 @app.function
 def item_qc_by_run(d):
     s = real_specimens(d)
@@ -1588,9 +1550,6 @@ def item_qc_run_matrix(d):
                          "the menu under the chart (latest run by default).")
 
 
-# ---------- QC: per build -------------------------------------------------
-
-
 @app.function
 def build_stage_long(d):
     b = d.builds
@@ -1672,9 +1631,6 @@ def item_build_table(d):
                          "(--clock-filter-iqd).", page_length=27)
 
 
-# ---------- QC: Nextclade metrics -----------------------------------------
-
-
 @app.function
 def item_nextclade_status(d):
     q = d.build_qc[(d.build_qc["segment"] != "genome")].copy()
@@ -1749,9 +1705,6 @@ def item_ha_scatter(d):
                  pptx=False)
 
 
-# ---------- QC: detailed tables -------------------------------------------
-
-
 @app.function
 def item_removed_table(d):
     dropped = d.build_qc[~d.build_qc["status"].isin(["in_build", "unknown"])].copy()
@@ -1817,9 +1770,6 @@ def item_database_glance(d):
         ("HA in the final builds", fmt_n(in_ha), fmt_pct(in_ha, len(real)) + " of submitted"),
         ("Genome in the final builds", fmt_n(in_g), fmt_pct(in_g, len(real)) + " of submitted"),
     ], title="Database at a glance (all runs)")
-
-
-# ---------- Interactive tables --------------------------------------------
 
 
 @app.function
@@ -1904,9 +1854,6 @@ def item_all_sequences(d):
                          "to reports/report.tsv).", pptx=False, page_length=15)
 
 
-# ---------- Methods -------------------------------------------------------
-
-
 @app.function
 def item_methods(d):
     cfg, meta = d.cfg, d.meta
@@ -1945,9 +1892,6 @@ def item_methods(d):
     lines.append(f"**Prepared by** {meta['prepared_by']}. {ATTRIBUTION}. "
                  f"Source code: [{cfg['source_url']}]({cfg['source_url']})")
     return Text("\n\n".join(lines), pptx=True)
-
-
-# ---------- Registry --------------------------------------------------------
 
 
 @app.function
@@ -2005,11 +1949,6 @@ def build_sections(d, strict=False):
     return out
 
 
-# ======================================================================
-# Rendering: shared helpers
-# ======================================================================
-
-
 @app.function
 def iter_blocks(blocks):
     """Flatten Tabs and Choice (every view; used by the figure/table exporters)."""
@@ -2060,11 +1999,6 @@ def md_plain(text):
     t = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     t = re.sub(r"`(.+?)`", r"\1", t)
     return re.sub(r"\[(.+?)\]\((.+?)\)", r"\2", t)
-
-
-# ======================================================================
-# Rendering: HTML
-# ======================================================================
 
 
 @app.function
@@ -2139,7 +2073,6 @@ table.static th{text-align:left;font-weight:600;color:var(--ink-2);border-bottom
 table.static td{padding:7px 10px;border-bottom:1px solid var(--line)}
 table.static td:not(:first-child),table.static th:not(:first-child){text-align:right}
 table.static tr.group td{font-weight:650;background:var(--surface-2)}
-.attribution{margin:0 0 14px;font-size:12px;letter-spacing:.02em;opacity:.7}
 .scope{margin-top:14px;font-size:13px;opacity:.9;max-width:90ch}
 .blocktitle{font-size:16px;margin:18px 0 0}
 .compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:14px 0 6px}
@@ -2171,6 +2104,7 @@ html.dark .st-in_build{background:#123d12;color:#8fe08f}html.dark .st-clock,html
 html.dark .st-qc,html.dark .st-length,html.dark .st-filter_other{background:#43220f;color:#ffb48f}
 html.dark .st-excluded,html.dark .st-no_sequence{background:#431515;color:#ff9c9c}
 footer{max-width:1240px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:12.5px}
+footer .disclosure{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:8px;color:var(--ink-2)}
 @media (max-width:900px){
  .layout{grid-template-columns:1fr;gap:0;padding-top:12px}
  .menu-btn{display:inline-block}
@@ -2404,7 +2338,7 @@ window.dispatchEvent(new Event('vega-ready'));</script>
 </head><body>
 <div class="topbar"><button class="btn menu-btn" id="menu" aria-label="Sections">☰</button>
 <div class="name">{title}</div><button class="btn" id="theme">Theme: auto</button></div>
-<header class="hero"><div class="hero-inner"><p class="attribution">{htmlmod.escape(ATTRIBUTION)}</p>
+<header class="hero"><div class="hero-inner">
 <p class="eyebrow">{htmlmod.escape(cfg.get('author') or '')} · Nextstrain surveillance</p>
 <h1>{title}</h1><p class="sub">{htmlmod.escape(cfg.get('subtitle') or '')}</p>
 <div class="chips">{chips_html}</div>
@@ -2413,17 +2347,13 @@ window.dispatchEvent(new Event('vega-ready'));</script>
 <div class="layout"><nav class="toc" aria-label="Sections">{''.join(toc)}</nav>
 <main>{''.join(body)}</main></div>
 <footer>{htmlmod.escape(COMPLEMENT_STATEMENT)} {htmlmod.escape(SUBMITTED_DEFINITION)}<br>
-Prepared by {htmlmod.escape(meta['prepared_by'])} · built by scripts/report.py · {htmlmod.escape(meta['generated'])} · {htmlmod.escape(ATTRIBUTION)}</footer>
+Prepared by {htmlmod.escape(meta['prepared_by'])} · built by scripts/report.py · {htmlmod.escape(meta['generated'])} · {htmlmod.escape(ATTRIBUTION)}
+<p class="disclosure">{htmlmod.escape(AI_DISCLOSURE)}</p></footer>
 <script type="module">
 function start(){{ {html_js(dark_map)} }}
 if (window.vegaEmbed) start(); else window.addEventListener('vega-ready', start, {{once: true}});
 </script>
 </body></html>"""
-
-
-# ======================================================================
-# Rendering: PowerPoint
-# ======================================================================
 
 
 @app.function
@@ -2642,7 +2572,6 @@ def render_pptx(d, sections, path, figure_cache=None):
     s = prs.slides.add_slide(blank)
     bg = s.shapes.add_shape(1, 0, 0, W, H)
     bg.fill.solid(); bg.fill.fore_color.rgb = rgb("#0d366b"); bg.line.fill.background()
-    textbox(s, Inches(0.9), Inches(0.7), Inches(11.5), Inches(0.35), ATTRIBUTION, 11, color="#9ec5f4")
     textbox(s, Inches(0.9), Inches(1.6), Inches(11.5), Inches(0.4), "NEXTSTRAIN SURVEILLANCE REPORT", 13,
             bold=True, color="#86b6ef")
     textbox(s, Inches(0.9), Inches(2.1), Inches(11.5), Inches(1.8), cfg["title"], 36, bold=True, color="#ffffff")
@@ -2686,29 +2615,30 @@ def render_pptx(d, sections, path, figure_cache=None):
             emit(b, sec.title)
     for title, blocks in appendix:
         season_appendix_slide(title, blocks)
+
+    # Closing slide: AI-assistance disclosure
+    s = base_slide("AI-assistance disclosure", "About this report")
+    textbox(s, margin, content_top, W - 2 * margin, content_h, [AI_DISCLOSURE, "", ATTRIBUTION], 16)
     prs.save(path)
-
-
-# ======================================================================
-# Writing everything
-# ======================================================================
 
 
 @app.function
 def verify_attribution(html_path=None, pptx_path=None):
-    """Fail the build if the attribution is missing from either output."""
+    """Fail the build if the attribution or AI disclosure is missing from either output."""
+    required = {"attribution": ATTRIBUTION, "AI disclosure": AI_DISCLOSURE}
     missing = []
-    if html_path is not None and ATTRIBUTION not in Path(html_path).read_text(encoding="utf-8"):
-        missing.append(str(html_path))
+    if html_path is not None:
+        page = htmlmod.unescape(Path(html_path).read_text(encoding="utf-8"))
+        missing += [f"{name} in {html_path}" for name, text in required.items() if text not in page]
     if pptx_path is not None:
         from pptx import Presentation
         texts = [sh.text_frame.text for sl in Presentation(pptx_path).slides
                  for sh in sl.shapes if sh.has_text_frame]
-        if not any(ATTRIBUTION in t for t in texts):
-            missing.append(str(pptx_path))
+        missing += [f"{name} in {pptx_path}" for name, text in required.items()
+                    if not any(text in t for t in texts)]
     if missing:
-        raise RuntimeError(f"Attribution '{ATTRIBUTION}' is missing from: {', '.join(missing)}. "
-                           "It must not be removed (see the authorship note in scripts/report.py).")
+        raise RuntimeError(f"Missing from the outputs: {'; '.join(missing)}. "
+                           "These must not be removed (see the disclosure note at the top of scripts/report.py).")
 
 
 @app.function
@@ -2774,11 +2704,6 @@ def main(argv=None):
     return d, sections
 
 
-# ======================================================================
-# marimo app: live exploration (marimo run / marimo edit)
-# ======================================================================
-
-
 @app.function
 def to_marimo(b):
     if isinstance(b, Text):
@@ -2816,7 +2741,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(args, is_script):
+def _(is_script):
     # Script mode: build the report files and stop.
     if is_script:
         main(sys.argv[1:])
@@ -2875,7 +2800,7 @@ def _(d, run_picker):
 
 
 @app.cell(hide_code=True)
-def _(d, sections):
+def _():
     export = mo.ui.run_button(label="Write HTML + PPTX to the output folder")
     export
     return (export,)

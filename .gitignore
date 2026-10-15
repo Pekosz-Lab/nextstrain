@@ -104,8 +104,12 @@ slurm-*
 scripts/flusort/flusort_out
 scripts/flusort/flusort_out/blast_output.txt
 
+# --- marimo layout files (written by the marimo editor's grid/slides views) --------
+# Saved next to the notebook, so editing scripts/report.py in marimo creates these.
+# The pipeline does not use them.
+scripts/layouts/
+
 # --- Work in progress, kept out until complete -------------------------------------
 notebooks/reassortment.ipynb
 notebooks/tanglegram.ipynb
-README2.md
 scripts/depreciated
