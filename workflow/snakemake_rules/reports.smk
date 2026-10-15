@@ -79,6 +79,8 @@ rule surveillance_report:
         # flusort's typing of every JHH specimen (from ingest.smk)
         flusort = flusort_metadata,
         report_config = "config/report.yaml",
+        # which flusort subtype calls go into which build (incl. assumed subtypes)
+        subtype_assignment = "config/subtype_assignment.yaml",
         # listed so that editing the report script rebuilds the report
         script = "scripts/report.py"
     output:
@@ -97,6 +99,7 @@ rule surveillance_report:
         python -u scripts/report.py \
             --outdir reports \
             --config {input.report_config} \
+            --subtype-assignment {input.subtype_assignment} \
             --jhh-metadata {params.jhh_metadata} \
             --jhh-sequences {params.jhh_sequences} \
             --flusort-metadata {input.flusort}

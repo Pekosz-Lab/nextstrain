@@ -1,0 +1,47 @@
+# Which fludb subtype values go into which Nextstrain build.
+#
+# flusort (scripts/flusort/flusort.py) writes the subtype from its HA and NA
+# BLAST calls, with "xx" for a segment it could not call (e.g. H1xx = HA is
+# H1, no NA call; xxN2 = no HA call, NA is N2; xxxx = neither). fludb stores
+# that value unchanged.
+#
+# Read by:
+#   scripts/fludb_download_builds.py   which fludb rows go into data/{build}/
+#   scripts/report.py                  which subtype a specimen is counted as,
+#                                      and the "subtype assumed" notes and
+#                                      methods disclaimer
+#
+# For each build (the {subtype} wildcard: h1n1, h3n2, vic):
+#   subtype   the general subtype the report uses for the build
+#   assigned  fludb values where flusort called both HA and NA (or the B lineage)
+#   assumed   fludb values with only HA or only NA called; the specimen is
+#             assumed to be this subtype and is reported as "subtype assumed"
+#
+# Any value not listed (e.g. xxxx, or a mixed or unexpected call) is left out
+# of every build.
+#
+# The assumed values below rest on A/H1N1pdm09 and A/H3N2 being the only
+# influenza A subtypes circulating seasonally in humans, so N1 implies H1 and
+# N2 implies H3 (and the reverse). If a reassortant (e.g. H1N2 or H3N1) starts
+# circulating, that no longer holds: remove the affected values from
+# `assumed` (they are then left out of the builds) or add a new build.
+# Changing this file changes what the builds contain (Tier 2 in AGENTS.md).
+
+assumption_basis: >-
+  A/H1N1pdm09 and A/H3N2 are the influenza A subtypes currently circulating
+  seasonally in humans, so a lone N1 or H1 call is taken as H1N1 and a lone N2
+  or H3 call as H3N2.
+
+builds:
+  h1n1:
+    subtype: H1N1
+    assigned: [H1N1]
+    assumed: [H1xx, xxN1]
+  h3n2:
+    subtype: H3N2
+    assigned: [H3N2]
+    assumed: [H3xx, xxN2]
+  vic:
+    subtype: Victoria
+    assigned: [Victoria]
+    assumed: []

@@ -49,6 +49,7 @@ What it reads (paths are relative to --repo, the repository root):
     auspice/{subtype}/{segment}.json            final Nextstrain build
     config/exclude.tsv                          manual exclusions
     config/report.yaml                          report title, notes, options
+    config/subtype_assignment.yaml              flusort call -> build subtype, incl. "subtype assumed"
 
 What it writes (to --outdir, default reports/):
     surveillance_report.html                    interactive report (any browser, offline)
@@ -516,6 +517,9 @@ def parse_args(argv=None):
     p.add_argument("--flusort-metadata", default=None,
                    help="flusort typing output (default: {source_dir}/flusort_JHH_metadata.tsv)")
     p.add_argument("--db", default="fludb.db", help="fludb SQLite database")
+    p.add_argument("--subtype-assignment", default="config/subtype_assignment.yaml",
+                   help="which flusort subtype calls go into which build, incl. assumed subtypes "
+                        "(default: config/subtype_assignment.yaml)")
     p.add_argument("--outdir", default="reports", help="output directory (default: reports)")
     p.add_argument("--run-id", default=None,
                    help="pipeline RUN_ID (YYYYMMDDTHHMMSS); default: latest in .run/run_logs")
@@ -553,6 +557,7 @@ def resolve_inputs(args):
         "jhh_sequences": repo / (args.jhh_sequences or pipe.get("jhh_sequences", f"{source_dir}/JHH_sequences.fasta")),
         "flusort_metadata": repo / (args.flusort_metadata or f"{source_dir}/flusort_JHH_metadata.tsv"),
         "exclude": repo / "config/exclude.tsv",
+        "subtype_assignment": repo / args.subtype_assignment,
         "run_logs": repo / ".run/run_logs",
         "outdir": (repo / args.outdir) if not Path(args.outdir).is_absolute() else Path(args.outdir),
     }
@@ -636,6 +641,40 @@ def load_fludb(db_path):
     """
     with sqlite3.connect(db_path) as conn:
         return pd.read_sql_query(query, conn)
+
+
+@app.function
+def load_subtype_assignment(path):
+    """The build map in config/subtype_assignment.yaml (shared with
+    scripts/fludb_download_builds.py): flusort/fludb subtype value -> general
+    subtype, and which values are assumed (only HA or only NA called).
+    Without the file, only exact H1N1/H3N2/Victoria calls count."""
+    raw = load_yaml(path)
+    to_subtype, assumed = {}, {}
+    for b in (raw.get("builds") or {}).values():
+        for v in b.get("assigned") or []:
+            to_subtype[v] = b["subtype"]
+        for v in b.get("assumed") or []:
+            to_subtype[v] = b["subtype"]
+            assumed[v] = b["subtype"]
+    if not to_subtype:
+        to_subtype = {s: s for s in SUBTYPE_ORDER}
+    return {"to_subtype": to_subtype, "assumed": assumed,
+            "basis": " ".join(str(raw.get("assumption_basis") or "").split()),
+            "found": bool(raw.get("builds")), "path": Path(path)}
+
+
+@app.function
+def apply_subtype_assignment(df, assignment):
+    """Keep flusort's call in `subtype_flusort`, flag assumed calls in
+    `subtype_assumed`, and set `subtype` to the general subtype the builds
+    use (H1xx -> H1N1). Values outside the map (e.g. xxxx) are kept as is."""
+    raw = df["subtype"]
+    pos = df.columns.get_loc("subtype") + 1
+    df.insert(pos, "subtype_flusort", raw)
+    df.insert(pos + 1, "subtype_assumed", raw.isin(list(assignment["assumed"])))
+    df["subtype"] = raw.map(assignment["to_subtype"]).fillna(raw)
+    return df
 
 
 @app.function
@@ -768,7 +807,12 @@ def collect(args):
     # --- sequences in fludb (+ clade calls) -----------------------------
     if not paths["db"].exists():
         raise FileNotFoundError(f"fludb not found: {paths['db']} (run the pipeline first)")
+    assignment = load_subtype_assignment(paths["subtype_assignment"])
+    if not assignment["found"]:
+        warnings.append(f"Subtype assignment file not found ({paths['subtype_assignment'].name}); "
+                        "only complete H1N1/H3N2/Victoria calls are counted as subtyped.")
     seqs = load_fludb(paths["db"]).merge(load_clades(repo), on="sequence_ID", how="left")
+    seqs = apply_subtype_assignment(seqs, assignment)
     seqs["date"] = pd.to_datetime(seqs["date"], errors="coerce")
     seqs["season"] = seqs["date"].apply(season_of)
     seqs["virus"] = seqs["subtype"].map(SUBTYPE_LABEL)
@@ -828,9 +872,10 @@ def collect(args):
             flusort[["sequence_ID", "type", "subtype"]].drop_duplicates("sequence_ID"),
             on="sequence_ID", how="left")
     lab_idx = lab.set_index("sequence_ID")
-    for col in ["type", "subtype"]:
-        fallback = submitted["sequence_ID"].map(lab_idx[col])
+    for col, src in [("type", "type"), ("subtype", "subtype_flusort")]:
+        fallback = submitted["sequence_ID"].map(lab_idx[src])
         submitted[col] = submitted[col].fillna(fallback) if col in submitted else fallback
+    submitted = apply_subtype_assignment(submitted, assignment)
     submitted["has_sequence"] = submitted["sequence_ID"].isin(lab["sequence_ID"])
     seg_counts = fasta_header_ids(paths["jhh_sequences"])
     submitted["segments_submitted"] = (submitted["sequence_ID"].map(seg_counts).fillna(0).astype(int)
@@ -883,8 +928,12 @@ def collect(args):
                 return "flusort could not type the specimen"
             return f"flusort: {TYPE_LABEL.get(r['type'], r['type'])}, subtype '{st}' (incomplete)"
         if r["ha_status"] == "absent":
-            return "HA segment not sequenced"
-        return r["ha_reason"] if pd.notna(r["ha_reason"]) else STATUS_LABEL.get(r["ha_status"], "")
+            text = "HA segment not sequenced"
+        else:
+            text = r["ha_reason"] if pd.notna(r["ha_reason"]) else STATUS_LABEL.get(r["ha_status"], "")
+        if r["subtype_assumed"]:
+            return f"Subtype assumed ({r['subtype_flusort']} → {r['subtype']})" + (f"; {text}" if text else "")
+        return text
 
     submitted["outcome"] = submitted.apply(outcome, axis=1)
     submitted["outcome_detail"] = submitted.apply(detail, axis=1)
@@ -942,6 +991,7 @@ def collect(args):
             "A/H3N2": int((g["subtype"] == "H3N2").sum()),
             "A/H1N1pdm09": int((g["subtype"] == "H1N1").sum()),
             "B/Victoria": int((g["subtype"] == "Victoria").sum()),
+            "Subtype assumed": int(g["subtype_assumed"].sum()),
             "Subtype/lineage not assigned": int(o.get("Subtype/lineage not assigned", 0)),
             "HA only": int(tier.get("HA only", 0)),
             "HA + NA": int(tier.get("HA + NA", 0)),
@@ -966,6 +1016,7 @@ def collect(args):
         "season_start": season_start_for(as_of),
         "prepared_by": prepared_by(),
         "provenance": prov,
+        "subtype_assignment": assignment,
         "paths": paths,
         "warnings": warnings,
         "data_through": lab["date"].max(),
@@ -1211,7 +1262,8 @@ def item_at_a_glance(d):
     ]
     return Compare(panels, title="At a glance",
                    caption="'In the final build' = the specimen's HA is a tip of the final Nextstrain "
-                           "HA tree. " + SUBMITTED_DEFINITION + " " + COMPLEMENT_STATEMENT)
+                           "HA tree. Subtype counts include specimens with subtype assumed from a single "
+                           "HA or NA call (see Methods). " + SUBMITTED_DEFINITION + " " + COMPLEMENT_STATEMENT)
 
 
 @app.function
@@ -1233,13 +1285,18 @@ def item_season_tables(d):
     for s in seasons:
         summ, sst = summary_table(d, s)
         gen, gst = genetic_table(d, s)
+        _, g_run, _, g_season = run_columns(d, s)
         label = season_label(s) + (" (current season)" if s == current else "")
         options.append((label, [
             Table(f"surveillance_summary_{s.year}",
                   "Johns Hopkins Hospital System – Influenza Surveillance Summary", summ,
                   caption="Counts are JHH specimen sequences in fludb. Percentages: Influenza A and B of "
-                          "the total; subtypes of Influenza A; lineages of Influenza B. 'Subtyping not "
-                          "possible' = Influenza A without a complete H1N1 or H3N2 call from flusort.",
+                          "the total; subtypes of Influenza A; lineages of Influenza B. A/H1N1pdm09 and "
+                          "A/H3N2 include specimens whose subtype was assumed from a single HA or NA call "
+                          f"(subtype assumed: {fmt_n(g_run['subtype_assumed'].sum())} in the most recent "
+                          f"run, {fmt_n(g_season['subtype_assumed'].sum())} this season; see Methods). "
+                          "'Subtyping not possible' = Influenza A with no usable HA or NA subtype call "
+                          "from flusort.",
                   interactive=False, row_styles=sst),
             Table(f"genetic_characterization_{s.year}",
                   "Genetic Characterization", gen,
@@ -1263,7 +1320,8 @@ def item_subtype_frequency(d):
     mk = lambda norm: (lambda w: stacked_run_chart(df, "subtype_label", dom_l, colors, w,
                                                    "Subtype", normalize=norm))
     cap = (f"JHH sequences per sequencing run since {d.cfg['plot_start_date']}, by subtype/lineage "
-           f"(flusort). Hover a bar for counts and shares. {SEASON_MARKER_NOTE}")
+           f"(flusort; includes {fmt_n(df['subtype_assumed'].sum())} with subtype assumed, see Methods). "
+           f"Hover a bar for counts and shares. {SEASON_MARKER_NOTE}")
     return Tabs([
         ("Counts", [Chart("subtype_frequency", "Subtype frequency by sequencing run", mk(False),
                           caption=cap, min_width=24 * n_runs)]),
@@ -1498,6 +1556,8 @@ def item_qc_runs_table(d):
                  "HA in final build", "Genome in final build", "HA build yield"]
     return Table("qc_runs", "QC summary per sequencing run", table, pptx_columns=pptx_cols,
                  caption="One row per sequencing run (newest first); controls are not counted. "
+                         "Subtype columns include specimens with subtype assumed from a single HA or "
+                         "NA call, also counted in 'Subtype assumed' (see Methods). "
                          "HA only = HA sequenced without NA; HA + NA = both, but not all 8 segments; "
                          "Whole genome = all 8 segments (segments uploaded to fludb). Removal columns "
                          "follow the HA build.", page_length=15, pptx_max_rows=14)
@@ -1729,8 +1789,10 @@ def item_removed_table(d):
 @app.function
 def item_specimen_journey(d):
     s = real_specimens(d).copy()
+    s["subtype"] = np.where(s["subtype_assumed"], s["subtype"] + " (subtype assumed)", s["subtype"])
     cols = {"sequence_ID": "Specimen", "sequencing_run": "Run", "date": "Date",
-            "type_label": "Type", "subtype": "Subtype (flusort)", "segments_submitted": "Segments submitted",
+            "type_label": "Type", "subtype_flusort": "Subtype (flusort)", "subtype": "Subtype",
+            "segments_submitted": "Segments submitted",
             "segment_count": "Segments in fludb", "segment_tier": "HA/NA/genome",
             "outcome": "Outcome", "outcome_detail": "Detail", "subclade": "HA subclade"}
     s["date"] = s["date"].dt.strftime("%Y-%m-%d")
@@ -1738,7 +1800,7 @@ def item_specimen_journey(d):
         s[f"{seg}_status"] = s[f"{seg}_status"].map(STATUS_SHORT).fillna("")
     jt = s.rename(columns=cols)
     jt = jt.rename(columns={f"{seg}_status": ("Genome" if seg == "genome" else seg.upper()) for seg in BUILDS})
-    order = (["Specimen", "Run", "Date", "Type", "Subtype (flusort)", "Outcome"]
+    order = (["Specimen", "Run", "Date", "Type", "Subtype (flusort)", "Subtype", "Outcome"]
              + [("Genome" if x == "genome" else x.upper()) for x in BUILDS]
              + ["Detail", "HA subclade", "HA/NA/genome", "Segments submitted", "Segments in fludb"])
     jt = jt[[c for c in order if c in jt.columns]].sort_values(["Run", "Specimen"], ascending=[False, True])
@@ -1825,7 +1887,8 @@ def item_genome_completeness(d):
             return f"{r['type']}_unknown"
         return f"{r['type']}_{r['subtype']}"
     g["Subtype"] = g.apply(cat, axis=1)
-    g["Status"] = np.where(g["subtype"].isin(SUBTYPE_ORDER), "Complete", "Incomplete")
+    g["Status"] = np.select([g["subtype_assumed"], g["subtype"].isin(SUBTYPE_ORDER)],
+                            ["Subtype assumed", "Complete"], default="Incomplete")
     rows = []
     for (t, st, status), x in g.groupby(["type", "Subtype", "Status"]):
         rows.append({"Type": t, "Subtype": st, "Subtyping": status, "N": len(x),
@@ -1840,8 +1903,9 @@ def item_genome_completeness(d):
                      "Complete genome (%)": f"{100 * (x['segment_count'] == 8).mean():.1f}%"})
     t3 = pd.DataFrame(rows).sort_values(["Type", "N"], ascending=[True, False])
     return Table("genome_completeness", "Genome completeness by type and subtype", t3,
-                 caption="Segments per JHH sequence in fludb. 'Incomplete' subtyping = flusort could not "
-                         "assign both HA and NA (e.g. H1xx, xxN2) or the type only.")
+                 caption="Segments per JHH sequence in fludb. 'Subtype assumed' = flusort called only HA "
+                         "or only NA (e.g. H1xx, xxN2) and the subtype was assumed (see Methods). "
+                         "'Incomplete' = no usable subtype call (e.g. xxxx) or the type only.")
 
 
 @app.function
@@ -1852,6 +1916,30 @@ def item_all_sequences(d):
     return Table("all_sequences", "All sequences (fludb) with clade calls", full,
                  caption="Every sequence in fludb, including GISAID vaccine references (also written "
                          "to reports/report.tsv).", pptx=False, page_length=15)
+
+
+@app.function
+def subtype_assumption_disclaimer(d):
+    """Methods paragraph on assumed subtypes, written from
+    config/subtype_assignment.yaml so it follows any change to that map."""
+    a = d.meta["subtype_assignment"]
+    head = "**Subtype assumption (disclaimer).** "
+    if not a["assumed"]:
+        return head + ("No subtypes are assumed: only specimens with both HA and NA subtyped by flusort "
+                       "enter the builds.")
+    by_subtype = {}
+    for raw, st in a["assumed"].items():
+        by_subtype.setdefault(st, []).append(raw)
+    rules = "; ".join(f"{', '.join(raws)} → {SUBTYPE_LABEL.get(st, st)}" for st, raws in by_subtype.items())
+    n = int(d.lab["subtype_assumed"].sum())
+    return head + (
+        f"When flusort calls only one of HA or NA, the subtype is assumed from the segment that was "
+        f"called ({rules}). {a['basis']} These specimens are labelled 'subtype assumed' in this report "
+        f"and enter that subtype's Nextstrain builds, without the segment that was not called. "
+        f"Specimens with neither HA nor NA called are not built. {fmt_n(n)} of {fmt_n(len(d.lab))} JHH "
+        f"sequences ({fmt_pct(n, len(d.lab))}) have an assumed subtype. If a reassortant subtype (e.g. "
+        f"H1N2 or H3N1) circulates, a single HA or NA call no longer identifies the subtype; the "
+        f"assumption is set in `config/subtype_assignment.yaml` and must be reviewed then.")
 
 
 @app.function
@@ -1868,8 +1956,10 @@ def item_methods(d):
         + (f"; runs excluded from plots: {', '.join(cfg['exclude_runs_from_plots'])}"
            if cfg.get("exclude_runs_from_plots") else "") + ".",
         "**Typing.** Segments are typed and subtyped by BLAST against a reference HA/NA database "
-        "(flusort). Only specimens assigned H1N1, H3N2 or B/Victoria enter the builds; partial calls "
-        "(e.g. H1xx, xxN2) are 'Subtyping not possible'.",
+        "(flusort). Specimens called H1N1, H3N2 or B/Victoria enter the builds, as do specimens whose "
+        "subtype was assumed from a single HA or NA call (see Subtype assumption below). Influenza A "
+        "specimens with no usable HA or NA call (e.g. xxxx) are 'Subtyping not possible' and are not "
+        "built.",
         "**Clades.** HA clades and subclades are assigned with Nextclade using the latest datasets "
         "(downloaded at each run) and propagated to every segment of the same specimen.",
         f"**Quality control.** augur filter keeps sequences with Nextclade coverage ≥ "
@@ -1889,6 +1979,7 @@ def item_methods(d):
                      + (f" ({prov.get('status')})" if prov.get("status") else "")
                      + (f", commit {prov['commit']}" if prov.get("commit") else "")
                      + (f"; {tools}" if tools else "") + ".")
+    lines.append(subtype_assumption_disclaimer(d))
     lines.append(f"**Prepared by** {meta['prepared_by']}. {ATTRIBUTION}. "
                  f"Source code: [{cfg['source_url']}]({cfg['source_url']})")
     return Text("\n\n".join(lines), pptx=True)

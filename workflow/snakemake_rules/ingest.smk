@@ -1,11 +1,16 @@
 """
-This pipeline accept 3 input sequence files in FASTA format and ingests them to 
-influenza genomes filtered to "complete" only by segment and concatenated genome for nextstrain builds
+This pipeline accepts 3 input sequence files in FASTA format, types and stores
+them in fludb, and writes per-build input files for the Nextstrain builds:
+
+    - segment builds: every sample that has that segment, whether or not its
+      genome is complete (download_segments)
+    - genome builds: only samples with all 8 segments, concatenated
+      (download_genomes, --complete-genomes)
 
 Input: 
 - vaccine.fasta
 - JHH_sequences.fasta
-- JHH_metadata.tsv
+- JHH_metadata.txt
 
 Output: 
 an equivalent sequences.fasta and metadata.tsv for: 
@@ -20,7 +25,12 @@ an equivalent sequences.fasta and metadata.tsv for:
     - mp
     - ns
 
-final output located at data/{segment OR genome}
+final output located at data/{subtype}/{segment OR genome}/
+
+Which samples go into each {subtype} is set in config/subtype_assignment.yaml
+(read by scripts/fludb_download_builds.py). A sample with only HA or only NA
+called by flusort (e.g. H1xx, xxN1) is assumed to be the seasonal subtype
+(H1N1 or H3N2); a sample with neither called (xxxx) goes into no build.
 
 Logging: every rule writes stdout + stderr to .run/logs/{rule}/... via
 `exec > {log} 2>&1`. Python scripts run with `-u` (unbuffered) so print()
@@ -126,7 +136,8 @@ rule download_segments:
     message: "Downloading segments"
     input:
         genomes_uploaded = "data/genomes_uploaded.flag",
-        vaccines_uploaded = "data/vaccines_uploaded.flag"
+        vaccines_uploaded = "data/vaccines_uploaded.flag",
+        subtype_assignment = "config/subtype_assignment.yaml"
     output:
         pb2 = "data/{subtype}/pb2/sequences.fasta",
         pb1 = "data/{subtype}/pb1/sequences.fasta",
@@ -150,7 +161,10 @@ rule download_segments:
     shell:
         """
         exec > {log} 2>&1
-        python -u scripts/fludb_download_seasonal_build.py
+        python -u scripts/fludb_download_builds.py \
+            --subtype {wildcards.subtype} \
+            --segments \
+            --config {input.subtype_assignment}
         """
 
 rule download_genomes:
@@ -158,7 +172,8 @@ rule download_genomes:
     input:
         segments_flag = "data/{subtype}/segments_downloaded.flag",
         genomes_uploaded = "data/genomes_uploaded.flag",
-        vaccines_uploaded = "data/vaccines_uploaded.flag"
+        vaccines_uploaded = "data/vaccines_uploaded.flag",
+        subtype_assignment = "config/subtype_assignment.yaml"
     output:
         genome = "data/{subtype}/genome/sequences.fasta",
         genome_metadata = "data/{subtype}/genome/metadata.tsv"
@@ -167,7 +182,10 @@ rule download_genomes:
     shell:
         """
         exec > {log} 2>&1
-        python -u scripts/fludb_download_seasonal_build_genomes.py
+        python -u scripts/fludb_download_builds.py \
+            --subtype {wildcards.subtype} \
+            --genome \
+            --config {input.subtype_assignment}
         """
 
 rule ingest_complete:
