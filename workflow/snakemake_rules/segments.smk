@@ -344,7 +344,8 @@ rule export:
         aa_muts=rules.translate.output.aa_muts,
         vaccine="config/{subtype}/vaccine.json",
         auspice_config="config/{subtype}/auspice_config.json",
-        colors="config/{subtype}/colors.tsv"  # subclade colours, synced by scripts/sync_subclade_colors.py
+        colors="config/{subtype}/colors.tsv",  # subclade colours, synced by scripts/sync_subclade_colors.py
+        colors_synced=subclade_colors_synced  # wait for sync_subclade_colors (colors.smk)
     output:
         auspice_json="auspice/{subtype}/{segment}.json"
     params:

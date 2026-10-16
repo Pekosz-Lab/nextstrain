@@ -212,7 +212,8 @@ rule genome_export:
         aa_muts = rules.genome_translate.output.aa_muts,
         config = "config/{subtype}/auspice_config.json",
         vaccine="config/{subtype}/vaccine.json",
-        colors="config/{subtype}/colors.tsv"  # subclade colours, synced by scripts/sync_subclade_colors.py
+        colors="config/{subtype}/colors.tsv",  # subclade colours, synced by scripts/sync_subclade_colors.py
+        colors_synced=subclade_colors_synced  # wait for sync_subclade_colors (colors.smk)
     output:
         auspice = "auspice/{subtype}/genome.json"
     log:

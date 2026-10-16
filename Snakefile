@@ -22,12 +22,14 @@ min_lengths = {
 # ---------------------------------------------------------------------------
 # Rules live in workflow/snakemake_rules/:
 #   ingest.smk    type (flusort) and sort input sequences -> data/{subtype}/{segment|genome}/
+#   colors.smk    sync subclade colours from nextstrain/seasonal-flu -> config/{subtype}/colors.tsv
 #   segments.smk  one Nextstrain build per segment  -> auspice/{subtype}/{segment}.json
 #   genomes.smk   whole-genome Nextstrain build     -> auspice/{subtype}/genome.json
 #   reports.smk   the surveillance report (reports/) and the per-run report (.run/)
 #   snapshot.smk  archive outputs to snapshots/ and clean the workspace
 # ---------------------------------------------------------------------------
 include: "workflow/snakemake_rules/ingest.smk"
+include: "workflow/snakemake_rules/colors.smk"   # must come before segments.smk and genomes.smk
 include: "workflow/snakemake_rules/segments.smk"
 include: "workflow/snakemake_rules/genomes.smk"
 include: "workflow/snakemake_rules/reports.smk"   # must come after ingest.smk
