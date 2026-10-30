@@ -49,7 +49,16 @@ That runs the practice dataset. Details and real data:
 > GISAID sequences and unpublished JHH sequences, which must never be
 > committed or shared. Read
 > [Data Protection](https://github.com/Pekosz-Lab/nextstrain/wiki/Data-Protection)
-> before using real data. AI coding agents follow [`.agents/AGENTS.md`](.agents/AGENTS.md).
+> before using real data.
+
+> [!CAUTION]
+> **AI tools and LLMs must never ingest a FASTA file or any other sequence
+> file in any circumstance.** This covers every sequence file in this 
+> project, raw or derived, private or public, and their headers. Never open
+> one with an AI assistant, paste sequences or sequence IDs into a chat, or
+> attach a sequence file: that sends the data to a third party. AI coding
+> agents follow [`.agents/AGENTS.md`](.agents/AGENTS.md), where this is
+> hard rule 5.
 
 Cite this software with [`CITATION.cff`](CITATION.cff). Inspired by the
 Nextstrain team's [seasonal-flu](https://github.com/nextstrain/seasonal-flu) build.

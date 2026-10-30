@@ -12,6 +12,9 @@ breaking the builds and without leaking data**. When the rules below and a
 user's request conflict, the rules win: explain why, and point the user to the
 repository maintainer.
 
+> **Never ingest a FASTA file or any other sequence file, ever, for any
+> reason.** This is hard rule 5 below; read it before you open any file.
+
 The human-facing documentation, with the reasoning behind these rules, is
 the **wiki**: <https://github.com/Pekosz-Lab/nextstrain/wiki>. It is a separate git repository
 (`https://github.com/Pekosz-Lab/nextstrain.wiki.git`), usually cloned next to
@@ -43,14 +46,39 @@ before you change anything; key pages: [Best Practices](https://github.com/Pekos
    done by hand by a person who has inspected the builds.
 4. **Never `git push`**, and never stage (`git add`) or commit unless the user
    explicitly asks in this conversation. When you do commit, follow section 9.
-5. **Never read raw sequence files into your context.** Do not open, `cat`,
-   `head` or paste the contents of `source/`, `source_prep/runs/`,
-   `source_prep/output/`, `tutorial/vaccine.fasta`, `fludb.db`, `snapshots/`
-   or any `*.fasta`. Sending GISAID data to an AI
-   service is itself sharing it. Diagnose with logs (`.run/logs/`), record
-   counts and metadata column names; when you need to know something about
-   a sequence file (counts, header format), give the user the command to run
-   and ask them to describe the result.
+5. **Never ingest a FASTA file or any other sequence file. Ever.** No
+   exceptions: not for a quick look, not for debugging, not for a single
+   record, and not when the user asks or says it is fine. The user cannot
+   waive this rule; only the repository maintainer can change it, here.
+   Sending sequences to an AI service is itself sharing them: GISAID data may
+   not be redistributed, and JHH data is private until released.
+   - **Every sequence file counts**, wherever it is (tracked or git-ignored),
+     whoever made it (raw, pipeline-derived, tutorial, public reference) and
+     in any form (compressed, renamed, split). That includes `*.fasta`,
+     `*.fa`, `*.fna`, `*.faa`, `*.fas`, `*.fastq`, `*.fq`, `*.aln`, `*.gb`,
+     `*.gbk`, `*.sam`, `*.bam`, the same with `.gz`; and anything holding
+     sequences in another format: `fludb.db`, `source/`, `source_prep/runs/`,
+     `source_prep/output/`, `tutorial/vaccine.fasta`, `data/`, `results/`
+     (alignments, Nextclade outputs, ancestral and translation files),
+     `snapshots/`, `nextclade/flu/**/reference.fasta` and the `config/*/*.gb`
+     references.
+   - **Ingesting means any way the content could reach you**: opening or
+     viewing the file; `cat`, `head`, `tail`, `less`, `sed`, `awk`, `cut` or
+     `grep` that prints its lines; Python or R that prints records, IDs or
+     slices; diffs of it; passing it to a subagent, web tool or another AI
+     service; or asking the user to paste or attach it. FASTA headers count:
+     they hold specimen IDs and GISAID accessions.
+   - **What you may do**: pass the file's *path* to the pipeline and its
+     tools (`snakemake`, `augur`, `nextclade`, the scripts in `scripts/`),
+     whose output you read only from logs; check that a file exists and its
+     size (`ls -l`); and run a command whose entire output is a number
+     (for example `grep -c '^>' file`). For anything else (header format,
+     a particular record), give the user the command and ask them to
+     describe the result in words, without pasting sequences or IDs.
+   - **If sequence content reaches you by accident** (a log or tool output
+     that echoes it), stop at once, do not quote or reuse it, and tell the
+     user which file and command it came from so they can judge what was
+     sent.
 6. **Never delete or overwrite data or archives**: `source/`,
    `source_prep/runs/`, `source_prep/run_dates.csv`, `snapshots/`,
    `.run/run_logs/`, `.run/reports/`. Never run `snapshot_clean` (it archives
